@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "name": "iPhone 15 Pro Max 256GB",
+    "price": 29590000,
+    "originalPrice": 34990000,
+    "discount": 15,
+    "specs": ["6.7\"", "Super Retina XDR", "8GB RAM", "256GB"],
+    "image": "https://cdn.tgdd.vn/Products/Images/42/305658/iphone-15-pro-max-blue-thumbnew-600x600.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Samsung Galaxy S24 Ultra 5G 256GB",
+    "price": 33990000,
+    "originalPrice": 38990000,
+    "discount": 12,
+    "specs": ["6.8\"", "Dynamic AMOLED 2X", "12GB RAM", "256GB"],
+    "image": "https://cdn.tgdd.vn/Products/Images/42/319665/samsung-galaxy-s24-ultra-grey-thumb-600x600.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Xiaomi 14 5G 12GB/256GB",
+    "price": 22990000,
+    "originalPrice": 24990000,
+    "discount": 8,
+    "specs": ["6.36\"", "AMOLED", "12GB RAM", "256GB"],
+    "image": "https://cdn.tgdd.vn/Products/Images/42/319670/xiaomi-14-black-thumb-600x600.jpg"
+  },
+  {
+    "id": 4,
+    "name": "OPPO Reno11 5G",
+    "price": 10990000,
+    "originalPrice": 11990000,
+    "discount": 8,
+    "specs": ["6.7\"", "AMOLED", "8GB RAM", "256GB"],
+    "image": "https://cdn.tgdd.vn/Products/Images/42/319808/oppo-reno11-5g-green-thumb-1-600x600.jpg"
+  },
+  {
+    "id": 5,
+    "name": "vivo Y100 8GB-256GB",
+    "price": 7290000,
+    "originalPrice": null,
+    "discount": null,
+    "specs": ["6.67\"", "AMOLED", "8GB RAM", "256GB"],
+    "image": "https://cdn.tgdd.vn/Products/Images/42/322096/vivo-y100-kimcuong-thumb-600x600.jpg"
+  }
+]
