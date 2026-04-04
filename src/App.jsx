@@ -23,6 +23,7 @@ function App() {
             {/* Sidebar danh mục (Giữ nguyên khi chuyển trang) */}
             <div className="hidden md:block">
                <Sidebar />
+               
             </div>
 
             {/* Nội dung chính linh hoạt theo Route */}
