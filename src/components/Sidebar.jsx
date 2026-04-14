@@ -1,10 +1,10 @@
 // Sidebar.jsx
 export default function Sidebar() {
   const categories = [
-    { name: '🔥 Chương trình khuyến mãi', isHot: true },
-    { name: '🎧 Phụ kiện điện thoại', isHot: false },
-    { name: '♻️ Máy cũ - giá cao', isHot: false },
-    { name: 'ℹ️ Thông tin - dịch vụ tiện ích', isHot: false },
+    { name: 'Chương trình khuyến mãi', isHot: true },
+    { name: 'Phụ kiện điện thoại', isHot: false },
+    { name: 'Máy cũ - giá cao', isHot: false },
+    { name: 'Thông tin - dịch vụ tiện ích', isHot: false },
   ];
 
   return (

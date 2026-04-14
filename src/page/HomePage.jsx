@@ -2,6 +2,7 @@
 import ProductCard from '../components/product/ProductCard';
 import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
+import FilterBar from '../components/FilterBar';
 
 export default function HomePage() {
   return (
@@ -11,9 +12,11 @@ export default function HomePage() {
         Chào mừng đến với hệ thống PhoneShop!
       </h2>
       <div className="bg-blue-50 text-secondary p-4 rounded mb-6 border border-blue-200">
-        🚀 Khám phá các sản phẩm điện thoại, phụ kiện và nhiều ưu đãi Mùa hè hấp dẫn.
+        Khám phá các sản phẩm điện thoại, phụ kiện và nhiều ưu đãi Mùa hè hấp dẫn.
       </div>
       
+      <FilterBar />
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {productsData.map((product) => (
           <ProductCard 

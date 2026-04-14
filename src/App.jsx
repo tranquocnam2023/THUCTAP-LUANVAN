@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -6,8 +6,20 @@ import Footer from './components/Footer';
 import HomePage from './page/HomePage';
 import AuthPage from './page/AuthPage';
 import CartPage from './page/CartPage';
+import AdminPage from './page/AdminPage';
 
 function App() {
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin');
+
+  if (isAdminPath) {
+    return (
+      <Routes>
+        <Route path="/admin" element={<AdminPage />} />
+      </Routes>
+    );
+  }
+
   return (
     <div 
       className="w-full flex justify-center font-sans min-h-screen" 
