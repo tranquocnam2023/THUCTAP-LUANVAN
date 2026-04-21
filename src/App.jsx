@@ -21,37 +21,37 @@ function App() {
   }
 
   return (
-    <div 
-      className="w-full flex justify-center font-sans min-h-screen" 
+    <div
+      className="w-full flex justify-center font-sans min-h-screen"
       style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text)' }}
     >
-       <div className="w-full h-full flex flex-col">
-          {/* Header full width */}
-          <Header />
-          
-          {/* Main Container - Giới hạn 1200px, chứa Sidebar và Routes */}
-          <div className="container-box flex flex-1 w-full my-6 flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 px-4">
-            
-            {/* Sidebar danh mục (Giữ nguyên khi chuyển trang) */}
-            <div className="hidden md:block">
-               <Sidebar />
-               
-            </div>
+      <div className="w-full h-full flex flex-col">
+        {/* Header full width */}
+        <Header />
 
-            {/* Nội dung chính linh hoạt theo Route */}
-            <main className="flex-1 bg-white p-6 rounded shadow-sm border border-bordercustom min-h-[50vh]">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/danh-muc/:brand" element={<HomePage />} />
-              </Routes>
-            </main>
+        {/* Main Container - Giới hạn 1200px, chứa Sidebar và Routes */}
+        <div className="container-box flex flex-1 w-full my-6 flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 px-4">
+
+          {/* Sidebar danh mục (Giữ nguyên khi chuyển trang) */}
+          <div className="hidden md:flex flex-col space-y-4 w-64">
+            <Sidebar />    
+            {/*thêm danh mục thì ghi đè*/}
           </div>
 
-          {/* Footer full width */}
-          <Footer />
-       </div>
+          {/* Nội dung chính linh hoạt theo Route */}
+          <main className="flex-1 bg-white p-6 rounded shadow-sm border border-bordercustom min-h-[50vh]">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/danh-muc/:brand" element={<HomePage />} />
+            </Routes>
+          </main>
+        </div>
+
+        {/* Footer full width */}
+        <Footer />
+      </div>
     </div>
   );
 }

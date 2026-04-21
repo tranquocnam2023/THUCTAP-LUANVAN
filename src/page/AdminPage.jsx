@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import AdminProducts from './AdminProducts';
 
 export default function AdminPage() {
-  // : Khai báo state lưu trữ trạng thái hiển thị (viewAllOrders) và dữ liệu tìm kiếm (filterDate, searchTerm)
+  const [activeAdminTab, setActiveAdminTab] = useState('products'); // Mở lên là thấy luôn phần Sản phẩm
+  // Khai báo state lưu trữ trạng thái hiển thị (viewAllOrders) và dữ liệu tìm kiếm (filterDate, searchTerm)
   const [viewAllOrders, setViewAllOrders] = useState(false);
   const [filterDate, setFilterDate] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,12 +19,20 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold tracking-wider text-white">Quản Lý PhoneShop</h1>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
-          <a href="#" className="flex items-center px-4 py-3 bg-gray-800 text-white rounded-lg transition-colors group">
-            <svg className="w-5 h-5 mr-3 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          <a 
+            href="#" 
+            onClick={(e) => { e.preventDefault(); setActiveAdminTab('dashboard'); }}
+            className={`flex items-center px-4 py-3 rounded-lg transition-colors group ${activeAdminTab === 'dashboard' ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+          >
+            <svg className={`w-5 h-5 mr-3 ${activeAdminTab === 'dashboard' ? 'text-white' : 'text-gray-400 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             Bảng thống kê
           </a>
-          <a href="#" className="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors group">
-            <svg className="w-5 h-5 mr-3 text-gray-500 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+          <a 
+            href="#" 
+            onClick={(e) => { e.preventDefault(); setActiveAdminTab('products'); }}
+            className={`flex items-center px-4 py-3 rounded-lg transition-colors group ${activeAdminTab === 'products' ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+          >
+            <svg className={`w-5 h-5 mr-3 ${activeAdminTab === 'products' ? 'text-white' : 'text-gray-500 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
             Sản phẩm
           </a>
           <a href="#" className="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors group">
@@ -68,7 +78,11 @@ export default function AdminPage() {
 
         {/* Bảng thống kê */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-          {/* Stats Grid */}
+          {activeAdminTab === 'products' ? (
+             <AdminProducts />
+          ) : (
+            <>
+              {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 w-full">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
               <div className="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
@@ -214,6 +228,8 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+          </>
+          )}
         </main>
       </div>
     </div>
