@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Filter, X } from 'lucide-react';
 import FilterModal from './FilterModal';
 
-export default function FilterBar() {
+export default function FilterBar({ selectedBrand, onSelectBrand, onApplyFilter, onClearAll }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const quickBrands = ['SAMSUNG', 'iPhone', 'OPPO', 'XIAOMI', 'vivo', 'realme', 'HONOR', 'NOKIA', 'TECNO'];
 
@@ -20,14 +20,45 @@ export default function FilterBar() {
         {quickBrands.map(brand => (
           <button 
             key={brand} 
-            className="px-3 py-1.5 border border-gray-200 rounded-[4px] text-[13px] hover:border-primary transition-colors text-gray-700 bg-white"
+            onClick={() => onSelectBrand(selectedBrand === brand ? null : brand)}
+            className={`px-3 py-1.5 border rounded-[4px] text-[13px] transition-all duration-200 ${
+              selectedBrand === brand 
+              ? 'border-primary text-primary bg-blue-50 font-bold shadow-inner' 
+              : 'border-gray-200 text-gray-700 bg-white hover:border-primary hover:bg-gray-50'
+            }`}
           >
             {brand}
           </button>
         ))}
+
+        {selectedBrand && (
+          <button 
+            onClick={() => onSelectBrand(null)}
+            className="flex items-center gap-1 px-3 py-1.5 text-[13px] text-red-500 hover:text-red-700 transition-colors font-medium border border-red-100 rounded bg-red-50/30"
+          >
+            <X size={14} /> Xóa hãng: {selectedBrand}
+          </button>
+        )}
+
+        {onClearAll && (
+          <button 
+            onClick={onClearAll}
+            className="flex items-center gap-1 px-3 py-1.5 text-[13px] text-gray-500 hover:text-red-600 transition-colors font-medium border border-gray-200 rounded hover:border-red-200 hover:bg-red-50"
+          >
+            <X size={14} /> Xóa tất cả lọc
+          </button>
+        )}
       </div>
 
-      {isModalOpen && <FilterModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <FilterModal 
+          onClose={() => setIsModalOpen(false)} 
+          onApply={(filters) => {
+             onApplyFilter(filters);
+             setIsModalOpen(false);
+          }} 
+        />
+      )}
     </>
   );
 }

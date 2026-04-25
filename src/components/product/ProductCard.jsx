@@ -1,5 +1,7 @@
-// src/components/product/ProductCard.jsx
+import { Link } from 'react-router-dom';
+
 export default function ProductCard({ 
+  id,
   name, 
   image, 
   price, 
@@ -8,7 +10,10 @@ export default function ProductCard({
   discount
 }) {
   return (
-    <div className="group flex flex-col bg-white border border-bordercustom rounded-lg p-3 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 relative cursor-pointer h-full overflow-hidden hover:border-blue-300">
+    <Link 
+      to={`/product/${id}`}
+      className="group flex flex-col bg-white border border-bordercustom rounded-lg p-3 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 relative cursor-pointer h-full overflow-hidden hover:border-blue-300"
+    >
       
       {/* Badge Giảm giá */}
       {discount && (
@@ -80,6 +85,7 @@ export default function ProductCard({
           <span className="text-[10px] text-gray-500 ml-1 mt-0.5">142 đánh giá</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
+

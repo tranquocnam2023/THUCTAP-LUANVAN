@@ -7,6 +7,11 @@ import HomePage from './page/HomePage';
 import AuthPage from './page/AuthPage';
 import CartPage from './page/CartPage';
 import AdminPage from './page/AdminPage';
+import DonatePage from './page/DonatePage';
+import ProductDetailPage from './page/ProductDetailPage';
+import PolicyPage from './page/PolicyPage';
+
+
 
 function App() {
   const location = useLocation();
@@ -44,7 +49,12 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/donate" element={<DonatePage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
+              <Route path="/chinh-sach/:type" element={<PolicyPage />} />
               <Route path="/danh-muc/:brand" element={<HomePage />} />
+
+
             </Routes>
           </main>
         </div>

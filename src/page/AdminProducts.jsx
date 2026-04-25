@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
 const BRANDS = ['iPhone', 'Samsung', 'Xiaomi', 'OPPO', 'Vivo', 'Nokia'];
-
+// gọi API
 const TRANSACTIONS = [
   { id: 'IMPORT_SUPPLIER', name: 'Nhập từ nhà cung cấp', type: 'IN', bgColor: '#ffffffff', textColor: '#db3e3eff', borderColor: 'var(--color-primary)' },
   { id: 'IMPORT_RETURN', name: 'Nhập hàng khách trả', type: 'IN', bgColor: '#23b85fff', textColor: '#ffffff', borderColor: 'var(--color-secondary)' },
   { id: 'EXPORT_SELL', name: 'Xuất bán hàng', type: 'OUT', bgColor: '#d1117aff', textColor: '#000000', borderColor: 'var(--color-yellow)' },
-  { id: 'EXPORT_DEFECT', name: 'Xuất trả hàng lỗi cho NCC', type: 'OUT', bgColor: '#abe617ff', textColor: 'var(--color-primary)', borderColor: 'var(--color-primary)' }
+  { id: 'EXPORT_DEFECT', name: 'Xuất trả hàng lỗi cho NCC', type: 'OUT', bgColor: '#84e8c3ff', textColor: 'var(--color-primary)', borderColor: 'var(--color-primary)' }
 ];
 
 export default function AdminProducts() {

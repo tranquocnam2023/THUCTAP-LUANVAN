@@ -44,16 +44,35 @@ const FilterSection = ({ title, options, selected, onSelect, columns = 4 }) => {
   );
 };
 
-export default function FilterModal({ onClose }) {
+export default function FilterModal({ onClose, onApply }) {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [priceRange, setPriceRange] = useState([0, 54000000]);
 
   const toggleFilter = (category, value) => {
+    if (category === 'Giá') {
+      // Update slider based on selected label for better sync
+      const ranges = {
+        'Dưới 2 triệu': [0, 2000000],
+        'Từ 2 - 4 triệu': [2000000, 4000000],
+        'Từ 4 - 7 triệu': [4000000, 7000000],
+        'Từ 7 - 13 triệu': [7000000, 13000000],
+        'Từ 13 - 20 triệu': [13000000, 20000000],
+        'Trên 20 triệu': [20000000, 60000000]
+      };
+      if (ranges[value]) {
+        setPriceRange(ranges[value]);
+      }
+    }
+
     setSelectedFilters(prev => {
       const current = prev[category] || [];
       if (current.includes(value)) {
         return { ...prev, [category]: current.filter(v => v !== value) };
       } else {
+        // For 'Giá', typically only one range is active at a time in TGDĐ style
+        if (category === 'Giá') {
+           return { ...prev, [category]: [value] };
+        }
         return { ...prev, [category]: [...current, value] };
       }
     });
@@ -70,6 +89,16 @@ export default function FilterModal({ onClose }) {
 
   const handlePriceChange = (value) => {
     setPriceRange(value);
+  };
+
+  const handleApply = () => {
+    // Collect all active filters
+    const activeFilters = {
+      ...selectedFilters,
+      priceRange: priceRange
+    };
+    onApply(activeFilters);
+    onClose();
   };
 
   return (
@@ -97,15 +126,8 @@ export default function FilterModal({ onClose }) {
               <span>Hoặc chọn mức giá phù hợp với bạn</span>
             </div>
 
-            {/* ========================================================
-                CẤU TRÚC 1: Thanh kéo nằm ở GIỮA (Đang hoạt động)
-            ======================================================== */}
-            {/* Layout: Input trái - Slider giữa - Input phải */}
             <div className="flex items-center gap-4">
-
-              {/* Input giá MIN */}
               <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5  w-[120px] text-center text-sm  outline-none"/>
-              {/* Slider nằm giữa */}
               <div className="flex-1 px-2">
                 <Slider
                   range min={0} max={60000000} step={500000} value={priceRange}  onChange={handlePriceChange}
@@ -114,68 +136,17 @@ export default function FilterModal({ onClose }) {
                     { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
                     {borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
                   ]}
-                  // ===== THANH NỀN =====
                   railStyle={{backgroundColor: '#e5e7eb',  height: 2}}    
                 />
               </div>
-              {/* Input giá MAX */}
               <input type="text" value={formatPrice(priceRange[1])} readOnly className="border border-gray-300  rounded px-3 py-1.5  w-[120px] text-center text-sm outline-none" />
             </div>
-
-            {/* ========================================================
-                CẤU TRÚC 2: Thanh kéo nằm TRÊN hai mức giá              
-            ======================================================== */}
-            {/* 
-            <div className="mb-6 px-3 pt-2 mt-2">
-              <Slider
-                range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
-                trackStyle={[{backgroundColor: '#288ad6', height: 2}]}
-                handleStyle={[
-                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
-                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
-                ]}
-                railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
-              />
-            </div>
-            <div className="flex items-center gap-4 justify-between">
-              <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[140px] text-center text-sm outline-none" />
-              <span className="text-gray-400">-</span>
-              <input type="text" value={formatPrice(priceRange[1])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[140px] text-center text-sm outline-none" />
-            </div>
-            */}
-
-            {/* ========================================================
-                CẤU TRÚC 3: Thanh kéo nằm DƯỚI hai mức giá      
-            ======================================================== */}
-            {/* 
-            <div className="flex items-center gap-4 justify-between mb-6 mt-2">
-              <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[140px] text-center text-sm outline-none" />
-              <span className="text-gray-400">-</span>
-              <input type="text" value={formatPrice(priceRange[1])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[140px] text-center text-sm outline-none" />
-            </div>
-            <div className="px-3 pb-2">
-              <Slider
-                range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
-                trackStyle={[{backgroundColor: '#288ad6', height: 2}]}
-                handleStyle={[
-                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
-                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
-                ]}
-                railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
-              />
-            </div>
-            */}
-
           </div>
 
           <FilterSection title="Loại điện thoại" options={filterData.types} selected={selectedFilters['Loại điện thoại'] || []} onSelect={toggleFilter} />
           <FilterSection title="Nhu cầu" options={filterData.needs} selected={selectedFilters['Nhu cầu'] || []} onSelect={toggleFilter} />
           <FilterSection title="RAM" options={filterData.ram} selected={selectedFilters['RAM'] || []} onSelect={toggleFilter} />
-          <FilterSection title="Độ phân giải" options={filterData.resolution} selected={selectedFilters['Độ phân giải'] || []} onSelect={toggleFilter} />
-          <FilterSection title="Tần số quét" options={filterData.refreshRate} selected={selectedFilters['Tần số quét'] || []} onSelect={toggleFilter} />
           <FilterSection title="Dung lượng lưu trữ" options={filterData.storage} selected={selectedFilters['Dung lượng lưu trữ'] || []} onSelect={toggleFilter} />
-          <FilterSection title="Pin & Sạc" options={filterData.battery} selected={selectedFilters['Pin & Sạc'] || []} onSelect={toggleFilter} />
-          <FilterSection title="Tính năng đặc biệt" options={filterData.features} selected={selectedFilters['Tính năng đặc biệt'] || []} onSelect={toggleFilter} />
         </div>
 
         {/* Footer */}
@@ -183,8 +154,8 @@ export default function FilterModal({ onClose }) {
           <button onClick={clearAll} className="px-10 py-2.5 border border-red-500 text-red-500 rounded font-medium hover:bg-red-50 transition-colors">
             Bỏ chọn
           </button>
-          <button onClick={onClose} className="px-10 py-2.5 bg-primary text-white rounded font-medium hover:bg-secondary transition-colors shadow-sm">
-            Xem 174 kết quả
+          <button onClick={handleApply} className="px-10 py-2.5 bg-primary text-white rounded font-medium hover:bg-secondary transition-colors shadow-sm uppercase">
+            Xem kết quả
           </button>
         </div>
       </div>
