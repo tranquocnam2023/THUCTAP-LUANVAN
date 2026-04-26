@@ -1,13 +1,24 @@
 // src/page/HomePage.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import ProductCard from '../components/product/ProductCard';
 import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
 import FilterBar from '../components/FilterBar';
 
 export default function HomePage() {
+  const { brand } = useParams();
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [advancedFilters, setAdvancedFilters] = useState(null);
+
+  useEffect(() => {
+    if (brand) {
+      // Normalize brand from URL (e.g., 'iphone' -> 'iPhone')
+      setSelectedBrand(brand);
+    } else {
+      setSelectedBrand(null);
+    }
+  }, [brand]);
 
   const handleApplyFilter = (filters) => {
     setAdvancedFilters(filters);
@@ -16,8 +27,15 @@ export default function HomePage() {
 
   const filteredProducts = productsData.filter(product => {
     // Quick brand filter
-    if (selectedBrand && !product.name.toLowerCase().includes(selectedBrand.toLowerCase())) {
-      return false;
+    if (selectedBrand) {
+      // Check if it's one of the "other" categories or a brand
+      const brandLower = selectedBrand.toLowerCase();
+      
+      // If it's a specific brand or category name in the product
+      const matches = product.name.toLowerCase().includes(brandLower) || 
+                      (product.category && product.category.toLowerCase().includes(brandLower));
+      
+      if (!matches) return false;
     }
 
     // Advanced filters from modal

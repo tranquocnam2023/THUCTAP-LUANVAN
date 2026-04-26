@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-
-const BRANDS = ['iPhone', 'Samsung', 'Xiaomi', 'OPPO', 'Vivo', 'Nokia'];
+import { BRANDS } from '../utils/constants';
 // gọi API
 const TRANSACTIONS = [
   { id: 'IMPORT_SUPPLIER', name: 'Nhập từ nhà cung cấp', type: 'IN', bgColor: '#ffffffff', textColor: '#db3e3eff', borderColor: 'var(--color-primary)' },

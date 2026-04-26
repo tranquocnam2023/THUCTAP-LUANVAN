@@ -1,234 +1,180 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminProducts from './AdminProducts';
+import AdminOrders from '../components/AdminOrders';
+import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell } from 'lucide-react';
 
 export default function AdminPage() {
-  const [activeAdminTab, setActiveAdminTab] = useState('products'); // Mở lên là thấy luôn phần Sản phẩm
-  // Khai báo state lưu trữ trạng thái hiển thị (viewAllOrders) và dữ liệu tìm kiếm (filterDate, searchTerm)
-  const [viewAllOrders, setViewAllOrders] = useState(false);
-  const [filterDate, setFilterDate] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeAdminTab, setActiveAdminTab] = useState('dashboard');
+  
+  // Khởi tạo state trống để sau này truyền API
+  const [stats, setStats] = useState({ users: 0, revenue: 0, orders: 0, products: 0 });
+  const [recentOrders, setRecentOrders] = useState([]);
 
-  const stats = { users: 0, revenue: 0, orders: 0, products: 0 };
-  const recentOrders = [];
+  // Kết nối API ở đây:
+  // useEffect(() => { fetchAdminStats().then(data => setStats(data)) }, [])
+  // useEffect(() => { fetchRecentOrders().then(data => setRecentOrders(data)) }, [])
+
+  const getHeaderTitle = () => {
+    switch (activeAdminTab) {
+      case 'products': return 'Quản lý sản phẩm';
+      case 'orders': return 'Quản lý đơn hàng';
+      case 'dashboard': return 'Bảng thống kê số liệu';
+      default: return 'Trang quản trị';
+    }
+  };
+
+  const SidebarItem = ({ id, icon: Icon, label }) => (
+    <button 
+      onClick={() => setActiveAdminTab(id)}
+      className={`w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 group ${
+        activeAdminTab === id 
+        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20 translate-x-2' 
+        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+      }`}
+    >
+      <Icon className={`w-5 h-5 mr-3 ${activeAdminTab === id ? 'text-white' : 'text-gray-400 group-hover:text-white'}`} />
+      <span className="font-medium text-sm">{label}</span>
+    </button>
+  );
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
       {/* Admin Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col hidden md:flex">
-        <div className="h-16 flex items-center justify-center border-b border-gray-800">
-          <h1 className="text-xl font-bold tracking-wider text-white">Quản Lý PhoneShop</h1>
+      <aside className="w-64 bg-gray-900 text-white flex flex-col hidden md:flex shrink-0 border-r border-gray-800">
+        <div className="h-16 flex items-center px-6 border-b border-gray-800">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-blue-600/30">
+            <span className="font-bold text-lg">P</span>
+          </div>
+          <h1 className="text-lg font-bold tracking-tight text-white uppercase">PhoneAdmin</h1>
         </div>
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          <a 
-            href="#" 
-            onClick={(e) => { e.preventDefault(); setActiveAdminTab('dashboard'); }}
-            className={`flex items-center px-4 py-3 rounded-lg transition-colors group ${activeAdminTab === 'dashboard' ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-          >
-            <svg className={`w-5 h-5 mr-3 ${activeAdminTab === 'dashboard' ? 'text-white' : 'text-gray-400 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-            Bảng thống kê
-          </a>
-          <a 
-            href="#" 
-            onClick={(e) => { e.preventDefault(); setActiveAdminTab('products'); }}
-            className={`flex items-center px-4 py-3 rounded-lg transition-colors group ${activeAdminTab === 'products' ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-          >
-            <svg className={`w-5 h-5 mr-3 ${activeAdminTab === 'products' ? 'text-white' : 'text-gray-500 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-            Sản phẩm
-          </a>
-          <a href="#" className="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors group">
-            <svg className="w-5 h-5 mr-3 text-gray-500 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            Khách hàng
-          </a>
-          <a href="#" className="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors group">
-            <svg className="w-5 h-5 mr-3 text-gray-500 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            Đơn hàng
-          </a>
-          <a href="#" className="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors group">
-            <svg className="w-5 h-5 mr-3 text-gray-500 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            Cài đặt
-          </a>
+        
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Chính</p>
+          <SidebarItem id="dashboard" icon={Layout} label="Bảng thống kê" />
+          <SidebarItem id="products" icon={Package} label="Sản phẩm" />
+          <SidebarItem id="orders" icon={ShoppingCart} label="Đơn hàng" />
+          <SidebarItem id="customers" icon={Users} label="Khách hàng" />
+          
+          <div className="pt-6">
+            <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Hệ thống</p>
+            <SidebarItem id="settings" icon={Settings} label="Cài đặt" />
+          </div>
         </nav>
-        <div className="p-4 bg-gray-800">
-          <a href="/" className="flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-            Quay lại trang chủ cửa hàng
+
+        <div className="p-4 bg-gray-900 border-t border-gray-800">
+          <a href="/" className="flex items-center px-4 py-3 text-sm font-medium text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-400/10 group">
+            <LogOut className="w-5 h-5 mr-3 group-hover:rotate-180 transition-transform" />
+            Thoát về cửa hàng
           </a>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="flex h-16 bg-white border-b border-gray-200 items-center justify-between px-6 shadow-sm z-10 w-full">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Navigation Bar */}
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0 z-20">
           <div className="flex items-center">
-            <button className="text-gray-500 focus:outline-none md:hidden">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <button className="p-2 -ml-2 text-gray-400 hover:text-gray-600 md:hidden">
+              <Layout size={24} />
             </button>
-            <h2 className="text-xl font-semibold text-gray-800 ml-3 md:ml-0">Bảng thống kê số liệu</h2>
+            <h2 className="text-xl font-bold text-gray-800 ml-2 md:ml-0">{getHeaderTitle()}</h2>
           </div>
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-500 hover:text-gray-700">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+          
+          <div className="flex items-center gap-4">
+            <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+              <Bell size={20} />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold shadow">
-              A
+            <div className="h-8 w-[1px] bg-gray-200 mx-1"></div>
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-xs font-bold text-gray-900 leading-none">Admin User</p>
+                <p className="text-[10px] text-gray-500 leading-none mt-1">Quản trị viên</p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center font-bold shadow-md shadow-blue-200">
+                A
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Bảng thống kê */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-          {activeAdminTab === 'products' ? (
-             <AdminProducts />
-          ) : (
-            <>
-              {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 w-full">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Tổng số khách hàng</p>
-                <h3 className="text-2xl font-bold text-gray-800">{stats.users}</h3>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
-              <div className="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Tổng doanh thu</p>
-                <h3 className="text-2xl font-bold text-gray-800">{stats.revenue.toLocaleString('vi-VN')}đ</h3>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Tổng đơn hàng</p>
-                <h3 className="text-2xl font-bold text-gray-800">{stats.orders}</h3>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
-              <div className="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Tổng sản phẩm</p>
-                <h3 className="text-2xl font-bold text-gray-800">{stats.products}</h3>
-              </div>
-            </div>
-          </div>
-
-          {/* Đơn hàng mới Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden">
-            {/*  Cập nhật Tiêu đề bảng thay đổi linh hoạt và gắn nút Đóng bộ lọc */}
-            <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {viewAllOrders ? 'Toàn bộ đơn hàng' : 'Đơn hàng mới'}
-              </h3>
-              {viewAllOrders && (
-                <button
-                  onClick={() => setViewAllOrders(false)}
-                  className="text-sm text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-md transition-colors border-none cursor-pointer"
-                >
-                  Đóng
-                </button>
-              )}
-            </div>
-
-            {/*  Thiết kế giao diện thanh Bộ lọc xuất hiện khi bấm 'Xem toàn bộ' */}
-            {viewAllOrders && (
-              <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                  <div className="flex flex-col">
-                    <label htmlFor="filterDate" className="text-xs font-semibold text-gray-600 mb-1">Ngày tháng</label>
-                    <input
-                      type="date"
-                      id="filterDate"
-                      className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={filterDate}
-                      onChange={(e) => setFilterDate(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col flex-1 sm:w-80">
-                    <label htmlFor="searchOrder" className="text-xs font-semibold text-gray-600 mb-1">Tìm kiếm</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        {/* Dynamic Page Content */}
+        <main className="flex-1 overflow-y-auto p-8 bg-gray-50/50 scroll-smooth">
+          {activeAdminTab === 'products' && <AdminProducts />}
+          {activeAdminTab === 'orders' && <AdminOrders />}
+          {activeAdminTab === 'dashboard' && (
+            <div className="space-y-8 animate-in fade-in duration-500">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { label: 'Khách hàng', value: stats?.users || 0, icon: Users, color: 'blue' },
+                  { label: 'Doanh thu', value: stats?.revenue || 0, icon: Layout, color: 'green' },
+                  { label: 'Đơn hàng', value: stats?.orders || 0, icon: ShoppingCart, color: 'orange' },
+                  { label: 'Sản phẩm', value: stats?.products || 0, icon: Package, color: 'purple' },
+                ].map((item, i) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+                      <div className={`p-4 rounded-xl bg-${item.color}-50 text-${item.color}-600`}>
+                        <Icon size={24} />
                       </div>
-                      <input
-                        type="text"
-                        id="searchOrder"
-                        placeholder="Mã đơn, tên khách, tên sản phẩm..."
-                        className="border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-tight mb-1">{item.label}</p>
+                        <h3 className="text-2xl font-black text-gray-900 leading-none">
+                          {typeof item.value === 'number' ? item.value.toLocaleString('vi-VN') : item.value}
+                          {item.label === 'Doanh thu' ? 'đ' : ''}
+                        </h3>
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+
+              {/* Recent Orders Overview */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Đơn hàng mới nhận</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">Tổng cộng 3 đơn hàng đang chờ xử lý</p>
                   </div>
-                </div>
-                <div className="w-full sm:w-auto self-end sm:self-center mt-5 sm:mt-0 flex">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border-none cursor-pointer w-full sm:w-auto flex-1 mt-1 sm:mt-0">
-                    Lọc kết quả
+                  <button
+                    onClick={() => setActiveAdminTab('orders')}
+                    className="px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
+                    Xem tất cả
                   </button>
                 </div>
-              </div>
-            )}
-            <div className="overflow-x-auto w-full">
-              <table className="w-full whitespace-nowrap">
-                <thead>
-                  <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-4">Mã đơn</th>
-                    <th className="px-6 py-4">Khách hàng</th>
-                    <th className="px-6 py-4">Ngày</th>
-                    <th className="px-6 py-4">Tổng tiền</th>
-                    <th className="px-6 py-4">Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 text-sm">
-                  {recentOrders.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                        Chưa có dữ liệu
-                      </td>
-                    </tr>
-                  ) : (
-                    recentOrders.map((order, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 text-blue-600 font-medium">{order.id}</td>
-                        <td className="px-6 py-4 font-medium text-gray-800">{order.customer}</td>
-                        <td className="px-6 py-4 text-gray-500">{order.date}</td>
-                        <td className="px-6 py-4 font-semibold text-gray-800">{order.amount.toLocaleString('vi-VN')}đ</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                            {order.status}
-                          </span>
-                        </td>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50/50">
+                      <tr className="text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100">
+                        <th className="px-6 py-4">Mã đơn</th>
+                        <th className="px-6 py-4">Khách hàng</th>
+                        <th className="px-6 py-4">Ngày đặt</th>
+                        <th className="px-6 py-4">Tổng tiền</th>
+                        <th className="px-6 py-4">Trạng thái</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-            {/*  Chuyển thẻ <a> 'Xem toàn bộ' thông thường thành <button> để kích hoạt State xuất hiện bộ lọc */}
-            {!viewAllOrders && (
-              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 text-center">
-                <button
-                  onClick={() => setViewAllOrders(true)}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors bg-transparent cursor-pointer border-none"
-                >
-                  Xem toàn bộ đơn hàng &rarr;
-                </button>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {recentOrders.map((order, idx) => (
+                        <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4 text-blue-600 font-bold">{order.id}</td>
+                          <td className="px-6 py-4 font-semibold text-gray-800">{order.customer}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{order.date}</td>
+                          <td className="px-6 py-4 font-black text-gray-900">{order.amount.toLocaleString('vi-VN')}đ</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                              {order.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            )}
-          </div>
-          </>
+            </div>
           )}
         </main>
       </div>

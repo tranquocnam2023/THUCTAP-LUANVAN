@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Filter, X } from 'lucide-react';
 import FilterModal from './FilterModal';
+import { BRANDS } from '../utils/constants';
 
 export default function FilterBar({ selectedBrand, onSelectBrand, onApplyFilter, onClearAll }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const quickBrands = ['SAMSUNG', 'iPhone', 'OPPO', 'XIAOMI', 'vivo', 'realme', 'HONOR', 'NOKIA', 'TECNO'];
+  const quickBrands = BRANDS;
 
   return (
     <>

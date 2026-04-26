@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import { BRANDS } from '../utils/constants';
 
 const filterData = {
-  brands: ['SAMSUNG', 'iPhone', 'OPPO', 'XIAOMI', 'motorola', 'vivo', 'realme', 'HONOR', 'TECNO', 'NOKIA', 'Masstel', 'mobell', 'nubia'],
+  brands: BRANDS,
   prices: ['Dưới 2 triệu', 'Từ 2 - 4 triệu', 'Từ 4 - 7 triệu', 'Từ 7 - 13 triệu', 'Từ 13 - 20 triệu', 'Trên 20 triệu'],
   types: ['Android', 'iPhone (iOS)', 'Điện thoại phổ thông', 'Điện thoại gập'],
   needs: ['Chơi game / Cấu hình cao', 'Pin khủng trên 7000 mAh', 'Chụp ảnh, quay phim', 'Livestream', 'Mỏng nhẹ'],
@@ -31,8 +32,8 @@ const FilterSection = ({ title, options, selected, onSelect, columns = 4 }) => {
               key={opt}
               onClick={() => onSelect(title, opt)}
               className={`px-2 py-2 border rounded-md text-[13px] text-center transition-colors break-words ${isSelected
-                  ? 'border-primary text-primary bg-[#f2f8ff]'
-                  : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                ? 'border-primary text-primary bg-[#f2f8ff]'
+                : 'border-gray-200 text-gray-700 hover:border-gray-300'
                 }`}
             >
               {opt}
@@ -71,7 +72,7 @@ export default function FilterModal({ onClose, onApply }) {
       } else {
         // For 'Giá', typically only one range is active at a time in TGDĐ style
         if (category === 'Giá') {
-           return { ...prev, [category]: [value] };
+          return { ...prev, [category]: [value] };
         }
         return { ...prev, [category]: [...current, value] };
       }
@@ -127,20 +128,63 @@ export default function FilterModal({ onClose, onApply }) {
             </div>
 
             <div className="flex items-center gap-4">
-              <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5  w-[120px] text-center text-sm  outline-none"/>
+              <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5  w-[120px] text-center text-sm  outline-none" />
               <div className="flex-1 px-2">
                 <Slider
-                  range min={0} max={60000000} step={500000} value={priceRange}  onChange={handlePriceChange}
-                  trackStyle={[{backgroundColor: '#288ad6', height: 2}]}
+                  range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
+                  trackStyle={[{ backgroundColor: '#288ad6', height: 2 }]}
                   handleStyle={[
-                    { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
-                    {borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
+                    { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff' },
+                    { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff' }
                   ]}
-                  railStyle={{backgroundColor: '#e5e7eb',  height: 2}}    
+                  railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
                 />
               </div>
               <input type="text" value={formatPrice(priceRange[1])} readOnly className="border border-gray-300  rounded px-3 py-1.5  w-[120px] text-center text-sm outline-none" />
             </div>
+            {/* ========================================================
+                CẤU TRÚC 2: Thanh kéo nằm TRÊN hai mức giá              
+            ======================================================== */}
+            {/* 
+            <div className="mb-6 px-3 pt-2 mt-2">
+              <Slider
+                range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
+                trackStyle={[{backgroundColor: '#288ad6', height: 2}]}
+                handleStyle={[
+                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
+                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
+                ]}
+                railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
+              />
+            </div>
+            <div className="flex items-center gap-4 justify-between">
+              <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[140px] text-center text-sm outline-none" />
+              <span className="text-gray-400">-</span>
+              <input type="text" value={formatPrice(priceRange[1])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[140px] text-center text-sm outline-none" />
+            </div>
+            */}
+
+            {/* ========================================================
+                CẤU TRÚC 3: Thanh kéo nằm DƯỚI hai mức giá      
+            ======================================================== */}
+            {/* 
+            <div className="flex items-center gap-4 justify-between mb-6 mt-2">
+              <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[140px] text-center text-sm outline-none" />
+              <span className="text-gray-400">-</span>
+              <input type="text" value={formatPrice(priceRange[1])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[140px] text-center text-sm outline-none" />
+            </div>
+            <div className="px-3 pb-2">
+              <Slider
+                range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
+                trackStyle={[{backgroundColor: '#288ad6', height: 2}]}
+                handleStyle={[
+                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
+                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
+                ]}
+                railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
+              />
+            </div>
+            */}
           </div>
 
           <FilterSection title="Loại điện thoại" options={filterData.types} selected={selectedFilters['Loại điện thoại'] || []} onSelect={toggleFilter} />

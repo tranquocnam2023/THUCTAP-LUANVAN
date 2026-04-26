@@ -24,10 +24,10 @@ const DonatePage = () => {
         </div>
 
         <div className="pt-16 pb-10 px-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Ủng hộ người thiết kế giao diện</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Donate cho thằng thiết kế giao diện</h1>
           <p className="text-gray-500 mb-8 leading-relaxed">
             Nếu bạn cảm thấy giao diện này hữu ích và muốn tiếp thêm động lực cho mình,
-            bạn có thể mời mình một ly cà phê nhé!
+            bạn có thể gửi mình một ly cà phê!
           </p>
 
           {/* QR Code Container */}

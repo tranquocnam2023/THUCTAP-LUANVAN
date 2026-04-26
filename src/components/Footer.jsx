@@ -21,7 +21,7 @@ export default function Footer() {
           <a href="#" className="hover:text-primary transition">Tuyển dụng</a>
           <a href="#" className="hover:text-primary transition">Gửi góp ý, khiếu nại</a>
           <a href="#" className="hover:text-primary transition">Tìm siêu thị (3.300+ shop)</a>
-          <Link to="/donate" className="hover:text-primary text-xs transition">Quyên góp cho thằng thiết kế giao diện</Link>
+          <Link to="/donate" className="hover:text-primary text-xs transition">Donate cho thằng thiết kế giao diện</Link>
         </div>
 
         {/* Col 3 */}
