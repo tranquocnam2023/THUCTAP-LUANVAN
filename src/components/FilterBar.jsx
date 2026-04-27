@@ -3,16 +3,27 @@ import { Filter, X } from 'lucide-react';
 import FilterModal from './FilterModal';
 import { BRANDS } from '../utils/constants';
 
+const THEME = {
+  primary: '#288ad6', 
+  border: '#e5e7eb', 
+};
+
 export default function FilterBar({ selectedBrand, onSelectBrand, onApplyFilter, onClearAll }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const quickBrands = BRANDS;
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 mb-4 bg-white p-2 rounded-lg shadow-sm border border-bordercustom">
+      <div 
+        className="flex flex-wrap items-center gap-2 mb-4 p-2 rounded-lg shadow-sm border"
+        style={{ backgroundColor: '#ffffff', borderColor: THEME.border }}
+      >
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 rounded text-sm hover:border-primary hover:text-primary transition-colors text-gray-700 font-medium bg-white"
+          className="flex items-center gap-1.5 px-4 py-2 border rounded text-sm transition-colors font-medium"
+          style={{ borderColor: '#d1d5db', color: '#374151', backgroundColor: '#ffffff' }}
+          onMouseOver={(e) => { e.currentTarget.style.borderColor = THEME.primary; e.currentTarget.style.color = THEME.primary; }}
+          onMouseOut={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#374151'; }}
         >
           <Filter size={16} /> <span className="hidden sm:inline">Lọc</span>
         </button>
@@ -24,9 +35,14 @@ export default function FilterBar({ selectedBrand, onSelectBrand, onApplyFilter,
             onClick={() => onSelectBrand(selectedBrand === brand ? null : brand)}
             className={`px-3 py-1.5 border rounded-[4px] text-[13px] transition-all duration-200 ${
               selectedBrand === brand 
-              ? 'border-primary text-primary bg-blue-50 font-bold shadow-inner' 
-              : 'border-gray-200 text-gray-700 bg-white hover:border-primary hover:bg-gray-50'
+              ? 'font-bold shadow-inner' 
+              : 'hover:bg-gray-50'
             }`}
+            style={{ 
+              borderColor: selectedBrand === brand ? THEME.primary : '#e5e7eb',
+              color: selectedBrand === brand ? THEME.primary : '#374151',
+              backgroundColor: selectedBrand === brand ? 'rgba(40, 138, 214, 0.05)' : '#ffffff'
+            }}
           >
             {brand}
           </button>

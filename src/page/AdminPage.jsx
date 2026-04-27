@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import AdminProducts from './AdminProducts';
 import AdminOrders from '../components/AdminOrders';
+import AdminDashboard from '../components/AdminDashboard';
+import AdminCustomers from '../components/AdminCustomers';
 import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell } from 'lucide-react';
+
+const DASHBOARD_STATS = [
+  { label: 'Tổng khách hàng', icon: Users, bgColor: '#5856d6', textColor: '#ffffff' },
+  { label: 'Doanh thu tháng', icon: Layout, bgColor: '#007aff', textColor: '#ffffff', isCurrency: true },
+  { label: 'Đơn hàng mới', icon: ShoppingCart, bgColor: '#32ade6', textColor: '#ffffff' },
+  { label: 'Sản phẩm', icon: Package, bgColor: '#ff9500', textColor: '#ffffff' },
+];
 
 export default function AdminPage() {
   const [activeAdminTab, setActiveAdminTab] = useState('dashboard');
@@ -18,6 +27,7 @@ export default function AdminPage() {
     switch (activeAdminTab) {
       case 'products': return 'Quản lý sản phẩm';
       case 'orders': return 'Quản lý đơn hàng';
+      case 'customers': return 'Quản lý khách hàng';
       case 'dashboard': return 'Bảng thống kê số liệu';
       default: return 'Trang quản trị';
     }
@@ -102,79 +112,9 @@ export default function AdminPage() {
         <main className="flex-1 overflow-y-auto p-8 bg-gray-50/50 scroll-smooth">
           {activeAdminTab === 'products' && <AdminProducts />}
           {activeAdminTab === 'orders' && <AdminOrders />}
+          {activeAdminTab === 'customers' && <AdminCustomers />}
           {activeAdminTab === 'dashboard' && (
-            <div className="space-y-8 animate-in fade-in duration-500">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  { label: 'Khách hàng', value: stats?.users || 0, icon: Users, color: 'blue' },
-                  { label: 'Doanh thu', value: stats?.revenue || 0, icon: Layout, color: 'green' },
-                  { label: 'Đơn hàng', value: stats?.orders || 0, icon: ShoppingCart, color: 'orange' },
-                  { label: 'Sản phẩm', value: stats?.products || 0, icon: Package, color: 'purple' },
-                ].map((item, i) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
-                      <div className={`p-4 rounded-xl bg-${item.color}-50 text-${item.color}-600`}>
-                        <Icon size={24} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-tight mb-1">{item.label}</p>
-                        <h3 className="text-2xl font-black text-gray-900 leading-none">
-                          {typeof item.value === 'number' ? item.value.toLocaleString('vi-VN') : item.value}
-                          {item.label === 'Doanh thu' ? 'đ' : ''}
-                        </h3>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Recent Orders Overview */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">Đơn hàng mới nhận</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">Tổng cộng 3 đơn hàng đang chờ xử lý</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveAdminTab('orders')}
-                    className="px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  >
-                    Xem tất cả
-                  </button>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead className="bg-gray-50/50">
-                      <tr className="text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100">
-                        <th className="px-6 py-4">Mã đơn</th>
-                        <th className="px-6 py-4">Khách hàng</th>
-                        <th className="px-6 py-4">Ngày đặt</th>
-                        <th className="px-6 py-4">Tổng tiền</th>
-                        <th className="px-6 py-4">Trạng thái</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {recentOrders.map((order, idx) => (
-                        <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4 text-blue-600 font-bold">{order.id}</td>
-                          <td className="px-6 py-4 font-semibold text-gray-800">{order.customer}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{order.date}</td>
-                          <td className="px-6 py-4 font-black text-gray-900">{order.amount.toLocaleString('vi-VN')}đ</td>
-                          <td className="px-6 py-4">
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
-                              {order.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <AdminDashboard />
           )}
         </main>
       </div>

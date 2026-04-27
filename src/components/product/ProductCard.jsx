@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom';
 
+const THEME = {
+  primary: '#288ad6', 
+  border: '#e5e7eb', 
+  textDark: '#333333', 
+};
+
 export default function ProductCard({ 
   id,
   name, 
@@ -12,7 +18,10 @@ export default function ProductCard({
   return (
     <Link 
       to={`/product/${id}`}
-      className="group flex flex-col bg-white border border-bordercustom rounded-lg p-3 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 relative cursor-pointer h-full overflow-hidden hover:border-blue-300"
+      className="group flex flex-col bg-white border rounded-lg p-3 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 relative cursor-pointer h-full overflow-hidden"
+      style={{ borderColor: THEME.border }}
+      onMouseOver={(e) => { e.currentTarget.style.borderColor = THEME.primary; }}
+      onMouseOut={(e) => { e.currentTarget.style.borderColor = THEME.border; }}
     >
       
       {/* Badge Giảm giá */}
@@ -42,7 +51,12 @@ export default function ProductCard({
       </div>
 
       {/* Product Name */}
-      <h3 className="font-bold text-sm text-text line-clamp-2 mb-2 group-hover:text-primary transition-colors leading-snug">
+      <h3 
+        className="font-bold text-sm line-clamp-2 mb-2 transition-colors leading-snug"
+        style={{ color: THEME.textDark }}
+        onMouseOver={(e) => { e.currentTarget.style.color = THEME.primary; }}
+        onMouseOut={(e) => { e.currentTarget.style.color = THEME.textDark; }}
+      >
         {name}
       </h3>
 
@@ -68,7 +82,10 @@ export default function ProductCard({
           ) : (
             <div className="h-4"></div> /* Khung trống để các card bằng nhau */
           )}
-          <div className="text-primary font-bold text-base md:text-lg">
+          <div 
+            className="font-bold text-base md:text-lg"
+            style={{ color: THEME.primary }}
+          >
             {price.toLocaleString('vi-VN')}₫
           </div>
         </div>

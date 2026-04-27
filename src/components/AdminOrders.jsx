@@ -10,6 +10,13 @@ const STATUS_TABS = [
   { id: 'cancelled', name: 'Đã hủy', count: 0, icon: XCircle, color: 'text-red-600', bgColor: 'bg-red-50' },
 ];
 
+const ORDER_STATS_CONFIG = [
+  { label: 'Tổng đơn hàng', countKey: 'all', icon: ShoppingCart, bgColor: '#5856d6', textColor: '#ffffff' },
+  { label: 'Chờ xác nhận', countKey: 'pending', icon: Clock, bgColor: '#ffcc00', textColor: '#000000' },
+  { label: 'Đang giao', countKey: 'shipping', icon: Truck, bgColor: '#007aff', textColor: '#ffffff' },
+  { label: 'Đã hoàn thành', countKey: 'delivered', icon: CheckCircle, bgColor: '#34c759', textColor: '#ffffff' },
+];
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]); // Khởi tạo mảng trống để sau này truyền API
   const [activeTab, setActiveTab] = useState('all');
@@ -45,6 +52,13 @@ export default function AdminOrders() {
     // Thực hiện gọi API cập nhật ở đây
   };
 
+  const counts = {
+    all: orders.length,
+    pending: orders.filter(o => o.status === 'pending').length,
+    shipping: orders.filter(o => o.status === 'shipping').length,
+    delivered: orders.filter(o => o.status === 'delivered').length,
+  };
+
   return (
     <div className="animate-in fade-in duration-500 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -64,6 +78,33 @@ export default function AdminOrders() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+      </div>
+
+      {/* Stats Overview - MISA Style */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {ORDER_STATS_CONFIG.map((item, i) => {
+          const Icon = item.icon;
+          const count = counts[item.countKey];
+          return (
+            <div 
+              key={i} 
+              className="p-6 rounded-2xl shadow-lg transition-all hover:scale-[1.02] flex flex-col justify-between h-32 border border-white/10"
+              style={{ backgroundColor: item.bgColor }}
+            >
+              <div className="flex justify-between items-start">
+                <p className="text-xs font-bold uppercase tracking-wider opacity-80" style={{ color: item.textColor }}>
+                  {item.label}
+                </p>
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Icon size={20} style={{ color: item.textColor }} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-black leading-none" style={{ color: item.textColor }}>
+                {count.toLocaleString('vi-VN')}
+              </h3>
+            </div>
+          );
+        })}
       </div>
 
       {/* Status Filter Tabs */}

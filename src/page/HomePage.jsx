@@ -6,6 +6,12 @@ import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
 import FilterBar from '../components/FilterBar';
 
+const THEME = {
+  primary: '#288ad6', 
+  secondary: '#0d5cb6', 
+  border: '#e5e7eb', 
+};
+
 export default function HomePage() {
   const { brand } = useParams();
   const [selectedBrand, setSelectedBrand] = useState(null);
@@ -28,11 +34,11 @@ export default function HomePage() {
   const filteredProducts = productsData.filter(product => {
     // Quick brand filter
     if (selectedBrand) {
-      // Check if it's one of the "other" categories or a brand
       const brandLower = selectedBrand.toLowerCase();
       
-      // If it's a specific brand or category name in the product
-      const matches = product.name.toLowerCase().includes(brandLower) || 
+      // Check brand field first, then name, then category
+      const matches = (product.brand && product.brand.toLowerCase() === brandLower) ||
+                      product.name.toLowerCase().includes(brandLower) || 
                       (product.category && product.category.toLowerCase().includes(brandLower));
       
       if (!matches) return false;
@@ -69,11 +75,17 @@ export default function HomePage() {
   return (
     <>
       <Breadcrumb items={[{ label: selectedBrand || advancedFilters ? 'Kết quả tìm kiếm' : 'Tất cả sản phẩm điện thoại' }]} />
-      <h2 className="text-2xl font-bold text-primary mb-4 pb-2 border-b border-bordercustom">
+      <h2 
+        className="text-2xl font-bold mb-4 pb-2 border-b"
+        style={{ color: THEME.primary, borderColor: THEME.border }}
+      >
         {selectedBrand || advancedFilters ? 'Kết quả lọc sản phẩm' : 'Chào mừng đến với hệ thống PhoneShop!'}
       </h2>
       {!selectedBrand && !advancedFilters && (
-        <div className="bg-blue-50 text-secondary p-4 rounded mb-6 border border-blue-200">
+        <div 
+          className="p-4 rounded mb-6 border"
+          style={{ backgroundColor: 'rgba(40, 138, 214, 0.05)', color: THEME.secondary, borderColor: 'rgba(40, 138, 214, 0.2)' }}
+        >
           Khám phá các sản phẩm điện thoại, phụ kiện và nhiều ưu đãi Mùa hè hấp dẫn.
         </div>
       )}
@@ -111,7 +123,8 @@ export default function HomePage() {
            <p className="text-lg">Không tìm thấy sản phẩm phù hợp.</p>
            <button 
              onClick={() => setSelectedBrand(null)}
-             className="mt-4 text-primary hover:underline"
+             className="mt-4 hover:underline"
+             style={{ color: THEME.primary }}
            >
              Xem tất cả sản phẩm
            </button>

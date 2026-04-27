@@ -1,11 +1,12 @@
 // src/utils/constants.js
 
 export const BRANDS = [
-  'IPhone',
+  'iPhone',
   'Samsung',
   'Xiaomi',
+  'POCO',
   'OPPO',
-  'Vivo',
+  'vivo',
   'Realme',
   'Nokia'
 ];

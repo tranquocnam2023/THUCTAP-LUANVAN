@@ -1,5 +1,11 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
+
+const THEME = {
+  background: '#f3f4f6',
+  textDark: '#333333',
+};
+
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
@@ -28,7 +34,7 @@ function App() {
   return (
     <div
       className="w-full flex justify-center font-sans min-h-screen"
-      style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text)' }}
+      style={{ backgroundColor: THEME.background, color: THEME.textDark }}
     >
       <div className="w-full h-full flex flex-col">
         {/* Header full width */}

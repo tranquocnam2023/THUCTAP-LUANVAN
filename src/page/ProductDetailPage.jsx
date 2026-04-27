@@ -1,304 +1,325 @@
 import { useParams, Link } from 'react-router-dom';
 import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+const THEME = {
+  primary: '#288ad6',
+  accent: '#ff9500',
+  secondary: '#0d5cb6',
+  background: '#f8f9fa',
+  border: '#e9ecef',
+  textDark: '#212529',
+  textGray: '#6c757d'
+};
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const product = productsData.find((p) => p.id === parseInt(id));
-  const [activeTab, setActiveTab] = useState('specs'); // 'specs' or 'info'
-  const [selectedStorage, setSelectedStorage] = useState('12GB - 256GB');
-  const [selectedColor, setSelectedColor] = useState('Đen');
+  const [activeTab, setActiveTab] = useState('specs'); 
+  const [selectedStorage, setSelectedStorage] = useState('');
+  const [selectedColor, setSelectedColor] = useState('Đen bóng');
+
+  useEffect(() => {
+    if (product && product.specs) {
+      setSelectedStorage(product.specs[3] || 'Standard');
+    }
+    window.scrollTo(0, 0);
+  }, [product]);
 
   if (!product) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Sản phẩm không tồn tại</h2>
-        <Link to="/" className="text-primary hover:underline">Quay lại trang chủ</Link>
+      <div className="flex flex-col items-center justify-center py-20 min-h-[60vh]">
+        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-gray-400">
+             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+           </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Sản phẩm không tồn tại</h2>
+        <p className="text-gray-500 mb-6 text-center max-w-xs">Có vẻ như sản phẩm này đã ngừng kinh doanh hoặc đường dẫn không chính xác.</p>
+        <Link 
+          to="/" 
+          className="px-8 py-3 rounded-full font-bold transition-all transform active:scale-95 shadow-lg"
+          style={{ backgroundColor: THEME.primary, color: '#fff' }}
+        >
+          Quay lại trang chủ
+        </Link>
       </div>
     );
   }
 
   const breadcrumbItems = [
     { label: 'Điện thoại', link: '/' },
+    { label: product.brand, link: `/danh-muc/${product.brand.toLowerCase()}` },
     { label: product.name }
   ];
 
-  // Mock data for variants
-  const storageVariants = ['12GB - 256GB', '8GB - 128GB', '8GB - 256GB'];
+  // Variants
+  const storageVariants = ['128GB', '256GB', '512GB', '1TB'];
   const colorVariants = [
-    { name: 'Đen', hex: '#4b4b4b' },
-    { name: 'Xám', hex: '#c0c0c0' },
-    { name: 'Xanh lá', hex: '#9db4a1' }
+    { name: 'Đen bóng', hex: '#1a1a1a' },
+    { name: 'Titan Tự nhiên', hex: '#bebebe' },
+    { name: 'Xanh dương', hex: '#4682b4' },
+    { name: 'Trắng Pearl', hex: '#f8f9fa' }
   ];
 
-  // Mock data for promotions
   const promotions = [
-    "Thu cũ Đổi mới: Trợ giá 50% - Tối đa 5.000.000₫",
-    "NHẬN HOÀN NGAY ĐẾN 800.000₫ khi mở thẻ tín dụng VPBANK MWG",
-    "Mỗi số điện thoại chỉ mua 1 sản phẩm",
-    "Giao hàng nhanh chóng (tuỳ khu vực)"
+    "Thu cũ Đổi mới: Trợ giá lên đến 2.000.000₫",
+    "Giảm thêm 500.000₫ khi thanh toán qua VNPay-QR",
+    "Tặng gói bảo hành rơi vỡ 12 tháng (Trị giá 1.500.000₫)",
+    "Ưu đãi mua kèm Phụ kiện Apple giảm đến 30%"
   ];
 
   return (
-    <div className="flex flex-col max-w-6xl mx-auto px-4">
-      <Breadcrumb items={breadcrumbItems} />
-      
-      {/* Product Title */}
-      <div className="border-b border-gray-200 pb-4 mb-6 mt-4">
-        <h1 className="text-2xl font-bold text-gray-800">{product.name}</h1>
-      </div>
-
-
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Column: Image and Tabs */}
-        <div className="lg:w-[65%]">
-          {/* Tabs Navigation (Thế Giới Di Động style) */}
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50 shadow-sm">
-              <button 
-                onClick={() => setActiveTab('specs')}
-                className={`px-6 sm:px-12 py-2.5 rounded-md text-sm font-bold transition-all duration-300 ${
-                  activeTab === 'specs' 
-                  ? 'bg-white text-blue-600 shadow-md ring-1 ring-black ring-opacity-5' 
-                  : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Thông số kỹ thuật
-              </button>
-              <button 
-                onClick={() => setActiveTab('info')}
-                className={`px-6 sm:px-12 py-2.5 rounded-md text-sm font-bold transition-all duration-300 ${
-                  activeTab === 'info' 
-                  ? 'bg-white text-blue-600 shadow-md ring-1 ring-black ring-opacity-5' 
-                  : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Thông tin sản phẩm
-              </button>
+    <div className="flex flex-col w-full pb-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4 w-full">
+        <Breadcrumb items={breadcrumbItems} />
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 pb-6 mb-8 mt-4 gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{product.name}</h1>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="flex text-yellow-400">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                    <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-sm text-blue-600 font-bold">142 đánh giá</span>
+              <span className="text-sm text-gray-400">|</span>
+              <span className="text-sm text-blue-600 font-bold">52 hỏi đáp</span>
             </div>
           </div>
-
-          {/* Tab Content Area */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-8 shadow-sm min-h-[500px]">
-            {activeTab === 'specs' ? (
-              <div className="animate-fade-in">
-                {/* Product Image */}
-                <div className="relative w-full aspect-video bg-white flex items-center justify-center mb-10 group">
-                   <img src={product.image} alt={product.name} className="max-h-full object-contain transition-transform duration-700 group-hover:scale-105" />
-                </div>
-
-                {/* Variants Selection Row (Moved here) */}
-                <div className="mb-10 space-y-6">
-                  {/* Storage Variants */}
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider">Chọn cấu hình:</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {storageVariants.map((storage) => (
-                        <button
-                          key={storage}
-                          onClick={() => setSelectedStorage(storage)}
-                          className={`px-4 py-2 rounded-xl border-2 text-sm font-medium transition-all ${
-                            selectedStorage === storage
-                            ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-sm'
-                            : 'border-gray-200 text-gray-700 hover:border-blue-300'
-                          }`}
-                        >
-                          {storage}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Color Variants */}
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider">Chọn màu sắc:</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {colorVariants.map((color) => (
-                        <button
-                          key={color.name}
-                          onClick={() => setSelectedColor(color.name)}
-                          className={`flex items-center gap-2 px-4 py-1.5 rounded-full border-2 text-sm font-medium transition-all ${
-                            selectedColor === color.name
-                            ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-sm'
-                            : 'border-gray-200 text-gray-700 hover:border-blue-300'
-                          }`}
-                        >
-                          <span 
-                            className="w-4 h-4 rounded-full shadow-inner border border-black/10" 
-                            style={{ backgroundColor: color.hex }}
-                          ></span>
-                          {color.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Technical Specs Table */}
-                <div className="mt-8">
-                   <div className="bg-gray-100 px-5 py-3 rounded-t-xl font-bold text-gray-700 flex justify-between items-center">
-                      <span className="flex items-center gap-2">
-                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-blue-600">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-                         </svg>
-                         Cấu hình & Bộ nhớ
-                      </span>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-400">
-                         <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                      </svg>
-                   </div>
-                   <div className="border-x border-b border-gray-100 rounded-b-xl overflow-hidden">
-                      <table className="w-full text-sm">
-                         <tbody>
-                            {[
-                               { label: 'Màn hình', value: `${product.specs[0]} (${product.specs[1]})` },
-                               { label: 'Hệ điều hành', value: 'Android 15' },
-                               { label: 'Chip xử lý (CPU)', value: 'Exynos 1580 8 nhân' },
-                               { label: 'RAM', value: product.specs[2] },
-                               { label: 'Dung lượng lưu trữ', value: product.specs[3] },
-                               { label: 'SIM', value: '2 Nano SIM (SIM 2 chung khe thẻ nhớ)' },
-                               { label: 'Pin, Sạc', value: '5000 mAh, 25 W' }
-                            ].map((row, idx) => (
-                               <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                  <td className="w-1/3 p-4 text-gray-500 font-medium">{row.label}:</td>
-                                  <td className="p-4 text-gray-800 font-semibold">{row.value}</td>
-                               </tr>
-                            ))}
-                         </tbody>
-                      </table>
-                   </div>
-                </div>
-                
-                <button className="w-full mt-6 py-3 border border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition-colors text-sm">
-                   Xem thêm cấu hình chi tiết
-                </button>
-              </div>
-            ) : (
-              <div className="animate-fade-in">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                   <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
-                   Thông tin sản phẩm {product.name}
-                </h3>
-                <div className="prose prose-blue max-w-none text-gray-600 space-y-6">
-                   <p className="text-lg leading-relaxed">
-                      {product.name} đại diện cho sự kết hợp hoàn hảo giữa thiết kế hiện đại và công nghệ tiên phong. 
-                      Với mỗi chi tiết được chăm chút tỉ mỉ, đây không chỉ là một thiết bị liên lạc mà còn là món phụ kiện thời thượng.
-                   </p>
-                   
-                   <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100">
-                      <h4 className="text-xl font-bold text-blue-800 mb-3">Hiệu năng vượt trội</h4>
-                      <p>
-                         Trang bị vi xử lý thế hệ mới nhất, {product.name} xử lý mượt mà mọi tác vụ từ làm việc đến giải trí đỉnh cao. 
-                         Khả năng đa nhiệm ấn tượng giúp bạn tối ưu hóa thời gian và hiệu quả công việc.
-                      </p>
-                   </div>
-
-                   <img src={product.image} alt="Feature highlight" className="w-full h-auto rounded-2xl shadow-lg border border-gray-100" />
-                   
-                   <p>
-                      Màn hình với độ phân giải cực cao mang lại màu sắc sống động, độ tương phản tuyệt vời, 
-                      giúp những thước phim và trò chơi trở nên chân thực hơn bao giờ hết.
-                   </p>
-                </div>
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+             <button className="p-2.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-600">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+                </svg>
+             </button>
+             <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all font-bold text-sm text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                </svg>
+                So sánh
+             </button>
           </div>
         </div>
 
-        {/* Right Column: Buying Box (Thế Giới Di Động style) */}
-        <div className="lg:w-[35%]">
-           <div className="sticky top-4 space-y-6">
-              {/* Main Buying Box */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xl shadow-gray-100 relative overflow-hidden">
-                 {/* Blue accent top */}
-                 <div className="absolute top-0 left-0 w-full h-1 bg-blue-600"></div>
-
-                 <div className="flex flex-col mb-6">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1">
-                       <span className="text-2xl sm:text-3xl font-black text-red-600 whitespace-nowrap">
-                          {product.price.toLocaleString('vi-VN')}₫
-                       </span>
-                       {product.originalPrice && (
-                          <span className="text-sm sm:text-base text-gray-400 line-through font-medium whitespace-nowrap">
-                             {product.originalPrice.toLocaleString('vi-VN')}₫
-                          </span>
-                       )}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Left Column: Visuals & Content */}
+          <div className="lg:col-span-7 space-y-10">
+            {/* Gallery Section */}
+            <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm flex flex-col items-center">
+               <div className="relative w-full aspect-square max-w-[450px] mb-8">
+                  <img src={product.image} alt={product.name} className="w-full h-full object-contain drop-shadow-2xl" />
+                  {product.discount && (
+                    <div className="absolute top-0 right-0 bg-red-600 text-white font-black text-xl px-4 py-2 rounded-2xl shadow-xl transform rotate-3">
+                       -{product.discount}%
                     </div>
-                    {product.discount && (
-                       <span className="inline-block bg-red-100 text-red-600 text-[10px] font-extrabold px-2 py-0.5 rounded-full w-fit">
-                          GIẢM {product.discount}%
-                       </span>
-                    )}
-                 </div>
-
-                 {/* Promotion Section */}
-                 <div className="border border-orange-200 rounded-xl overflow-hidden mb-6">
-                    <div className="bg-orange-50 px-4 py-2.5 font-bold text-sm text-orange-700 border-b border-orange-200 flex items-center">
-                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 mr-2">
-                          <path fillRule="evenodd" d="M12.964 2.815a.75.75 0 0 1 .494.314l3.426 5.138a.75.75 0 0 1-.161.944l-4.999 4.074a.75.75 0 0 1-.947 0l-4.999-4.074a.75.75 0 0 1-.161-.944l3.426-5.138a.75.75 0 0 1 .494-.314l1.2-.12a.75.75 0 0 1 .184 0l1.2.12Zm-3.411 9.421 2.22 1.81a.75.75 0 0 0 .954 0l2.22-1.81 2.304 3.456a.75.75 0 0 1-.16.944l-4.75 3.87a.75.75 0 0 1-.954 0l-4.75-3.87a.75.75 0 0 1-.16-.944l2.304-3.456Z" clipRule="evenodd" />
-                       </svg>
-                       Khuyến mãi đặc biệt
+                  )}
+               </div>
+               <div className="flex gap-4 overflow-x-auto w-full pb-4 scroll-smooth">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex-shrink-0 w-20 h-20 rounded-2xl border-2 border-gray-100 p-2 cursor-pointer hover:border-blue-500 transition-all">
+                       <img src={product.image} className="w-full h-full object-contain" />
                     </div>
-                    <div className="p-4 bg-white space-y-3">
-                       {promotions.map((promo, i) => (
-                          <div key={i} className="flex items-start gap-3 text-xs text-gray-700 leading-relaxed">
-                             <div className="flex-shrink-0 w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center text-[10px] font-bold text-orange-600 mt-0.5">
-                                {i + 1}
-                             </div>
-                             <span>{promo}</span>
-                          </div>
-                       ))}
-                    </div>
-                 </div>
+                  ))}
+               </div>
+            </div>
 
-                 {/* CTAs */}
-                 <div className="space-y-3">
-                    <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black py-4 rounded-xl text-xl uppercase transition-all shadow-lg shadow-orange-100 transform active:scale-[0.98]">
-                       Mua ngay
+            {/* Content Tabs */}
+            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+              <div className="flex border-b border-gray-100 bg-gray-50/50">
+                <button 
+                  onClick={() => setActiveTab('specs')}
+                  className={`flex-1 py-4 font-bold text-sm transition-all relative ${
+                    activeTab === 'specs' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  ĐẶC ĐIỂM NỔI BẬT
+                  {activeTab === 'specs' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-600 rounded-t-full"></div>}
+                </button>
+                <button 
+                  onClick={() => setActiveTab('info')}
+                  className={`flex-1 py-4 font-bold text-sm transition-all relative ${
+                    activeTab === 'info' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  THÔNG SỐ KỸ THUẬT
+                  {activeTab === 'info' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-600 rounded-t-full"></div>}
+                </button>
+              </div>
+
+              <div className="p-8">
+                {activeTab === 'specs' ? (
+                  <div className="prose prose-blue max-w-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <h3 className="text-2xl font-black text-gray-800 mb-6">Trải nghiệm đẳng cấp cùng {product.name}</h3>
+                    <p className="text-gray-600 leading-relaxed text-lg">
+                      Sản phẩm mang đến sự đột phá về mặt hiệu năng với con chip thế hệ mới nhất, 
+                      kết hợp cùng hệ thống camera chuyên nghiệp giúp bạn bắt trọn mọi khoảnh khắc. 
+                      Thiết kế titan siêu bền và nhẹ tạo nên vẻ ngoài sang trọng bậc nhất.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
+                       <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                          <h4 className="font-bold text-blue-700 mb-2">Màn hình sống động</h4>
+                          <p className="text-sm text-gray-600">Công nghệ LTPO giúp tiết kiệm pin tối đa trong khi vẫn đảm bảo tần số quét 120Hz mượt mà.</p>
+                       </div>
+                       <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                          <h4 className="font-bold text-blue-700 mb-2">Pin ấn tượng</h4>
+                          <p className="text-sm text-gray-600">Thời lượng sử dụng lên đến 30 giờ phát video liên tục, hỗ trợ sạc siêu nhanh.</p>
+                       </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <table className="w-full">
+                      <tbody className="divide-y divide-gray-100">
+                        {[
+                          { label: 'Kích thước màn hình', value: product.specs[0] },
+                          { label: 'Công nghệ màn hình', value: product.specs[1] },
+                          { label: 'RAM', value: product.specs[2] },
+                          { label: 'Bộ nhớ trong', value: product.specs[3] },
+                          { label: 'Camera sau', value: '48MP + 12MP + 12MP' },
+                          { label: 'Camera trước', value: '12MP' },
+                          { label: 'Chipset', value: 'A18 Pro (Dự kiến)' },
+                          { label: 'Dung lượng pin', value: '4422 mAh' }
+                        ].map((row, idx) => (
+                          <tr key={idx} className="group">
+                            <td className="py-4 font-bold text-gray-500 w-1/3 group-hover:text-blue-600 transition-colors">{row.label}</td>
+                            <td className="py-4 text-gray-800 font-semibold">{row.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Buying Section */}
+          <div className="lg:col-span-5 space-y-8">
+            <div className="sticky top-10 space-y-6">
+               {/* Selection Card */}
+               <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-xl shadow-gray-100 space-y-8">
+                  {/* Variants */}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Dung lượng:</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {storageVariants.map((storage) => (
+                          <button
+                            key={storage}
+                            onClick={() => setSelectedStorage(storage)}
+                            className={`py-3 rounded-2xl border-2 font-black transition-all ${
+                              selectedStorage === storage || (product.specs[3] && product.specs[3].includes(storage))
+                              ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-md transform scale-[1.02]'
+                              : 'border-gray-100 text-gray-500 hover:border-blue-200'
+                            }`}
+                          >
+                            {storage}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Màu sắc:</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {colorVariants.map((color) => (
+                          <button
+                            key={color.name}
+                            onClick={() => setSelectedColor(color.name)}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 font-bold transition-all ${
+                              selectedColor === color.name
+                              ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-md transform scale-[1.02]'
+                              : 'border-gray-100 text-gray-500 hover:border-blue-200'
+                            }`}
+                          >
+                            <div className="w-5 h-5 rounded-full border border-black/10 shadow-inner" style={{ backgroundColor: color.hex }}></div>
+                            <span className="text-xs">{color.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="bg-gray-50 rounded-3xl p-6 space-y-2 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <span className="text-4xl font-black text-red-600">
+                        {product.price.toLocaleString('vi-VN')}₫
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-lg text-gray-400 line-through">
+                          {product.originalPrice.toLocaleString('vi-VN')}₫
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                       <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg uppercase">TIẾT KIỆM {((product.originalPrice - product.price) || 0).toLocaleString('vi-VN')}₫</span>
+                       <span className="text-xs text-green-600 font-bold italic">Có hàng tại 120 siêu thị</span>
+                    </div>
+                  </div>
+
+                  {/* Promotions */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-black text-gray-800 uppercase tracking-widest flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500">
+                        <path fillRule="evenodd" d="M12.964 2.815a.75.75 0 0 1 .494.314l3.426 5.138a.75.75 0 0 1-.161.944l-4.999 4.074a.75.75 0 0 1-.947 0l-4.999-4.074a.75.75 0 0 1-.161-.944l3.426-5.138a.75.75 0 0 1 .494-.314l1.2-.12a.75.75 0 0 1 .184 0l1.2.12Zm-3.411 9.421 2.22 1.81a.75.75 0 0 0 .954 0l2.22-1.81 2.304 3.456a.75.75 0 0 1-.16.944l-4.75 3.87a.75.75 0 0 1-.954 0l-4.75-3.87a.75.75 0 0 1-.16-.944l2.304-3.456Z" clipRule="evenodd" />
+                      </svg>
+                      KHUYẾN MÃI
+                    </h4>
+                    <div className="space-y-3">
+                      {promotions.map((promo, idx) => (
+                        <div key={idx} className="flex gap-3 items-start group">
+                           <div className="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center text-[10px] font-black text-orange-600 mt-0.5 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                              {idx + 1}
+                           </div>
+                           <p className="text-xs text-gray-600 leading-relaxed font-medium">{promo}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="space-y-4 pt-4">
+                    <button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black py-5 rounded-3xl text-2xl uppercase shadow-2xl shadow-red-100 transition-all transform active:scale-95 flex flex-col items-center">
+                      MUA NGAY
+                      <span className="text-[11px] font-bold opacity-80 normal-case mt-1">(Giao tận nơi hoặc nhận tại siêu thị)</span>
                     </button>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                       <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-xs uppercase transition-all shadow-md shadow-blue-50">
-                          Mua trả góp 0%
-                          <span className="block text-[10px] font-normal lowercase mt-0.5 opacity-90">Qua thẻ hoặc công ty tài chính</span>
+                    <div className="grid grid-cols-2 gap-4">
+                       <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-3xl text-sm uppercase shadow-lg shadow-blue-100 transition-all">
+                          TRẢ GÓP 0%
+                          <span className="block text-[10px] font-normal normal-case mt-0.5">Duyệt nhanh qua ĐT</span>
                        </button>
-                       <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-3.5 rounded-xl text-xs uppercase transition-all flex items-center justify-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                          </svg>
-                          Thêm giỏ
+                       <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-4 rounded-3xl text-sm uppercase transition-all flex flex-col items-center justify-center">
+                          TRẢ GÓP QUA THẺ
+                          <span className="block text-[10px] font-normal normal-case mt-0.5">Visa, Mastercard, JCB</span>
                        </button>
                     </div>
-                 </div>
+                  </div>
+               </div>
 
-                 <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-center gap-2 text-xs text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-500">
-                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                    </svg>
-                    Gọi tư vấn: <span className="font-bold text-blue-600">1900 232 460</span>
-                 </div>
-              </div>
-
-              {/* Related/History Box */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                 <div className="flex justify-between items-center mb-4">
-                    <h4 className="text-xs font-black text-gray-800 uppercase tracking-widest">Sản phẩm đã xem</h4>
-                    <button className="text-[10px] text-blue-600 font-bold hover:underline">XÓA LỊCH SỬ</button>
-                 </div>
-                 <div className="grid grid-cols-3 gap-3">
-                    {productsData.slice(0, 3).map((p) => (
-                       <Link key={p.id} to={`/product/${p.id}`} className="group block">
-                          <div className="aspect-square bg-gray-50 border border-gray-100 rounded-xl p-2 mb-2 group-hover:border-blue-200 transition-colors">
-                             <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
-                          </div>
-                          <div className="text-[10px] font-bold text-gray-700 line-clamp-1 mb-0.5">{p.name}</div>
-                          <div className="text-[10px] font-black text-red-600">{p.price.toLocaleString('vi-VN')}₫</div>
-                       </Link>
-                    ))}
-                 </div>
-              </div>
-           </div>
+               {/* Store Info */}
+               <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100">
+                  <div className="flex items-center gap-4">
+                     <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                        </svg>
+                     </div>
+                     <div>
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Hỗ trợ nhanh</p>
+                        <p className="text-lg font-black text-gray-800">Tìm siêu thị gần bạn</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Package, Layout, Bell, ShoppingCart } from 'lucide-react';
 import { BRANDS } from '../utils/constants';
 // gọi API
 const TRANSACTIONS = [
@@ -6,6 +7,13 @@ const TRANSACTIONS = [
   { id: 'IMPORT_RETURN', name: 'Nhập hàng khách trả', type: 'IN', bgColor: '#23b85fff', textColor: '#ffffff', borderColor: 'var(--color-secondary)' },
   { id: 'EXPORT_SELL', name: 'Xuất bán hàng', type: 'OUT', bgColor: '#d1117aff', textColor: '#000000', borderColor: 'var(--color-yellow)' },
   { id: 'EXPORT_DEFECT', name: 'Xuất trả hàng lỗi cho NCC', type: 'OUT', bgColor: '#84e8c3ff', textColor: 'var(--color-primary)', borderColor: 'var(--color-primary)' }
+];
+
+const PRODUCT_STATS_CONFIG = [
+  { label: 'Tổng sản phẩm', value: 0, icon: 'Package', bgColor: '#5856d6', textColor: '#ffffff' },
+  { label: 'Giá trị tồn kho', value: 0, icon: 'Layout', bgColor: '#007aff', textColor: '#ffffff', isCurrency: true },
+  { label: 'Sắp hết hàng', value: 0, icon: 'Bell', bgColor: '#ff9500', textColor: '#ffffff' },
+  { label: 'Đã bán tháng này', value: 0, icon: 'ShoppingCart', bgColor: '#34c759', textColor: '#ffffff' },
 ];
 
 export default function AdminProducts() {
@@ -97,6 +105,29 @@ export default function AdminProducts() {
       {/* Khu vực Chính: Chức năng nhập xuất & Danh sách */}
       <div className="flex-1 flex flex-col">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý kho: {selectedBrand}</h2>
+        
+        {/* Stats Overview - MISA Style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {PRODUCT_STATS_CONFIG.map((item, i) => {
+            return (
+              <div 
+                key={i} 
+                className="p-5 rounded-2xl shadow-md transition-all hover:scale-[1.02] flex flex-col justify-between h-28 border border-white/10"
+                style={{ backgroundColor: item.bgColor }}
+              >
+                <div className="flex justify-between items-start">
+                  <p className="text-[10px] font-bold uppercase tracking-wider opacity-80" style={{ color: item.textColor }}>
+                    {item.label}
+                  </p>
+                </div>
+                <h3 className="text-2xl font-black leading-none" style={{ color: item.textColor }}>
+                  {item.value.toLocaleString('vi-VN')}
+                  {item.isCurrency ? 'đ' : ''}
+                </h3>
+              </div>
+            );
+          })}
+        </div>
 
         {/* 4 Nút điều hướng Nhập/Xuất */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
