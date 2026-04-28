@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Eye, Edit, CheckCircle, Truck, XCircle, Clock, ShoppingCart } from 'lucide-react';
+import { MOCK_ORDERS } from '../utils/mockData';
 
 const STATUS_TABS = [
   { id: 'all', name: 'Tất cả', count: 0 },
@@ -18,12 +19,20 @@ const ORDER_STATS_CONFIG = [
 ];
 
 export default function AdminOrders() {
-  const [orders, setOrders] = useState([]); // Khởi tạo mảng trống để sau này truyền API
+  const [orders, setOrders] = useState(MOCK_ORDERS); // Sử dụng dữ liệu ảo làm mặc định
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Kết nối API ở đây:
-  // useEffect(() => { fetchOrders().then(data => setOrders(data)) }, [])
+  useEffect(() => {
+    fetch('http://localhost:5000/api/Order')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) setOrders(data);
+      })
+      .catch(err => {
+        console.log("Sử dụng dữ liệu ảo (API không khả dụng)");
+      });
+  }, []);
 
   const filteredOrders = orders.filter(order => {
     const matchesTab = activeTab === 'all' || order.status === activeTab;

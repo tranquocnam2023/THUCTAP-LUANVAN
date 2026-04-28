@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, UserPlus, Edit, Trash2, Users, Star, Award, UserCheck, ShieldCheck } from 'lucide-react';
+import { MOCK_CUSTOMERS } from '../utils/mockData';
 
 const CUSTOMER_TABS = [
   { id: 'all', name: 'Tất cả', count: 0, icon: Users, color: 'text-gray-600', bgColor: 'bg-gray-50' },
@@ -17,7 +18,16 @@ const CUSTOMER_STATS_CONFIG = [
 
 export default function AdminCustomers() {
   // Mock data for demonstration
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/User')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) setCustomers(data);
+      })
+      .catch(err => console.log("Sử dụng dữ liệu ảo (API không khả dụng)"));
+  }, []);
 
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');

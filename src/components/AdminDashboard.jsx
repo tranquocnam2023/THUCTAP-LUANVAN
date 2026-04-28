@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   ComposedChart, Line
 } from 'recharts';
 import { ShoppingCart, Gift, Package, TrendingUp } from 'lucide-react';
+import { MOCK_DASHBOARD } from '../utils/mockData';
 
 const THEME = {
   primary: '#5856d6',
@@ -14,19 +15,34 @@ const THEME = {
   border: '#f0f0f0'
 };
 
-// 1. Dữ liệu doanh thu (7 ngày & Tháng)
-const revenueData = [];
-
-// 2. Dữ liệu sinh nhật
-const birthdays = [];
-
-// 3. Dữ liệu đơn hàng gần đây
-const recentOrders = [];
-
-// 4. Dữ liệu tồn kho & bán ra theo hiệu (Brand)
-const brandPerformance = [];
-
 export default function AdminDashboard() {
+  const [revenueData, setRevenueData] = useState(MOCK_DASHBOARD.revenue);
+  const [birthdays, setBirthdays] = useState(MOCK_DASHBOARD.birthdays);
+  const [recentOrders, setRecentOrders] = useState(MOCK_DASHBOARD.recentOrders);
+  const [brandPerformance, setBrandPerformance] = useState(MOCK_DASHBOARD.performance);
+
+  useEffect(() => {
+    // Giả định các API này tồn tại hoặc sẽ được tạo
+    fetch('http://localhost:5000/api/Dashboard/Revenue')
+      .then(res => res.json())
+      .then(data => { if (data && data.length > 0) setRevenueData(data); })
+      .catch(e => console.log("Sử dụng dữ liệu ảo Doanh thu"));
+
+    fetch('http://localhost:5000/api/User/Birthdays')
+      .then(res => res.json())
+      .then(data => { if (data && data.length > 0) setBirthdays(data); })
+      .catch(e => console.log("Sử dụng dữ liệu ảo Sinh nhật"));
+
+    fetch('http://localhost:5000/api/Order/Recent')
+      .then(res => res.json())
+      .then(data => { if (data && data.length > 0) setRecentOrders(data); })
+      .catch(e => console.log("Sử dụng dữ liệu ảo Đơn hàng mới"));
+
+    fetch('http://localhost:5000/api/Product/Performance')
+      .then(res => res.json())
+      .then(data => { if (data && data.length > 0) setBrandPerformance(data); })
+      .catch(e => console.log("Sử dụng dữ liệu ảo Hiệu suất"));
+  }, []);
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100">

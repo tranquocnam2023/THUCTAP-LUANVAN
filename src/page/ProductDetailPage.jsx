@@ -1,7 +1,8 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
 import { useState, useEffect } from 'react';
+import { useCart } from '../context/CartContext';
 
 const THEME = {
   primary: '#288ad6',
@@ -15,10 +16,34 @@ const THEME = {
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const product = productsData.find((p) => p.id === parseInt(id));
   const [activeTab, setActiveTab] = useState('specs'); 
   const [selectedStorage, setSelectedStorage] = useState('');
   const [selectedColor, setSelectedColor] = useState('Đen bóng');
+
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart({
+        ...product,
+        selectedStorage,
+        selectedColor
+      });
+      alert('Đã thêm sản phẩm vào giỏ hàng!');
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (product) {
+      addToCart({
+        ...product,
+        selectedStorage,
+        selectedColor
+      });
+      navigate('/cart');
+    }
+  };
 
   useEffect(() => {
     if (product && product.specs) {
@@ -248,7 +273,7 @@ export default function ProductDetailPage() {
 
                   {/* Pricing */}
                   <div className="bg-gray-50 rounded-3xl p-6 space-y-2 border border-gray-100">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-baseline flex-wrap gap-3">
                       <span className="text-4xl font-black text-red-600">
                         {product.price.toLocaleString('vi-VN')}₫
                       </span>
@@ -258,8 +283,8 @@ export default function ProductDetailPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
-                       <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg uppercase">TIẾT KIỆM {((product.originalPrice - product.price) || 0).toLocaleString('vi-VN')}₫</span>
+                    <div className="flex items-center flex-wrap gap-2">
+                       <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg uppercase whitespace-nowrap">TIẾT KIỆM {((product.originalPrice - product.price) || 0).toLocaleString('vi-VN')}₫</span>
                        <span className="text-xs text-green-600 font-bold italic">Có hàng tại 120 siêu thị</span>
                     </div>
                   </div>
@@ -286,20 +311,22 @@ export default function ProductDetailPage() {
 
                   {/* CTAs */}
                   <div className="space-y-4 pt-4">
-                    <button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black py-5 rounded-3xl text-2xl uppercase shadow-2xl shadow-red-100 transition-all transform active:scale-95 flex flex-col items-center">
+                    <button 
+                      onClick={handleBuyNow}
+                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black py-5 rounded-3xl text-2xl uppercase shadow-2xl shadow-red-100 transition-all transform active:scale-95 flex flex-col items-center"
+                    >
                       MUA NGAY
                       <span className="text-[11px] font-bold opacity-80 normal-case mt-1">(Giao tận nơi hoặc nhận tại siêu thị)</span>
                     </button>
-                    <div className="grid grid-cols-2 gap-4">
-                       <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-3xl text-sm uppercase shadow-lg shadow-blue-100 transition-all">
-                          TRẢ GÓP 0%
-                          <span className="block text-[10px] font-normal normal-case mt-0.5">Duyệt nhanh qua ĐT</span>
-                       </button>
-                       <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-4 rounded-3xl text-sm uppercase transition-all flex flex-col items-center justify-center">
-                          TRẢ GÓP QUA THẺ
-                          <span className="block text-[10px] font-normal normal-case mt-0.5">Visa, Mastercard, JCB</span>
-                       </button>
-                    </div>
+                    <button 
+                      onClick={handleAddToCart}
+                      className="w-full border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-black py-4 rounded-3xl text-lg uppercase transition-all flex items-center justify-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                      </svg>
+                      THÊM VÀO GIỎ HÀNG
+                    </button>
                   </div>
                </div>
 

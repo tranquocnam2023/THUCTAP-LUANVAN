@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 // Sidebar.jsx
 const THEME = {
   primary: '#288ad6', 
@@ -7,12 +8,23 @@ const THEME = {
 };
 
 export default function Sidebar() {
-  const categories = [
+  const [categories, setCategories] = useState([
     { name: 'Chương trình khuyến mãi', isHot: true },
     { name: 'Phụ kiện điện thoại', isHot: false },
     { name: 'Máy cũ - giá rẻ', isHot: false },
     { name: 'Thông tin - dịch vụ tiện ích', isHot: false },
-  ];
+  ]);
+//API
+  useEffect(() => {
+    fetch('http://localhost:5000/api/Category')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          setCategories(data);
+        }
+      })
+      .catch(err => console.error("Lỗi Sidebar API:", err));
+  }, []);
 
   return (
     <aside 

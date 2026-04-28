@@ -3,7 +3,9 @@ import AdminProducts from './AdminProducts';
 import AdminOrders from '../components/AdminOrders';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminCustomers from '../components/AdminCustomers';
-import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell } from 'lucide-react';
+import AdminCategories from '../components/AdminCategories';
+import AdminReviews from '../components/AdminReviews';
+import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star } from 'lucide-react';
 
 const DASHBOARD_STATS = [
   { label: 'Tổng khách hàng', icon: Users, bgColor: '#5856d6', textColor: '#ffffff' },
@@ -19,13 +21,20 @@ export default function AdminPage() {
   const [stats, setStats] = useState({ users: 0, revenue: 0, orders: 0, products: 0 });
   const [recentOrders, setRecentOrders] = useState([]);
 
-  // Kết nối API ở đây:
-  // useEffect(() => { fetchAdminStats().then(data => setStats(data)) }, [])
-  // useEffect(() => { fetchRecentOrders().then(data => setRecentOrders(data)) }, [])
+  useEffect(() => {
+    fetch('http://localhost:5000/api/Dashboard/Stats')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setStats(data);
+      })
+      .catch(e => console.log("Lỗi tải thống kê tổng quát"));
+  }, []);
 
   const getHeaderTitle = () => {
     switch (activeAdminTab) {
       case 'products': return 'Quản lý sản phẩm';
+      case 'categories': return 'Quản lý danh mục';
+      case 'reviews': return 'Quản lý đánh giá';
       case 'orders': return 'Quản lý đơn hàng';
       case 'customers': return 'Quản lý khách hàng';
       case 'dashboard': return 'Bảng thống kê số liệu';
@@ -62,6 +71,8 @@ export default function AdminPage() {
           <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Chính</p>
           <SidebarItem id="dashboard" icon={Layout} label="Bảng thống kê" />
           <SidebarItem id="products" icon={Package} label="Sản phẩm" />
+          <SidebarItem id="categories" icon={FolderTree} label="Danh mục" />
+          <SidebarItem id="reviews" icon={Star} label="Đánh giá" />
           <SidebarItem id="orders" icon={ShoppingCart} label="Đơn hàng" />
           <SidebarItem id="customers" icon={Users} label="Khách hàng" />
           
@@ -111,6 +122,8 @@ export default function AdminPage() {
         {/* Dynamic Page Content */}
         <main className="flex-1 overflow-y-auto p-8 bg-gray-50/50 scroll-smooth">
           {activeAdminTab === 'products' && <AdminProducts />}
+          {activeAdminTab === 'categories' && <AdminCategories />}
+          {activeAdminTab === 'reviews' && <AdminReviews />}
           {activeAdminTab === 'orders' && <AdminOrders />}
           {activeAdminTab === 'customers' && <AdminCustomers />}
           {activeAdminTab === 'dashboard' && (

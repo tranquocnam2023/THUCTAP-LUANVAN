@@ -1,12 +1,13 @@
 // src/page/CartPage.jsx
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../components/Breadcrumb';
+import { useCart } from '../context/CartContext';
 
 export default function CartPage() {
-  // Data giỏ hàng trống mặc định. Sau này anh/chị truyền State/Redux/API data vào đây nhé.
-  const cartItems = []; 
+  const { cartItems, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const navigate = useNavigate();
   
-  const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const total = cartTotal;
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -47,9 +48,14 @@ export default function CartPage() {
                        <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain" />
                     </div>
                     <div className="flex flex-col">
-                      <Link to="#" className="font-bold text-gray-800 hover:text-primary transition leading-snug">{item.name}</Link>
-                      <span className="text-xs text-gray-500 mt-1">Cấu hình: {item.specs ? item.specs.join(' | ') : ''}</span>
-                      <button className="text-red-500 hover:text-white hover:bg-red-500 border border-transparent hover:border-red-500 text-xs font-semibold text-left mt-3 flex items-center justify-center p-1 px-2 rounded w-fit space-x-1 transition">
+                      <Link to={`/product/${item.id}`} className="font-bold text-gray-800 hover:text-primary transition leading-snug">{item.name}</Link>
+                      <span className="text-xs text-gray-500 mt-1">
+                        Cấu hình: {item.selectedStorage || (item.specs ? item.specs[3] : '')} | Màu: {item.selectedColor || 'Mặc định'}
+                      </span>
+                      <button 
+                        onClick={() => removeFromCart(item.cartId)}
+                        className="text-red-500 hover:text-white hover:bg-red-500 border border-transparent hover:border-red-500 text-xs font-semibold text-left mt-3 flex items-center justify-center p-1 px-2 rounded w-fit space-x-1 transition"
+                      >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
                         <span>Xóa</span>
                       </button>
@@ -59,9 +65,15 @@ export default function CartPage() {
                   {/* Quantity Selector */}
                   <div className="col-span-1 md:col-span-3 flex md:justify-center items-center">
                      <div className="flex border border-bordercustom rounded overflow-hidden w-24">
-                        <button className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition">-</button>
+                        <button 
+                          onClick={() => updateQuantity(item.cartId, item.quantity - 1)}
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition"
+                        >-</button>
                         <input type="text" value={item.quantity} readOnly className="w-8 h-8 text-center text-sm font-semibold outline-none border-x border-bordercustom bg-white" />
-                        <button className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition">+</button>
+                        <button 
+                          onClick={() => updateQuantity(item.cartId, item.quantity + 1)}
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition"
+                        >+</button>
                      </div>
                   </div>
 
@@ -93,7 +105,10 @@ export default function CartPage() {
                  </div>
                </div>
 
-               <button className="w-full bg-[#fbd535] text-gray-900 border border-[#f3ca22] font-bold py-3.5 rounded-lg text-lg hover:bg-[#f3ca22] transition shadow-sm uppercase group">
+               <button 
+                 onClick={() => navigate('/checkout')}
+                 className="w-full bg-[#fbd535] text-gray-900 border border-[#f3ca22] font-bold py-3.5 rounded-lg text-lg hover:bg-[#f3ca22] transition shadow-sm uppercase group"
+               >
                  Tiến hành đặt hàng
                  <span className="block text-xs font-normal mt-0.5 opacity-80 normal-case">Thanh toán tiện lợi, giao hàng nhanh chóng</span>
                </button>

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Package, Layout, Bell, ShoppingCart } from 'lucide-react';
-import { BRANDS } from '../utils/constants';
+import React, { useState, useEffect } from 'react';
+import { Package, Layout, Bell, ShoppingCart, Settings2 } from 'lucide-react';
+import { MOCK_CATEGORIES, MOCK_PRODUCTS } from '../utils/mockData';
+import AdminProductVariants from '../components/AdminProductVariants';
+
 // gọi API
 const TRANSACTIONS = [
   { id: 'IMPORT_SUPPLIER', name: 'Nhập từ nhà cung cấp', type: 'IN', bgColor: '#ffffffff', textColor: '#db3e3eff', borderColor: 'var(--color-primary)' },
@@ -9,16 +11,55 @@ const TRANSACTIONS = [
   { id: 'EXPORT_DEFECT', name: 'Xuất trả hàng lỗi cho NCC', type: 'OUT', bgColor: '#84e8c3ff', textColor: 'var(--color-primary)', borderColor: 'var(--color-primary)' }
 ];
 
-const PRODUCT_STATS_CONFIG = [
-  { label: 'Tổng sản phẩm', value: 0, icon: 'Package', bgColor: '#5856d6', textColor: '#ffffff' },
-  { label: 'Giá trị tồn kho', value: 0, icon: 'Layout', bgColor: '#007aff', textColor: '#ffffff', isCurrency: true },
-  { label: 'Sắp hết hàng', value: 0, icon: 'Bell', bgColor: '#ff9500', textColor: '#ffffff' },
-  { label: 'Đã bán tháng này', value: 0, icon: 'ShoppingCart', bgColor: '#34c759', textColor: '#ffffff' },
-];
-
 export default function AdminProducts() {
+  const [categories, setCategories] = useState(MOCK_CATEGORIES);
+  const [products, setProducts] = useState(MOCK_PRODUCTS['iPhone'] || []);
   const [selectedBrand, setSelectedBrand] = useState('iPhone');
   const [activeTxTab, setActiveTxTab] = useState(null);
+  const [selectedProductForVariants, setSelectedProductForVariants] = useState(null);
+
+  useEffect(() => {
+    const fetchCategoriesData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/Category');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          setCategories(data);
+          setSelectedBrand(data[0].name);
+        }
+      } catch (error) {
+        console.log("Sử dụng dữ liệu ảo cho Danh mục");
+      }
+    };
+    
+    fetchCategoriesData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedBrand && selectedBrand !== 'Đang tải...' && selectedBrand !== 'Không có danh mục') {
+      const category = categories.find(c => c.name === selectedBrand);
+      if (category) {
+        fetch(`http://localhost:5000/api/Product/Category/${category.id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (Array.isArray(data) && data.length > 0) setProducts(data);
+            else setProducts(MOCK_PRODUCTS[selectedBrand] || []);
+          })
+          .catch(err => {
+            setProducts(MOCK_PRODUCTS[selectedBrand] || []);
+          });
+      }
+    }
+  }, [selectedBrand, categories]);
+
+  const stats = [
+    { label: 'Tổng sản phẩm', value: products.length, icon: 'Package', bgColor: '#5856d6', textColor: '#ffffff' },
+    { label: 'Giá trị tồn kho', value: products.reduce((acc, p) => acc + (p.price * (p.stockQuantity || 0)), 0), icon: 'Layout', bgColor: '#007aff', textColor: '#ffffff', isCurrency: true },
+    { label: 'Sắp hết hàng', value: products.filter(p => p.stockQuantity < 5).length, icon: 'Bell', bgColor: '#ff9500', textColor: '#ffffff' },
+    { label: 'Đã bán tháng này', value: 24, icon: 'ShoppingCart', bgColor: '#34c759', textColor: '#ffffff' },
+  ];
 
   // Tái sử dụng form giao dịch chung cho cả 4 loại
   const renderReusableTransactionForm = () => {
@@ -78,6 +119,10 @@ export default function AdminProducts() {
     );
   };
 
+  if (selectedProductForVariants) {
+    return <AdminProductVariants product={selectedProductForVariants} onBack={() => setSelectedProductForVariants(null)} />;
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-full gap-6">
       {/* Sidebar chọn thương hiệu (Nằm gọn bên trái) */}
@@ -87,18 +132,22 @@ export default function AdminProducts() {
           Thương hiệu
         </div>
         <div className="flex flex-col p-2">
-          {BRANDS.map(brand => (
-            <button
-              key={brand}
-              onClick={() => { setSelectedBrand(brand); setActiveTxTab(null); }}
-              className={`px-4 py-2.5 text-left rounded-lg mb-1 transition-colors ${selectedBrand === brand
-                  ? 'bg-blue-50 text-blue-700 font-bold'
-                  : 'text-gray-600 hover:bg-gray-50'
-                }`}
-            >
-              • {brand}
-            </button>
-          ))}
+          {categories.length > 0 ? (
+            categories.map(category => (
+              <button
+                key={category.id}
+                onClick={() => { setSelectedBrand(category.name); setActiveTxTab(null); }}
+                className={`px-4 py-2.5 text-left rounded-lg mb-1 transition-colors ${selectedBrand === category.name
+                    ? 'bg-blue-50 text-blue-700 font-bold'
+                    : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                • {category.name}
+              </button>
+            ))
+          ) : (
+            <div className="text-center p-4 text-sm text-gray-500">Đang tải API...</div>
+          )}
         </div>
       </div>
 
@@ -108,7 +157,7 @@ export default function AdminProducts() {
         
         {/* Stats Overview - MISA Style */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {PRODUCT_STATS_CONFIG.map((item, i) => {
+          {stats.map((item, i) => {
             return (
               <div 
                 key={i} 
@@ -172,15 +221,40 @@ export default function AdminProducts() {
                     <th className="p-3 border-b">Sản phẩm</th>
                     <th className="p-3 border-b text-center">Tồn kho</th>
                     <th className="p-3 border-b">Giá bán</th>
-                    <th className="p-3 border-b">Trạng thái</th>
+                    <th className="p-3 border-b text-center">Trạng thái</th>
+                    <th className="p-3 border-b text-center">Biến thể</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm border-b">
-                  <tr>
-                    <td colSpan="4" className="p-8 text-center text-gray-500 bg-white">
-                      Chưa có dữ liệu sản phẩm
-                    </td>
-                  </tr>
+                  {products.length > 0 ? (
+                    products.map((product) => (
+                      <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="p-3 border-b font-medium">{product.name}</td>
+                        <td className="p-3 border-b text-center">{product.stockQuantity || 0}</td>
+                        <td className="p-3 border-b">{product.price?.toLocaleString('vi-VN')}đ</td>
+                        <td className="p-3 border-b">
+                          <span className={`px-2 py-1 rounded text-[10px] font-bold ${product.stockQuantity > 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                            {product.stockQuantity > 0 ? 'Còn hàng' : 'Hết hàng'}
+                          </span>
+                        </td>
+                        <td className="p-3 border-b text-center">
+                          <button 
+                            onClick={() => setSelectedProductForVariants(product)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" 
+                            title="Quản lý biến thể"
+                          >
+                            <Settings2 size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="p-8 text-center text-gray-500 bg-white">
+                        Chưa có dữ liệu sản phẩm cho {selectedBrand}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
