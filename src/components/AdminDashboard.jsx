@@ -5,6 +5,8 @@ import {
 } from 'recharts';
 import { ShoppingCart, Gift, Package, TrendingUp } from 'lucide-react';
 import { MOCK_DASHBOARD } from '../utils/mockData';
+import { dashboardService } from '../services/dashboardService';
+import { productService } from '../services/productService';
 
 const THEME = {
   primary: '#5856d6',
@@ -22,24 +24,25 @@ export default function AdminDashboard() {
   const [brandPerformance, setBrandPerformance] = useState(MOCK_DASHBOARD.performance);
 
   useEffect(() => {
-    // Giả định các API này tồn tại hoặc sẽ được tạo
-    fetch('http://localhost:5000/api/Dashboard/Revenue')
-      .then(res => res.json())
+    // Sử dụng service thay vì fetch trực tiếp
+    dashboardService.getRevenue()
       .then(data => { if (data && data.length > 0) setRevenueData(data); })
       .catch(e => console.log("Sử dụng dữ liệu ảo Doanh thu"));
 
-    fetch('http://localhost:5000/api/User/Birthdays')
-      .then(res => res.json())
+    dashboardService.getBirthdays()
       .then(data => { if (data && data.length > 0) setBirthdays(data); })
       .catch(e => console.log("Sử dụng dữ liệu ảo Sinh nhật"));
 
-    fetch('http://localhost:5000/api/Order/Recent')
-      .then(res => res.json())
+    dashboardService.getRecentOrders()
       .then(data => { if (data && data.length > 0) setRecentOrders(data); })
       .catch(e => console.log("Sử dụng dữ liệu ảo Đơn hàng mới"));
 
-    fetch('http://localhost:5000/api/Product/Performance')
-      .then(res => res.json())
+    dashboardService.getStats() // Lưu ý: DashboardService có thể mở rộng thêm
+      .then(data => { /* xử lý thêm nếu cần */ })
+      .catch(e => {});
+
+    // Sử dụng productService cho hiệu suất sản phẩm
+    productService.getPerformance()
       .then(data => { if (data && data.length > 0) setBrandPerformance(data); })
       .catch(e => console.log("Sử dụng dữ liệu ảo Hiệu suất"));
   }, []);

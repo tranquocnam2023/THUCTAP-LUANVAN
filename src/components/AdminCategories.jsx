@@ -15,8 +15,7 @@ export default function AdminCategories() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/Category')
-      .then(res => res.json())
+    categoryService.getAll()
       .then(data => {
         if (Array.isArray(data) && data.length > 0) setCategories(data);
       })

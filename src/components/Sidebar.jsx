@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { categoryService } from '../services/categoryService';
 // Sidebar.jsx
 const THEME = {
   primary: '#288ad6', 
@@ -16,8 +17,7 @@ export default function Sidebar() {
   ]);
 //API
   useEffect(() => {
-    fetch('http://localhost:5000/api/Category')
-      .then(res => res.json())
+    categoryService.getAll()
       .then(data => {
         if (data && data.length > 0) {
           setCategories(data);

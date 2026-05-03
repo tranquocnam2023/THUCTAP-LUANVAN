@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, UserPlus, Edit, Trash2, Users, Star, Award, UserCheck, ShieldCheck } from 'lucide-react';
 import { MOCK_CUSTOMERS } from '../utils/mockData';
+import { userService } from '../services/userService';
+import { usePagination } from '../hooks/usePagination';
+import { useFormat } from '../hooks/useFormat';
 
 const CUSTOMER_TABS = [
   { id: 'all', name: 'Tất cả', count: 0, icon: Users, color: 'text-gray-600', bgColor: 'bg-gray-50' },
@@ -21,8 +24,7 @@ export default function AdminCustomers() {
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/User')
-      .then(res => res.json())
+    userService.getAll()
       .then(data => {
         if (Array.isArray(data) && data.length > 0) setCustomers(data);
       })
@@ -31,6 +33,9 @@ export default function AdminCustomers() {
 
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Khởi tạo các hook
+  const { formatCurrency, formatDate, formatNumber } = useFormat();
 
   // Potential threshold: > 1000 points
   // Loyal threshold: > 2000 points
@@ -41,17 +46,29 @@ export default function AdminCustomers() {
   };
 
   const filteredCustomers = customers.filter(customer => {
-    const type = getCustomerType(customer.points);
+    const type = getCustomerType(customer.points || 0);
     const matchesTab = activeTab === 'all' || 
                       (activeTab === 'potential' && type.id === 'potential') ||
                       (activeTab === 'loyal' && type.id === 'loyal') ||
-                      (activeTab === 'new' && new Date(customer.joinDate) > new Date('2024-03-01')); // Example for "New"
+                      (activeTab === 'new' && new Date(customer.joinDate) > new Date('2024-03-01'));
     
-    const matchesSearch = customer.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          customer.phone.includes(searchTerm);
+    const matchesSearch = (customer.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (customer.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (customer.phone || '').includes(searchTerm);
     return matchesTab && matchesSearch;
   });
+
+  const { 
+    currentData: paginatedCustomers, 
+    currentPage, 
+    totalPages, 
+    nextPage, 
+    prevPage, 
+    goToPage,
+    startIndex,
+    endIndex,
+    totalItems
+  } = usePagination(filteredCustomers, 5); // Hiển thị 5 khách hàng mỗi trang
 
   // Calculate counts for tabs
   const tabCounts = {
@@ -158,8 +175,8 @@ export default function AdminCustomers() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredCustomers.length > 0 ? (
-                filteredCustomers.map((customer) => {
+              {paginatedCustomers.length > 0 ? (
+                paginatedCustomers.map((customer) => {
                   const type = getCustomerType(customer.points);
                   return (
                     <tr key={customer.id} className="hover:bg-gray-50/50 transition-colors group">
@@ -169,7 +186,7 @@ export default function AdminCustomers() {
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-blue-600 font-bold">
-                            {customer.name.charAt(0)}
+                            {(customer.name || 'U').charAt(0)}
                           </div>
                           <span className="font-bold text-gray-900">{customer.name}</span>
                         </div>
@@ -180,7 +197,7 @@ export default function AdminCustomers() {
                       <td className="px-8 py-6 text-center">
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-black text-sm border border-blue-100">
                           <Award size={14} />
-                          {customer.points.toLocaleString('vi-VN')}
+                          {formatNumber(customer.points)}
                         </div>
                       </td>
                       <td className="px-8 py-6">
@@ -189,7 +206,7 @@ export default function AdminCustomers() {
                         </span>
                       </td>
                       <td className="px-8 py-6 text-sm font-semibold text-gray-500">
-                        {new Date(customer.joinDate).toLocaleDateString('vi-VN')}
+                        {formatDate(customer.joinDate)}
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center justify-center gap-2">
@@ -219,12 +236,34 @@ export default function AdminCustomers() {
           </table>
         </div>
         
-        <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between text-xs font-bold text-gray-400">
-          <span>HIỂN THỊ {filteredCustomers.length} TRÊN {customers.length} KHÁCH HÀNG</span>
+        <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            HIỂN THỊ {startIndex}-{endIndex} TRÊN {totalItems} KHÁCH HÀNG
+          </span>
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:text-gray-900 transition-colors shadow-sm disabled:opacity-50" disabled>TRƯỚC</button>
-            <button className="px-4 py-2 bg-blue-600 text-white border border-blue-600 rounded-xl shadow-lg shadow-blue-200">1</button>
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:text-gray-900 transition-colors shadow-sm">SAU</button>
+            <button 
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black hover:text-gray-900 transition-colors shadow-sm disabled:opacity-50"
+            >
+              TRƯỚC
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goToPage(i + 1)}
+                className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${currentPage === i + 1 ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border border-gray-100 text-gray-400 hover:border-blue-200'}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button 
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black hover:text-gray-900 transition-colors shadow-sm disabled:opacity-50"
+            >
+              SAU
+            </button>
           </div>
         </div>
       </div>

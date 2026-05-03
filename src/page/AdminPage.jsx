@@ -5,6 +5,8 @@ import AdminDashboard from '../components/AdminDashboard';
 import AdminCustomers from '../components/AdminCustomers';
 import AdminCategories from '../components/AdminCategories';
 import AdminReviews from '../components/AdminReviews';
+import { dashboardService } from '../services/dashboardService';
+import { authService } from '../services/authService';
 import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star } from 'lucide-react';
 
 const DASHBOARD_STATS = [
@@ -22,13 +24,22 @@ export default function AdminPage() {
   const [recentOrders, setRecentOrders] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/Dashboard/Stats')
-      .then(res => res.json())
+    dashboardService.getStats()
       .then(data => {
         if (data) setStats(data);
       })
       .catch(e => console.log("Lỗi tải thống kê tổng quát"));
   }, []);
+
+  const userJson = localStorage.getItem('user');
+  const user = userJson ? JSON.parse(userJson) : null;
+
+  const handleLogout = () => {
+    if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
+      authService.logout();
+      window.location.href = '/auth';
+    }
+  };
 
   const getHeaderTitle = () => {
     switch (activeAdminTab) {
@@ -82,11 +93,18 @@ export default function AdminPage() {
           </div>
         </nav>
 
-        <div className="p-4 bg-gray-900 border-t border-gray-800">
-          <a href="/" className="flex items-center px-4 py-3 text-sm font-medium text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-400/10 group">
-            <LogOut className="w-5 h-5 mr-3 group-hover:rotate-180 transition-transform" />
+        <div className="p-4 bg-gray-900 border-t border-gray-800 space-y-2">
+          <a href="/" className="flex items-center px-4 py-3 text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-400/10 group">
+            <Layout className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform" />
             Thoát về cửa hàng
           </a>
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-400/10 group"
+          >
+            <LogOut className="w-5 h-5 mr-3 group-hover:translate-x-1 transition-transform" />
+            Đăng xuất
+          </button>
         </div>
       </aside>
 
@@ -109,11 +127,11 @@ export default function AdminPage() {
             <div className="h-8 w-[1px] bg-gray-200 mx-1"></div>
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-gray-900 leading-none">Admin User</p>
-                <p className="text-[10px] text-gray-500 leading-none mt-1">Quản trị viên</p>
+                <p className="text-xs font-bold text-gray-900 leading-none">{user?.username || 'Admin User'}</p>
+                <p className="text-[10px] text-gray-500 leading-none mt-1 uppercase">{user?.role || 'Quản trị viên'}</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center font-bold shadow-md shadow-blue-200">
-                A
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center font-bold shadow-md shadow-blue-200 uppercase">
+                {user?.username?.charAt(0) || 'A'}
               </div>
             </div>
           </div>

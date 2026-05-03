@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Package, Layout, Bell, ShoppingCart, Settings2 } from 'lucide-react';
 import { MOCK_CATEGORIES, MOCK_PRODUCTS } from '../utils/mockData';
 import AdminProductVariants from '../components/AdminProductVariants';
+import { categoryService } from '../services/categoryService';
+import { productService } from '../services/productService';
+import { usePagination } from '../hooks/usePagination';
+import { useFormat } from '../hooks/useFormat';
 
 // gọi API
 const TRANSACTIONS = [
@@ -17,14 +21,25 @@ export default function AdminProducts() {
   const [selectedBrand, setSelectedBrand] = useState('iPhone');
   const [activeTxTab, setActiveTxTab] = useState(null);
   const [selectedProductForVariants, setSelectedProductForVariants] = useState(null);
+  
+  // Khởi tạo các hook
+  const { formatCurrency, formatNumber } = useFormat();
+  const { 
+    currentData: paginatedProducts, 
+    currentPage, 
+    totalPages, 
+    nextPage, 
+    prevPage, 
+    goToPage,
+    startIndex,
+    endIndex,
+    totalItems
+  } = usePagination(products, 5); // Hiển thị 5 sản phẩm mỗi trang
 
   useEffect(() => {
     const fetchCategoriesData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/Category');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        
+        const data = await categoryService.getAll();
         if (data && data.length > 0) {
           setCategories(data);
           setSelectedBrand(data[0].name);
@@ -41,8 +56,7 @@ export default function AdminProducts() {
     if (selectedBrand && selectedBrand !== 'Đang tải...' && selectedBrand !== 'Không có danh mục') {
       const category = categories.find(c => c.name === selectedBrand);
       if (category) {
-        fetch(`http://localhost:5000/api/Product/Category/${category.id}`)
-          .then(res => res.json())
+        productService.getByCategory(category.id)
           .then(data => {
             if (Array.isArray(data) && data.length > 0) setProducts(data);
             else setProducts(MOCK_PRODUCTS[selectedBrand] || []);
@@ -170,8 +184,7 @@ export default function AdminProducts() {
                   </p>
                 </div>
                 <h3 className="text-2xl font-black leading-none" style={{ color: item.textColor }}>
-                  {item.value.toLocaleString('vi-VN')}
-                  {item.isCurrency ? 'đ' : ''}
+                  {item.isCurrency ? formatCurrency(item.value) : formatNumber(item.value)}
                 </h3>
               </div>
             );
@@ -226,12 +239,12 @@ export default function AdminProducts() {
                   </tr>
                 </thead>
                 <tbody className="text-sm border-b">
-                  {products.length > 0 ? (
-                    products.map((product) => (
+                  {paginatedProducts.length > 0 ? (
+                    paginatedProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                         <td className="p-3 border-b font-medium">{product.name}</td>
                         <td className="p-3 border-b text-center">{product.stockQuantity || 0}</td>
-                        <td className="p-3 border-b">{product.price?.toLocaleString('vi-VN')}đ</td>
+                        <td className="p-3 border-b">{formatCurrency(product.price)}</td>
                         <td className="p-3 border-b">
                           <span className={`px-2 py-1 rounded text-[10px] font-bold ${product.stockQuantity > 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                             {product.stockQuantity > 0 ? 'Còn hàng' : 'Hết hàng'}
@@ -250,7 +263,7 @@ export default function AdminProducts() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" className="p-8 text-center text-gray-500 bg-white">
+                      <td colSpan="5" className="p-8 text-center text-gray-500 bg-white">
                         Chưa có dữ liệu sản phẩm cho {selectedBrand}
                       </td>
                     </tr>
@@ -258,8 +271,35 @@ export default function AdminProducts() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 text-center text-gray-500 text-sm">
-              {/*Trang quản lý sử dụng chung một cấu trúc layout để tái sử dụng hiệu quả.*/}
+            <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4 px-2 py-2">
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                Hiển thị {startIndex}-{endIndex} trên {totalItems} sản phẩm
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                  TRƯỚC
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goToPage(i + 1)}
+                    className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${currentPage === i + 1 ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border border-gray-100 text-gray-400 hover:border-blue-200'}`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button 
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                  SAU
+                </button>
+              </div>
             </div>
           </div>
         )}

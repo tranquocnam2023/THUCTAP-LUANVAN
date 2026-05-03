@@ -11,9 +11,12 @@ const THEME = {
 
 export default function Header() {
   const { cartCount } = useCart();
-  // kết nối api ở đây
-  const isLoggedIn = false; // Đã chuyển thành false để mô phỏng TÀI KHOẢN CHƯA ĐĂNG NHẬP
-  const userRole = 'customer'; // Mô phỏng chỉ là tài khoản khách
+  
+  // Lấy thông tin user từ localStorage
+  const userJson = localStorage.getItem('user');
+  const user = userJson ? JSON.parse(userJson) : null;
+  const isLoggedIn = !!user;
+  const userRole = user?.role?.toLowerCase() || 'customer';
 
   return (
     <header className="w-full text-white" style={{ backgroundColor: THEME.primary, color: THEME.textLight }}>
@@ -64,8 +67,8 @@ export default function Header() {
               Đăng nhập<br/>Tài khoản
             </Link>
 
-            {/* KIỂM TRA QUYỀN: Phải ĐĂNG NHẬP và là NHÂN VIÊN mới thấy Thẻ Quản Trị */}
-            {isLoggedIn && userRole === 'admin' && (
+            {/* KIỂM TRA QUYỀN: Phải ĐĂNG NHẬP và là NHÂN VIÊN/ADMIN mới thấy Thẻ Quản Trị */}
+            {isLoggedIn && (userRole === 'admin' || userRole === 'staff') && (
               <Link 
                 to="/admin" 
                 className="flex items-center px-3 py-2 rounded border font-bold transition text-center shadow-sm"

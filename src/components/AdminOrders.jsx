@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Eye, Edit, CheckCircle, Truck, XCircle, Clock, ShoppingCart } from 'lucide-react';
 import { MOCK_ORDERS } from '../utils/mockData';
+import { orderService } from '../services/orderService';
+import { usePagination } from '../hooks/usePagination';
+import { useFormat } from '../hooks/useFormat';
 
 const STATUS_TABS = [
   { id: 'all', name: 'Tất cả', count: 0 },
@@ -22,10 +25,12 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState(MOCK_ORDERS); // Sử dụng dữ liệu ảo làm mặc định
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Khởi tạo các hook
+  const { formatCurrency, formatDate } = useFormat();
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/Order')
-      .then(res => res.json())
+    orderService.getAll()
       .then(data => {
         if (Array.isArray(data) && data.length > 0) setOrders(data);
       })
@@ -33,13 +38,25 @@ export default function AdminOrders() {
         console.log("Sử dụng dữ liệu ảo (API không khả dụng)");
       });
   }, []);
-
+  
   const filteredOrders = orders.filter(order => {
     const matchesTab = activeTab === 'all' || order.status === activeTab;
     const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           order.customer.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
   });
+
+  const { 
+    currentData: paginatedOrders, 
+    currentPage, 
+    totalPages, 
+    nextPage, 
+    prevPage, 
+    goToPage,
+    startIndex,
+    endIndex,
+    totalItems
+  } = usePagination(filteredOrders, 5); // Hiển thị 5 đơn hàng mỗi trang
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -157,8 +174,8 @@ export default function AdminOrders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => (
+              {paginatedOrders.length > 0 ? (
+                paginatedOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-8 py-6">
                       <span className="text-blue-600 font-black group-hover:underline cursor-pointer">{order.id}</span>
@@ -169,7 +186,7 @@ export default function AdminOrders() {
                         <span className="text-[11px] text-gray-400 font-bold">{order.phone}</span>
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-sm font-semibold text-gray-500">{order.date}</td>
+                    <td className="px-8 py-6 text-sm font-semibold text-gray-500">{formatDate(order.date)}</td>
                     <td className="px-8 py-6">
                       <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-tighter ${
                         order.payment === 'Đã thanh toán' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-gray-50 text-gray-400 border-gray-100'
@@ -178,7 +195,7 @@ export default function AdminOrders() {
                       </span>
                     </td>
                     <td className="px-8 py-6 font-black text-gray-900 text-lg">
-                      {order.amount.toLocaleString('vi-VN')}đ
+                      {formatCurrency(order.amount)}
                     </td>
                     <td className="px-8 py-6">
                       <span className={`px-4 py-2 rounded-2xl text-[11px] font-black border uppercase tracking-tight shadow-sm inline-block ${getStatusStyle(order.status)}`}>
@@ -215,12 +232,34 @@ export default function AdminOrders() {
           </table>
         </div>
         
-        <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between text-xs font-bold text-gray-400">
-          <span>HIỂN THỊ {filteredOrders.length} TRÊN {orders.length} ĐƠN HÀNG</span>
+        <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            HIỂN THỊ {startIndex}-{endIndex} TRÊN {totalItems} ĐƠN HÀNG
+          </span>
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:text-gray-900 transition-colors shadow-sm disabled:opacity-50" disabled>TRƯỚC</button>
-            <button className="px-4 py-2 bg-blue-600 text-white border border-blue-600 rounded-xl shadow-lg shadow-blue-200">1</button>
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:text-gray-900 transition-colors shadow-sm">SAU</button>
+            <button 
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black hover:text-gray-900 transition-colors shadow-sm disabled:opacity-50"
+            >
+              TRƯỚC
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goToPage(i + 1)}
+                className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${currentPage === i + 1 ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border border-gray-100 text-gray-400 hover:border-blue-200'}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button 
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black hover:text-gray-900 transition-colors shadow-sm disabled:opacity-50"
+            >
+              SAU
+            </button>
           </div>
         </div>
       </div>
