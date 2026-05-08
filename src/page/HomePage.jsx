@@ -5,6 +5,7 @@ import ProductCard from '../components/product/ProductCard';
 import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
 import FilterBar from '../components/FilterBar';
+import { productService } from '../services/productService';
 
 const THEME = {
   primary: '#288ad6', 
@@ -16,10 +17,23 @@ export default function HomePage() {
   const { brand } = useParams();
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [advancedFilters, setAdvancedFilters] = useState(null);
+  const [products, setProducts] = useState(productsData);
+
+  useEffect(() => {
+    productService.getAll()
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setProducts(data);
+        }
+      })
+      .catch(err => {
+        console.log("Sử dụng dữ liệu mẫu từ JSON");
+        setProducts(productsData);
+      });
+  }, []);
 
   useEffect(() => {
     if (brand) {
-      // Normalize brand from URL (e.g., 'iphone' -> 'iPhone')
       setSelectedBrand(brand);
     } else {
       setSelectedBrand(null);
@@ -28,25 +42,24 @@ export default function HomePage() {
 
   const handleApplyFilter = (filters) => {
     setAdvancedFilters(filters);
-    setSelectedBrand(null); // Clear quick brand filter when advanced filter is applied
+    setSelectedBrand(null); 
   };
 
-  const filteredProducts = productsData.filter(product => {
+  const filteredProducts = products.filter(product => {
     // Quick brand filter
     if (selectedBrand) {
       const brandLower = selectedBrand.toLowerCase();
       
-      // Check brand field first, then name, then category
       const matches = (product.brand && product.brand.toLowerCase() === brandLower) ||
                       product.name.toLowerCase().includes(brandLower) || 
-                      (product.category && product.category.toLowerCase().includes(brandLower));
+                      (product.category && product.category.toLowerCase().includes(brandLower)) ||
+                      (product.categoryName && product.categoryName.toLowerCase().includes(brandLower));
       
       if (!matches) return false;
     }
 
     // Advanced filters from modal
     if (advancedFilters) {
-      // Filter by Brands (Multiple)
       if (advancedFilters['Hãng'] && advancedFilters['Hãng'].length > 0) {
         const matchesBrand = advancedFilters['Hãng'].some(brand => 
           product.name.toLowerCase().includes(brand.toLowerCase())
@@ -54,14 +67,12 @@ export default function HomePage() {
         if (!matchesBrand) return false;
       }
 
-      // Filter by Price Range
       const [min, max] = advancedFilters.priceRange;
       if (product.price < min || product.price > max) {
         return false;
       }
 
-      // Filter by RAM (if available in specs)
-      if (advancedFilters['RAM'] && advancedFilters['RAM'].length > 0) {
+      if (advancedFilters['RAM'] && advancedFilters['RAM'].length > 0 && product.specs) {
         const matchesRam = advancedFilters['RAM'].some(ram => 
           product.specs.some(spec => spec.includes(ram))
         );
@@ -79,7 +90,7 @@ export default function HomePage() {
         className="text-2xl font-bold mb-4 pb-2 border-b"
         style={{ color: THEME.primary, borderColor: THEME.border }}
       >
-        {selectedBrand || advancedFilters ? 'Kết quả lọc sản phẩm' : 'Chào mừng đến với hệ thống PhoneShop!'}
+        {selectedBrand || advancedFilters ? `Sản phẩm ${selectedBrand || 'đã lọc'}` : 'Chào mừng đến với hệ thống PhoneShop!'}
       </h2>
       {!selectedBrand && !advancedFilters && (
         <div 
@@ -113,8 +124,9 @@ export default function HomePage() {
                price={product.price}
                originalPrice={product.originalPrice}
                discount={product.discount}
-               specs={product.specs}
+               specs={product.specs || []}
                image={product.image}
+               stockQuantity={product.stockQuantity}
             />
           ))}
         </div>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BRANDS, OTHER_CATEGORIES } from '../utils/constants';
 import { useCart } from '../context/CartContext';
 
@@ -11,12 +11,21 @@ const THEME = {
 
 export default function Header() {
   const { cartCount } = useCart();
+  const navigate = useNavigate();
   
   // Lấy thông tin user từ localStorage
   const userJson = localStorage.getItem('user');
-  const user = userJson ? JSON.parse(userJson) : null;
-  const isLoggedIn = !!user;
-  const userRole = user?.role?.toLowerCase() || 'customer';
+  const user = (userJson && userJson !== 'undefined' && userJson !== 'null') ? JSON.parse(userJson) : null;
+  
+  // Kiểm tra đăng nhập cực kỳ nghiêm ngặt
+  const isLoggedIn = !!(user && user.id); 
+  const userRole = user?.role?.toLowerCase() || '';
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    window.location.href = '/'; // Reload để xóa state
+  };
 
   return (
     <header className="w-full text-white" style={{ backgroundColor: THEME.primary, color: THEME.textLight }}>
@@ -49,7 +58,6 @@ export default function Header() {
               className="w-full h-full text-gray-800 px-3 outline-none"
             />
             <button className="h-full px-4 text-gray-600 bg-white hover:bg-gray-100 transition">
-              {/* Search Icon */}
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
               </svg>
@@ -59,20 +67,32 @@ export default function Header() {
 
         {/* Right Icons: Orders, Cart, Account */}
         <div className="flex items-center space-x-3 text-xs shrink-0">
-            <Link 
-              to="/auth" 
-              className="flex items-center px-3 py-2 rounded transition text-center hover:bg-opacity-20"
-              style={{ color: THEME.textLight }}
-            >
-              Đăng nhập<br/>Tài khoản
-            </Link>
+            {isLoggedIn ? (
+              <div className="flex items-center px-3 py-1 rounded bg-white/10 gap-3">
+                 <div className="flex flex-col items-end">
+                    <span className="font-bold opacity-80">Chào, {user.username || user.name || 'User'}</span>
+                    <button onClick={handleLogout} className="text-[10px] hover:underline text-yellow-300 font-bold uppercase">Đăng xuất</button>
+                 </div>
+                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
+                    {(user.username || 'U')[0].toUpperCase()}
+                 </div>
+              </div>
+            ) : (
+              <Link 
+                to="/auth" 
+                className="flex items-center px-3 py-2 rounded transition text-center hover:bg-white/20"
+                style={{ color: THEME.textLight }}
+              >
+                Đăng nhập<br/>Tài khoản
+              </Link>
+            )}
 
             {/* KIỂM TRA QUYỀN: Phải ĐĂNG NHẬP và là NHÂN VIÊN/ADMIN mới thấy Thẻ Quản Trị */}
             {isLoggedIn && (userRole === 'admin' || userRole === 'staff') && (
               <Link 
                 to="/admin" 
-                className="flex items-center px-3 py-2 rounded border font-bold transition text-center shadow-sm"
-                style={{ backgroundColor: THEME.accent, color: '#333', borderColor: THEME.accent }}
+                className="flex items-center px-3 py-2 rounded border font-black transition text-center shadow-lg animate-pulse hover:animate-none"
+                style={{ backgroundColor: THEME.accent, color: '#000', borderColor: THEME.accent }}
               >
                 Trang<br/>Quản trị
               </Link>
@@ -80,13 +100,13 @@ export default function Header() {
  
             <Link 
               to="/cart" 
-              className="flex items-center px-3 py-2 border rounded transition space-x-2 relative"
+              className="flex items-center px-3 py-2 border rounded transition space-x-2 relative group"
               style={{ borderColor: 'rgba(255,255,255,0.3)' }}
               onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = THEME.primary; }}
               onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = THEME.textLight; }}
             >
               <div className="relative">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 transition-transform group-hover:scale-110">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                 </svg>
                 {cartCount > 0 && (

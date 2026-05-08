@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { categoryService } from '../services/categoryService';
+
 // Sidebar.jsx
 const THEME = {
   primary: '#288ad6', 
@@ -10,12 +12,12 @@ const THEME = {
 
 export default function Sidebar() {
   const [categories, setCategories] = useState([
-    { name: 'Chương trình khuyến mãi', isHot: true },
-    { name: 'Phụ kiện điện thoại', isHot: false },
-    { name: 'Máy cũ - giá rẻ', isHot: false },
-    { name: 'Thông tin - dịch vụ tiện ích', isHot: false },
+    { name: 'iPhone', isHot: true },
+    { name: 'Samsung', isHot: false },
+    { name: 'Xiaomi', isHot: false },
+    { name: 'Oppo', isHot: false },
   ]);
-//API
+
   useEffect(() => {
     categoryService.getAll()
       .then(data => {
@@ -42,23 +44,19 @@ export default function Sidebar() {
       </div>
       <nav className="flex flex-col py-1">
         {categories.map((cat, idx) => (
-          <a
+          <Link
             key={idx}
-            href="#"
+            to={`/danh-muc/${cat.name}`}
             className="group flex flex-col justify-center px-4 py-3 hover:bg-gray-50 transition border-b"
             style={{ borderColor: THEME.border }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
           >
             <div 
-              className={`font-medium flex items-center transition`}
+              className={`font-medium flex items-center transition group-hover:text-blue-500`}
               style={{ color: THEME.textDark }}
-              onMouseOver={(e) => { e.currentTarget.style.color = THEME.primary; }}
-              onMouseOut={(e) => { e.currentTarget.style.color = THEME.textDark; }}
             >
               {cat.name}
             </div>
-          </a>
+          </Link>
         ))}
       </nav>
     </aside>

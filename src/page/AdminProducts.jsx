@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Layout, Bell, ShoppingCart, Settings2 } from 'lucide-react';
+import { Package, Layout, Bell, ShoppingCart, Settings2, Plus, Edit, Trash2, X } from 'lucide-react';
 import { MOCK_CATEGORIES, MOCK_PRODUCTS } from '../utils/mockData';
 import AdminProductVariants from '../components/AdminProductVariants';
 import { categoryService } from '../services/categoryService';
@@ -22,6 +22,19 @@ export default function AdminProducts() {
   const [activeTxTab, setActiveTxTab] = useState(null);
   const [selectedProductForVariants, setSelectedProductForVariants] = useState(null);
   
+  // State for Product CRUD
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [productFormData, setProductFormData] = useState({
+    name: '',
+    price: 0,
+    originalPrice: 0,
+    stockQuantity: 0,
+    categoryId: '',
+    description: '',
+    image: ''
+  });
+
   // Khởi tạo các hook
   const { formatCurrency, formatNumber } = useFormat();
   const { 
@@ -35,6 +48,21 @@ export default function AdminProducts() {
     endIndex,
     totalItems
   } = usePagination(products, 5); // Hiển thị 5 sản phẩm mỗi trang
+
+  const fetchProducts = async () => {
+    if (selectedBrand && selectedBrand !== 'Đang tải...' && selectedBrand !== 'Không có danh mục') {
+      const category = categories.find(c => c.name === selectedBrand);
+      if (category) {
+        try {
+          const data = await productService.getByCategory(category.id);
+          if (Array.isArray(data) && data.length > 0) setProducts(data);
+          else setProducts(MOCK_PRODUCTS[selectedBrand] || []);
+        } catch (err) {
+          setProducts(MOCK_PRODUCTS[selectedBrand] || []);
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchCategoriesData = async () => {
@@ -53,27 +81,87 @@ export default function AdminProducts() {
   }, []);
 
   useEffect(() => {
-    if (selectedBrand && selectedBrand !== 'Đang tải...' && selectedBrand !== 'Không có danh mục') {
-      const category = categories.find(c => c.name === selectedBrand);
-      if (category) {
-        productService.getByCategory(category.id)
-          .then(data => {
-            if (Array.isArray(data) && data.length > 0) setProducts(data);
-            else setProducts(MOCK_PRODUCTS[selectedBrand] || []);
-          })
-          .catch(err => {
-            setProducts(MOCK_PRODUCTS[selectedBrand] || []);
-          });
-      }
-    }
+    fetchProducts();
   }, [selectedBrand, categories]);
 
   const stats = [
     { label: 'Tổng sản phẩm', value: products.length, icon: 'Package', bgColor: '#5856d6', textColor: '#ffffff' },
-    { label: 'Giá trị tồn kho', value: products.reduce((acc, p) => acc + (p.price * (p.stockQuantity || 0)), 0), icon: 'Layout', bgColor: '#007aff', textColor: '#ffffff', isCurrency: true },
-    { label: 'Sắp hết hàng', value: products.filter(p => p.stockQuantity < 5).length, icon: 'Bell', bgColor: '#ff9500', textColor: '#ffffff' },
+    { label: 'Giá trị tồn kho', value: products.reduce((acc, p) => acc + ((p.basePrice || p.price || 0) * (p.stock || p.stockQuantity || 0)), 0), icon: 'Layout', bgColor: '#007aff', textColor: '#ffffff', isCurrency: true },
+    { label: 'Sắp hết hàng', value: products.filter(p => (p.stock || p.stockQuantity || 0) < 5).length, icon: 'Bell', bgColor: '#ff9500', textColor: '#ffffff' },
     { label: 'Đã bán tháng này', value: 24, icon: 'ShoppingCart', bgColor: '#34c759', textColor: '#ffffff' },
   ];
+
+  const handleOpenProductModal = (product = null) => {
+    if (product) {
+      setEditingProduct(product);
+      setProductFormData({
+        name: product.name,
+        price: product.basePrice || product.price || 0,
+        originalPrice: product.originalPrice || product.basePrice || product.price || 0,
+        stockQuantity: product.stock || product.stockQuantity || 0,
+        categoryId: product.categoryId || (categories.find(c => c.name === selectedBrand)?.id || ''),
+        description: product.description || '',
+        image: product.thumbnailImage || product.image || ''
+      });
+    } else {
+      setEditingProduct(null);
+      setProductFormData({
+        name: '',
+        price: 0,
+        originalPrice: 0,
+        stockQuantity: 0,
+        categoryId: categories.find(c => c.name === selectedBrand)?.id || '',
+        description: '',
+        image: ''
+      });
+    }
+    setIsProductModalOpen(true);
+  };
+
+  const handleSaveProduct = async (e) => {
+    e.preventDefault();
+    try {
+      // Map frontend form data to backend DTO structure
+      const payload = {
+        name: productFormData.name,
+        slug: productFormData.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+        description: productFormData.description,
+        basePrice: productFormData.price,
+        stock: productFormData.stockQuantity,
+        isActive: true,
+        shopId: 1, // Defaulting to shop 1 for now
+        categoryId: parseInt(productFormData.categoryId) || 1,
+        thumbnailImage: productFormData.image || "",
+        mainImage: productFormData.image,
+        images: ""
+      };
+
+      if (editingProduct) {
+        await productService.update(editingProduct.id, payload);
+        alert('Cập nhật sản phẩm thành công!');
+      } else {
+        await productService.create(payload);
+        alert('Thêm sản phẩm mới thành công!');
+      }
+      setIsProductModalOpen(false);
+      fetchProducts();
+    } catch (error) {
+      console.error('Lưu sản phẩm thất bại:', error.response?.data || error.message);
+      alert('Có lỗi xảy ra khi lưu sản phẩm: ' + (JSON.stringify(error.response?.data) || error.message));
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+      try {
+        await productService.delete(id);
+        alert('Xóa sản phẩm thành công!');
+        fetchProducts();
+      } catch (error) {
+        alert('Lỗi: ' + (error.message || 'Không thể xóa sản phẩm'));
+      }
+    }
+  };
 
   // Tái sử dụng form giao dịch chung cho cả 4 loại
   const renderReusableTransactionForm = () => {
@@ -101,6 +189,7 @@ export default function AdminProducts() {
             <label className="block text-sm font-semibold text-gray-600 mb-2">Chọn sản phẩm</label>
             <select className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
               <option>-- Chọn sản phẩm {selectedBrand} --</option>
+              {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
           <div>
@@ -167,7 +256,16 @@ export default function AdminProducts() {
 
       {/* Khu vực Chính: Chức năng nhập xuất & Danh sách */}
       <div className="flex-1 flex flex-col">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý kho: {selectedBrand}</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">Quản lý kho: {selectedBrand}</h2>
+          <button 
+            onClick={() => handleOpenProductModal()}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold shadow-md hover:bg-blue-700 transition-all active:scale-95"
+          >
+            <Plus size={18} />
+            <span>Thêm sản phẩm</span>
+          </button>
+        </div>
         
         {/* Stats Overview - MISA Style */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -235,7 +333,7 @@ export default function AdminProducts() {
                     <th className="p-3 border-b text-center">Tồn kho</th>
                     <th className="p-3 border-b">Giá bán</th>
                     <th className="p-3 border-b text-center">Trạng thái</th>
-                    <th className="p-3 border-b text-center">Biến thể</th>
+                    <th className="p-3 border-b text-center">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm border-b">
@@ -243,21 +341,37 @@ export default function AdminProducts() {
                     paginatedProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                         <td className="p-3 border-b font-medium">{product.name}</td>
-                        <td className="p-3 border-b text-center">{product.stockQuantity || 0}</td>
-                        <td className="p-3 border-b">{formatCurrency(product.price)}</td>
+                        <td className="p-3 border-b text-center">{product.stock ?? product.stockQuantity ?? 0}</td>
+                        <td className="p-3 border-b">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
                         <td className="p-3 border-b">
-                          <span className={`px-2 py-1 rounded text-[10px] font-bold ${product.stockQuantity > 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                            {product.stockQuantity > 0 ? 'Còn hàng' : 'Hết hàng'}
+                          <span className={`px-2 py-1 rounded text-[10px] font-bold ${(product.stock ?? product.stockQuantity ?? 0) > 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                            {(product.stock ?? product.stockQuantity ?? 0) > 0 ? 'Còn hàng' : 'Hết hàng'}
                           </span>
                         </td>
-                        <td className="p-3 border-b text-center">
-                          <button 
-                            onClick={() => setSelectedProductForVariants(product)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" 
-                            title="Quản lý biến thể"
-                          >
-                            <Settings2 size={18} />
-                          </button>
+                        <td className="p-3 border-b">
+                          <div className="flex items-center justify-center gap-1">
+                            <button 
+                              onClick={() => setSelectedProductForVariants(product)}
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" 
+                              title="Quản lý biến thể"
+                            >
+                              <Settings2 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleOpenProductModal(product)}
+                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-all" 
+                              title="Sửa"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-all" 
+                              title="Xóa"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -304,6 +418,103 @@ export default function AdminProducts() {
           </div>
         )}
       </div>
+
+      {/* Product CRUD Modal */}
+      {isProductModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b flex justify-between items-center bg-blue-600 text-white">
+              <h3 className="text-xl font-bold">{editingProduct ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}</h3>
+              <button onClick={() => setIsProductModalOpen(false)} className="hover:rotate-90 transition-transform">
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveProduct} className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Tên sản phẩm</label>
+                  <input 
+                    type="text" required
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={productFormData.name}
+                    onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Giá bán (VNĐ)</label>
+                  <input 
+                    type="number" required
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={productFormData.price}
+                    onChange={(e) => setProductFormData({...productFormData, price: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Giá gốc (VNĐ)</label>
+                  <input 
+                    type="number"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={productFormData.originalPrice}
+                    onChange={(e) => setProductFormData({...productFormData, originalPrice: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Số lượng tồn</label>
+                  <input 
+                    type="number" required
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={productFormData.stockQuantity}
+                    onChange={(e) => setProductFormData({...productFormData, stockQuantity: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Danh mục</label>
+                  <select 
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={productFormData.categoryId}
+                    onChange={(e) => setProductFormData({...productFormData, categoryId: e.target.value})}
+                  >
+                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Link hình ảnh</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="https://..."
+                    value={productFormData.image}
+                    onChange={(e) => setProductFormData({...productFormData, image: e.target.value})}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Mô tả ngắn</label>
+                  <textarea 
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none h-24"
+                    value={productFormData.description}
+                    onChange={(e) => setProductFormData({...productFormData, description: e.target.value})}
+                  ></textarea>
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <button 
+                  type="button"
+                  onClick={() => setIsProductModalOpen(false)}
+                  className="px-6 py-2 border text-gray-500 rounded-lg font-bold hover:bg-gray-50 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button 
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold shadow-md hover:bg-blue-700 transition-all active:scale-95"
+                >
+                  {editingProduct ? 'Lưu thay đổi' : 'Thêm sản phẩm'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

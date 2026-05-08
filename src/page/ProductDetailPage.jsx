@@ -3,6 +3,7 @@ import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { productService } from '../services/productService';
 
 const THEME = {
   primary: '#288ad6',
@@ -18,10 +19,24 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const product = productsData.find((p) => p.id === parseInt(id));
+  const [product, setProduct] = useState(null);
   const [activeTab, setActiveTab] = useState('specs'); 
   const [selectedStorage, setSelectedStorage] = useState('');
   const [selectedColor, setSelectedColor] = useState('Đen bóng');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    productService.getById(id)
+      .then(data => {
+        if (data) setProduct(data);
+        else setProduct(productsData.find((p) => p.id === parseInt(id)));
+      })
+      .catch(() => {
+        setProduct(productsData.find((p) => p.id === parseInt(id)));
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const handleAddToCart = () => {
     if (product) {
@@ -52,6 +67,8 @@ export default function ProductDetailPage() {
     window.scrollTo(0, 0);
   }, [product]);
 
+  if (loading) return <div className="py-20 text-center font-bold text-gray-500">Đang tải thông tin sản phẩm...</div>;
+
   if (!product) {
     return (
       <div className="flex flex-col items-center justify-center py-20 min-h-[60vh]">
@@ -75,7 +92,7 @@ export default function ProductDetailPage() {
 
   const breadcrumbItems = [
     { label: 'Điện thoại', link: '/' },
-    { label: product.brand, link: `/danh-muc/${product.brand.toLowerCase()}` },
+    { label: product.brand || 'Thương hiệu', link: `/danh-muc/${(product.brand || '').toLowerCase()}` },
     { label: product.name }
   ];
 
@@ -115,6 +132,10 @@ export default function ProductDetailPage() {
               <span className="text-sm text-blue-600 font-bold">142 đánh giá</span>
               <span className="text-sm text-gray-400">|</span>
               <span className="text-sm text-blue-600 font-bold">52 hỏi đáp</span>
+              <span className="text-sm text-gray-400">|</span>
+              <span className={`text-sm font-bold ${product.stockQuantity > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {product.stockQuantity > 0 ? `Còn ${product.stockQuantity} sản phẩm` : 'Hết hàng'}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -202,10 +223,10 @@ export default function ProductDetailPage() {
                     <table className="w-full">
                       <tbody className="divide-y divide-gray-100">
                         {[
-                          { label: 'Kích thước màn hình', value: product.specs[0] },
-                          { label: 'Công nghệ màn hình', value: product.specs[1] },
-                          { label: 'RAM', value: product.specs[2] },
-                          { label: 'Bộ nhớ trong', value: product.specs[3] },
+                          { label: 'Kích thước màn hình', value: product.specs?.[0] || '6.7 inch' },
+                          { label: 'Công nghệ màn hình', value: product.specs?.[1] || 'OLED' },
+                          { label: 'RAM', value: product.specs?.[2] || '8GB' },
+                          { label: 'Bộ nhớ trong', value: product.specs?.[3] || '128GB' },
                           { label: 'Camera sau', value: '48MP + 12MP + 12MP' },
                           { label: 'Camera trước', value: '12MP' },
                           { label: 'Chipset', value: 'A18 Pro (Dự kiến)' },
@@ -239,7 +260,7 @@ export default function ProductDetailPage() {
                             key={storage}
                             onClick={() => setSelectedStorage(storage)}
                             className={`py-3 rounded-2xl border-2 font-black transition-all ${
-                              selectedStorage === storage || (product.specs[3] && product.specs[3].includes(storage))
+                              selectedStorage === storage || (product.specs?.[3] && product.specs[3].includes(storage))
                               ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-md transform scale-[1.02]'
                               : 'border-gray-100 text-gray-500 hover:border-blue-200'
                             }`}
@@ -284,8 +305,14 @@ export default function ProductDetailPage() {
                       )}
                     </div>
                     <div className="flex items-center flex-wrap gap-2">
-                       <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg uppercase whitespace-nowrap">TIẾT KIỆM {((product.originalPrice - product.price) || 0).toLocaleString('vi-VN')}₫</span>
-                       <span className="text-xs text-green-600 font-bold italic">Có hàng tại 120 siêu thị</span>
+                       {product.originalPrice > product.price && (
+                         <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg uppercase whitespace-nowrap">
+                           TIẾT KIỆM {((product.originalPrice - product.price) || 0).toLocaleString('vi-VN')}₫
+                         </span>
+                       )}
+                       <span className={`text-xs font-bold italic ${product.stockQuantity > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                         {product.stockQuantity > 0 ? `Sẵn hàng (Còn ${product.stockQuantity} máy)` : 'Tạm hết hàng'}
+                       </span>
                     </div>
                   </div>
 
@@ -313,14 +340,18 @@ export default function ProductDetailPage() {
                   <div className="space-y-4 pt-4">
                     <button 
                       onClick={handleBuyNow}
-                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black py-5 rounded-3xl text-2xl uppercase shadow-2xl shadow-red-100 transition-all transform active:scale-95 flex flex-col items-center"
+                      disabled={product.stockQuantity === 0}
+                      className={`w-full bg-gradient-to-r ${product.stockQuantity > 0 ? 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800' : 'from-gray-400 to-gray-500 cursor-not-allowed'} text-white font-black py-5 rounded-3xl text-2xl uppercase shadow-2xl transition-all transform active:scale-95 flex flex-col items-center`}
                     >
-                      MUA NGAY
-                      <span className="text-[11px] font-bold opacity-80 normal-case mt-1">(Giao tận nơi hoặc nhận tại siêu thị)</span>
+                      {product.stockQuantity > 0 ? 'MUA NGAY' : 'HẾT HÀNG'}
+                      <span className="text-[11px] font-bold opacity-80 normal-case mt-1">
+                        {product.stockQuantity > 0 ? '(Giao tận nơi hoặc nhận tại siêu thị)' : '(Vui lòng quay lại sau)'}
+                      </span>
                     </button>
                     <button 
                       onClick={handleAddToCart}
-                      className="w-full border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-black py-4 rounded-3xl text-lg uppercase transition-all flex items-center justify-center gap-2"
+                      disabled={product.stockQuantity === 0}
+                      className={`w-full border-2 ${product.stockQuantity > 0 ? 'border-blue-600 text-blue-600 hover:bg-blue-50' : 'border-gray-300 text-gray-400 cursor-not-allowed'} font-black py-4 rounded-3xl text-lg uppercase transition-all flex items-center justify-center gap-2`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
