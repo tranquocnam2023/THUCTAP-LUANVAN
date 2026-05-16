@@ -29,7 +29,16 @@ export default function ProductDetailPage() {
     setLoading(true);
     productService.getById(id)
       .then(data => {
-        if (data) setProduct(data);
+        if (data) {
+          // Chuẩn hóa dữ liệu API
+          const normalized = {
+            ...data,
+            price: data.price || data.basePrice || 0,
+            image: data.image || data.thumbnailImage || data.mainImage,
+            stockQuantity: data.stockQuantity !== undefined ? data.stockQuantity : data.stock
+          };
+          setProduct(normalized);
+        }
         else setProduct(productsData.find((p) => p.id === parseInt(id)));
       })
       .catch(() => {

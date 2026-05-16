@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductCard from '../components/product/ProductCard';
-import productsData from '../utils/products.json';
+// import productsData from '../utils/products.json'; // Removed mock data
 import Breadcrumb from '../components/Breadcrumb';
 import FilterBar from '../components/FilterBar';
 import { productService } from '../services/productService';
@@ -17,18 +17,27 @@ export default function HomePage() {
   const { brand } = useParams();
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [advancedFilters, setAdvancedFilters] = useState(null);
-  const [products, setProducts] = useState(productsData);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     productService.getAll()
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          setProducts(data);
+          // Chuẩn hóa dữ liệu từ API để khớp với props của ProductCard
+          const normalizedData = data.map(p => ({
+            ...p,
+            price: p.price || p.basePrice,
+            image: p.image || p.thumbnailImage || p.mainImage,
+            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : p.stock
+          }));
+          setProducts(normalizedData);
+        } else {
+          setProducts([]);
         }
       })
       .catch(err => {
-        console.log("Sử dụng dữ liệu mẫu từ JSON");
-        setProducts(productsData);
+        console.error("Lỗi tải sản phẩm:", err);
+        setProducts([]);
       });
   }, []);
 

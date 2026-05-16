@@ -4,10 +4,11 @@ import AdminOrders from '../components/AdminOrders';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminCustomers from '../components/AdminCustomers';
 import AdminCategories from '../components/AdminCategories';
+import AdminShopTypes from '../components/AdminShopTypes';
 import AdminReviews from '../components/AdminReviews';
 import { dashboardService } from '../services/dashboardService';
 import { authService } from '../services/authService';
-import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star } from 'lucide-react';
+import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star, LayoutGrid } from 'lucide-react';
 
 const DASHBOARD_STATS = [
   { label: 'Tổng khách hàng', icon: Users, bgColor: '#5856d6', textColor: '#ffffff' },
@@ -45,6 +46,7 @@ export default function AdminPage() {
     switch (activeAdminTab) {
       case 'products': return 'Quản lý sản phẩm';
       case 'categories': return 'Quản lý danh mục';
+      case 'shoptypes': return 'Quản lý loại cửa hàng';
       case 'reviews': return 'Quản lý đánh giá';
       case 'orders': return 'Quản lý đơn hàng';
       case 'customers': return 'Quản lý khách hàng';
@@ -56,51 +58,52 @@ export default function AdminPage() {
   const SidebarItem = ({ id, icon: Icon, label }) => (
     <button 
       onClick={() => setActiveAdminTab(id)}
-      className={`w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 group ${
+      className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 font-bold ${
         activeAdminTab === id 
-        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20 translate-x-2' 
-        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+        ? 'bg-[#F4F7FE] text-[#4318FF] border-r-4 border-[#4318FF]' 
+        : 'text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#2B3674]'
       }`}
     >
-      <Icon className={`w-5 h-5 mr-3 ${activeAdminTab === id ? 'text-white' : 'text-gray-400 group-hover:text-white'}`} />
-      <span className="font-medium text-sm">{label}</span>
+      <Icon className={`w-5 h-5 mr-3 ${activeAdminTab === id ? 'text-[#4318FF]' : 'text-[#A3AED0]'}`} />
+      <span className="text-sm">{label}</span>
     </button>
   );
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#F4F7FE] overflow-hidden font-sans">
       {/* Admin Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col hidden md:flex shrink-0 border-r border-gray-800">
-        <div className="h-16 flex items-center px-6 border-b border-gray-800">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-blue-600/30">
-            <span className="font-bold text-lg">P</span>
+      <aside className="w-64 bg-[#FFFFFF] flex flex-col hidden md:flex shrink-0 border-r border-[#E0E5F2] shadow-sm">
+        <div className="h-20 flex items-center px-8 border-b border-[#E0E5F2]">
+          <div className="w-8 h-8 bg-[#4318FF] rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-[#4318FF]/30">
+            <span className="font-bold text-lg text-[#FFFFFF]">Ad</span>
           </div>
-          <h1 className="text-lg font-bold tracking-tight text-white uppercase">PhoneAdmin</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-[#2B3674] uppercase">PhoneShop</h1>
         </div>
         
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Chính</p>
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Chính</p>
           <SidebarItem id="dashboard" icon={Layout} label="Bảng thống kê" />
           <SidebarItem id="products" icon={Package} label="Sản phẩm" />
+          <SidebarItem id="shoptypes" icon={LayoutGrid} label="Loại cửa hàng" />
           <SidebarItem id="categories" icon={FolderTree} label="Danh mục" />
           <SidebarItem id="reviews" icon={Star} label="Đánh giá" />
           <SidebarItem id="orders" icon={ShoppingCart} label="Đơn hàng" />
           <SidebarItem id="customers" icon={Users} label="Khách hàng" />
           
           <div className="pt-6">
-            <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Hệ thống</p>
+            <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Hệ thống</p>
             <SidebarItem id="settings" icon={Settings} label="Cài đặt" />
           </div>
         </nav>
 
-        <div className="p-4 bg-gray-900 border-t border-gray-800 space-y-2">
-          <a href="/" className="flex items-center px-4 py-3 text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-400/10 group">
+        <div className="p-4 bg-[#FFFFFF] border-t border-[#E0E5F2] space-y-2">
+          <a href="/" className="flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#4318FF] transition-colors rounded-xl hover:bg-[#F4F7FE] group">
             <Layout className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform" />
             Thoát về cửa hàng
           </a>
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-400/10 group"
+            className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#EE5D50] transition-colors rounded-xl hover:bg-[#FFF5F5] group"
           >
             <LogOut className="w-5 h-5 mr-3 group-hover:translate-x-1 transition-transform" />
             Đăng xuất
@@ -111,26 +114,27 @@ export default function AdminPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navigation Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0 z-20">
-          <div className="flex items-center">
-            <button className="p-2 -ml-2 text-gray-400 hover:text-gray-600 md:hidden">
-              <Layout size={24} />
-            </button>
-            <h2 className="text-xl font-bold text-gray-800 ml-2 md:ml-0">{getHeaderTitle()}</h2>
+        <header className="h-20 bg-[#F4F7FE] flex items-center justify-between px-8 shrink-0 z-20 mt-4">
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center">
+              <button className="p-2 -ml-2 text-[#A3AED0] hover:text-[#2B3674] md:hidden">
+                <Layout size={24} />
+              </button>
+              <p className="text-sm font-medium text-[#A3AED0]">Trang chủ / {getHeaderTitle()}</p>
+            </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+          <div className="flex items-center bg-[#FFFFFF] rounded-full px-4 py-2 shadow-sm border border-[#E0E5F2]">
+            <div className="flex items-center bg-[#F4F7FE] rounded-full px-4 py-2 mr-4">
+              <svg className="w-4 h-4 text-[#2B3674]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <input type="text" placeholder="Tìm kiếm..." className="bg-transparent border-none outline-none text-sm ml-2 w-32 placeholder-[#A3AED0] text-[#2B3674]" />
+            </div>
+            <button className="relative p-2 text-[#A3AED0] hover:text-[#4318FF] transition-colors mr-2">
               <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-[#EE5D50] rounded-full border-2 border-[#FFFFFF]"></span>
             </button>
-            <div className="h-8 w-[1px] bg-gray-200 mx-1"></div>
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-gray-900 leading-none">{user?.username || 'Admin User'}</p>
-                <p className="text-[10px] text-gray-500 leading-none mt-1 uppercase">{user?.role || 'Quản trị viên'}</p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center font-bold shadow-md shadow-blue-200 uppercase">
+            <div className="flex items-center gap-3 ml-2 cursor-pointer">
+              <div className="w-10 h-10 rounded-full bg-[#4318FF] text-[#FFFFFF] flex items-center justify-center font-bold text-sm shadow-md">
                 {user?.username?.charAt(0) || 'A'}
               </div>
             </div>
@@ -138,8 +142,9 @@ export default function AdminPage() {
         </header>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 overflow-y-auto p-8 bg-gray-50/50 scroll-smooth">
+        <main className="flex-1 overflow-y-auto px-8 pb-8 pt-4 bg-[#F4F7FE] scroll-smooth">
           {activeAdminTab === 'products' && <AdminProducts />}
+          {activeAdminTab === 'shoptypes' && <AdminShopTypes />}
           {activeAdminTab === 'categories' && <AdminCategories />}
           {activeAdminTab === 'reviews' && <AdminReviews />}
           {activeAdminTab === 'orders' && <AdminOrders />}

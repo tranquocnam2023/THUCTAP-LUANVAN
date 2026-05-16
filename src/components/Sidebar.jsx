@@ -11,12 +11,7 @@ const THEME = {
 };
 
 export default function Sidebar() {
-  const [categories, setCategories] = useState([
-    { name: 'iPhone', isHot: true },
-    { name: 'Samsung', isHot: false },
-    { name: 'Xiaomi', isHot: false },
-    { name: 'Oppo', isHot: false },
-  ]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     categoryService.getAll()

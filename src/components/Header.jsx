@@ -13,13 +13,21 @@ export default function Header() {
   const { cartCount } = useCart();
   const navigate = useNavigate();
   
-  // Lấy thông tin user từ localStorage
-  const userJson = localStorage.getItem('user');
-  const user = (userJson && userJson !== 'undefined' && userJson !== 'null') ? JSON.parse(userJson) : null;
+  // Lấy thông tin user từ localStorage an toàn hơn
+  let user = null;
+  try {
+    const userJson = localStorage.getItem('user');
+    if (userJson && userJson !== 'undefined' && userJson !== 'null') {
+      user = JSON.parse(userJson);
+    }
+  } catch (err) {
+    console.error("Lỗi parse user từ localStorage:", err);
+    localStorage.removeItem('user'); // Xóa nếu hỏng
+  }
   
   // Kiểm tra đăng nhập cực kỳ nghiêm ngặt
-  const isLoggedIn = !!(user && user.id); 
-  const userRole = user?.role?.toLowerCase() || '';
+  const isLoggedIn = !!(user && (user.id || user.Id)); 
+  const userRole = user?.role || user?.Role || '';
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -88,7 +96,7 @@ export default function Header() {
             )}
 
             {/* KIỂM TRA QUYỀN: Phải ĐĂNG NHẬP và là NHÂN VIÊN/ADMIN mới thấy Thẻ Quản Trị */}
-            {isLoggedIn && (userRole === 'admin' || userRole === 'staff') && (
+            {isLoggedIn && (userRole === 'Admin' || userRole === 'Staff') && (
               <Link 
                 to="/admin" 
                 className="flex items-center px-3 py-2 rounded border font-black transition text-center shadow-lg animate-pulse hover:animate-none"

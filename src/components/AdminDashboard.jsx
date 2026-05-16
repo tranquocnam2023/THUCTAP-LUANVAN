@@ -4,75 +4,89 @@ import {
   ComposedChart, Line
 } from 'recharts';
 import { ShoppingCart, Gift, Package, TrendingUp } from 'lucide-react';
-import { MOCK_DASHBOARD } from '../utils/mockData';
+// import { MOCK_DASHBOARD } from '../utils/mockData'; // Removed mock data
 import { dashboardService } from '../services/dashboardService';
 import { productService } from '../services/productService';
 
 const THEME = {
-  primary: '#5856d6',
-  success: '#34c759',
-  warning: '#ff9500',
-  danger: '#ff3b30',
-  info: '#007aff',
-  border: '#f0f0f0'
+  primary: '#4318FF',
+  success: '#01B574',
+  warning: '#FFB547',
+  danger: '#EE5D50',
+  info: '#39B8FF',
+  border: '#E0E5F2',
+  textMain: '#2B3674',
+  textMuted: '#A3AED0',
+  bgCard: '#FFFFFF',
+  bgPage: '#F4F7FE'
 };
 
 export default function AdminDashboard() {
-  const [revenueData, setRevenueData] = useState(MOCK_DASHBOARD.revenue);
-  const [birthdays, setBirthdays] = useState(MOCK_DASHBOARD.birthdays);
-  const [recentOrders, setRecentOrders] = useState(MOCK_DASHBOARD.recentOrders);
-  const [brandPerformance, setBrandPerformance] = useState(MOCK_DASHBOARD.performance);
+  const [revenueData, setRevenueData] = useState([]);
+  const [birthdays, setBirthdays] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [brandPerformance, setBrandPerformance] = useState([]);
+  const [stats, setStats] = useState({ totalRevenue: 0, totalOrders: 0, totalProducts: 0, totalUsers: 0 });
 
   useEffect(() => {
     // Sử dụng service thay vì fetch trực tiếp
     dashboardService.getRevenue()
       .then(data => { if (data && data.length > 0) setRevenueData(data); })
-      .catch(e => console.log("Sử dụng dữ liệu ảo Doanh thu"));
-
-    dashboardService.getBirthdays()
-      .then(data => { if (data && data.length > 0) setBirthdays(data); })
-      .catch(e => console.log("Sử dụng dữ liệu ảo Sinh nhật"));
+      .catch(e => console.error("Lỗi tải Doanh thu:", e));
 
     dashboardService.getRecentOrders()
       .then(data => { if (data && data.length > 0) setRecentOrders(data); })
-      .catch(e => console.log("Sử dụng dữ liệu ảo Đơn hàng mới"));
+      .catch(e => console.error("Lỗi tải Đơn hàng mới:", e));
 
-    dashboardService.getStats() // Lưu ý: DashboardService có thể mở rộng thêm
-      .then(data => { /* xử lý thêm nếu cần */ })
-      .catch(e => {});
+    dashboardService.getStats()
+      .then(data => { if (data) setStats(data); })
+      .catch(e => console.error("Lỗi tải Thống kê:", e));
 
-    // Sử dụng productService cho hiệu suất sản phẩm
-    productService.getPerformance()
-      .then(data => { if (data && data.length > 0) setBrandPerformance(data); })
-      .catch(e => console.log("Sử dụng dữ liệu ảo Hiệu suất"));
+    // Fetch products to show performance (by category)
+    productService.getAll()
+      .then(data => {
+        if (data && data.length > 0) {
+          // Group by category for performance chart
+          const performance = {};
+          data.forEach(p => {
+            const brand = p.categoryName || 'Khác';
+            if (!performance[brand]) performance[brand] = { brand, stock: 0, sold: 0 };
+            performance[brand].stock += p.stockQuantity || 0;
+            performance[brand].sold += 5; // Dummy sold count for visual
+          });
+          setBrandPerformance(Object.values(performance));
+        }
+      });
   }, []);
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <h2 className="text-xl font-extrabold text-gray-800">Thống kê cửa hàng</h2>
-        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cập nhật: Vừa xong</span>
+      <div className="flex items-center justify-between bg-[#FFFFFF] p-5 rounded-[20px] shadow-sm">
+        <h2 className="text-xl font-bold text-[#2B3674]">Thống kê cửa hàng</h2>
+        <span className="text-xs font-bold text-[#A3AED0] uppercase tracking-widest bg-[#F4F7FE] px-3 py-1.5 rounded-lg">Cập nhật: Vừa xong</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* 1. BIỂU ĐỒ DOANH THU */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-[400px] flex flex-col transition-all hover:shadow-md">
+        <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-gray-800 flex items-center gap-2">
-              <TrendingUp size={20} className="text-blue-500" />
+            <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
+              <div className="p-2 bg-[#F4F7FE] rounded-lg">
+                <TrendingUp size={20} className="text-[#4318FF]" />
+              </div>
               Doanh thu (7 ngày & Tháng)
             </h3>
-            <div className="flex gap-4 text-[10px] font-bold">
-              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Daily</span>
-              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-purple-500"></div> Monthly</span>
+            <div className="flex gap-4 text-[12px] font-medium text-[#A3AED0]">
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: THEME.info }}></div> Ngày</span>
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: THEME.primary }}></div> Tháng</span>
             </div>
           </div>
           <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={THEME.border} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 11}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 11}} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: THEME.textMuted, fontSize: 12, fontWeight: 500}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: THEME.textMuted, fontSize: 12, fontWeight: 500}} />
                 <Tooltip cursor={{fill: '#f9fafb'}} />
                 <Legend iconType="circle" />
                 <Bar dataKey="daily" name="Doanh thu ngày" fill={THEME.info} radius={[4, 4, 0, 0]} barSize={20} />
@@ -83,10 +97,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* 2. HIỆU SUẤT THEO THƯƠNG HIỆU (TỒN & BÁN) */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-[400px] flex flex-col transition-all hover:shadow-md">
+        <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-gray-800 flex items-center gap-2">
-              <Package size={20} className="text-orange-500" />
+            <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
+              <div className="p-2 bg-[#F4F7FE] rounded-lg">
+                <Package size={20} className="text-[#FFB547]" />
+              </div>
               Tồn kho & Bán ra theo Hiệu
             </h3>
           </div>
@@ -96,75 +112,77 @@ export default function AdminDashboard() {
                   {brandPerformance.map((item, idx) => (
                     <div key={idx} className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-black text-gray-700">{item.brand}</span>
-                        <div className="flex gap-3 text-[11px] font-bold">
-                          <span className="text-gray-400">Tồn: {item.stock}</span>
-                          <span className="text-green-600">Bán: {item.sold}</span>
+                        <span className="text-sm font-bold text-[#2B3674]">{item.brand}</span>
+                        <div className="flex gap-3 text-[12px] font-medium">
+                          <span className="text-[#A3AED0]">Tồn: {item.stock}</span>
+                          <span className="text-[#01B574] font-bold">Bán: {item.sold}</span>
                         </div>
                       </div>
-                      <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden flex">
+                      <div className="w-full h-2.5 bg-[#F4F7FE] rounded-full overflow-hidden flex">
                          <div 
-                          className="h-full bg-orange-400 transition-all duration-1000" 
-                          style={{ width: `${(item.stock / (item.stock + item.sold)) * 100}%` }}
+                          className="h-full transition-all duration-1000" 
+                          style={{ width: `${(item.stock / (item.stock + item.sold)) * 100}%`, backgroundColor: THEME.warning }}
                          ></div>
                          <div 
-                          className="h-full bg-green-500 transition-all duration-1000" 
-                          style={{ width: `${(item.sold / (item.stock + item.sold)) * 100}%` }}
+                          className="h-full transition-all duration-1000" 
+                          style={{ width: `${(item.sold / (item.stock + item.sold)) * 100}%`, backgroundColor: THEME.success }}
                          ></div>
                       </div>
                     </div>
                   ))}
                </div>
              ) : (
-              <div className="h-full flex items-center justify-center text-gray-400 text-sm font-medium">
+              <div className="h-full flex items-center justify-center text-[#A3AED0] text-sm font-medium">
                 Chưa có dữ liệu tồn kho
               </div>
              )}
           </div>
-          <div className="mt-4 pt-4 border-t flex justify-center gap-6 text-[11px] font-bold">
-            <span className="flex items-center gap-1.5"><div className="w-3 h-1.5 rounded bg-orange-400"></div> Tồn kho</span>
-            <span className="flex items-center gap-1.5"><div className="w-3 h-1.5 rounded bg-green-500"></div> Đã bán</span>
+          <div className="mt-4 pt-4 border-t border-[#E0E5F2] flex justify-center gap-6 text-[12px] font-medium text-[#A3AED0]">
+            <span className="flex items-center gap-1.5"><div className="w-3 h-1.5 rounded-full" style={{ backgroundColor: THEME.warning }}></div> Tồn kho</span>
+            <span className="flex items-center gap-1.5"><div className="w-3 h-1.5 rounded-full" style={{ backgroundColor: THEME.success }}></div> Đã bán</span>
           </div>
         </div>
 
         {/* 3. ĐƠN HÀNG GẦN ĐÂY */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-[400px] flex flex-col transition-all hover:shadow-md">
+        <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
            <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-gray-800 flex items-center gap-2">
-              <ShoppingCart size={20} className="text-purple-500" />
+            <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
+              <div className="p-2 bg-[#F4F7FE] rounded-lg">
+                <ShoppingCart size={20} className="text-[#39B8FF]" />
+              </div>
               Đơn hàng mới nhận
             </h3>
           </div>
           <div className="flex-1 overflow-y-auto">
             {recentOrders.length > 0 ? (
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50 sticky top-0">
-                  <tr className="text-gray-400 text-left uppercase tracking-widest font-black">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-[#FFFFFF] z-10 border-b border-[#E0E5F2]">
+                  <tr className="text-[#A3AED0] text-left font-medium">
                     <th className="py-3 px-2">Mã</th>
                     <th className="py-3 px-2">Khách</th>
                     <th className="py-3 px-2 text-right">Tổng</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[#E0E5F2]">
                   {recentOrders.map((order, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-2 font-bold text-blue-600">{order.id}</td>
+                    <tr key={idx} className="hover:bg-[#F4F7FE] transition-colors">
+                      <td className="py-4 px-2 font-bold text-[#4318FF]">{order.id}</td>
                       <td className="py-4 px-2">
-                        <p className="font-bold text-gray-700">{order.customer}</p>
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${
-                          order.status === 'Đã giao' ? 'bg-green-100 text-green-600' : 
-                          order.status === 'Đã hủy' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'
+                        <p className="font-bold text-[#2B3674]">{order.customer}</p>
+                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
+                          order.status === 'Đã giao' ? 'bg-[#01B574]/10 text-[#01B574]' : 
+                          order.status === 'Đã hủy' ? 'bg-[#EE5D50]/10 text-[#EE5D50]' : 'bg-[#FFB547]/10 text-[#FFB547]'
                         }`}>
                           {order.status}
                         </span>
                       </td>
-                      <td className="py-4 px-2 text-right font-black text-gray-800">{order.total}</td>
+                      <td className="py-4 px-2 text-right font-bold text-[#2B3674]">{order.total}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             ) : (
-              <div className="h-full flex items-center justify-center text-gray-400 text-sm font-medium">
+              <div className="h-full flex items-center justify-center text-[#A3AED0] text-sm font-medium">
                 Chưa có đơn hàng nào
               </div>
             )}
@@ -172,38 +190,40 @@ export default function AdminDashboard() {
         </div>
 
         {/* 4. KHÁCH HÀNG SINH NHẬT */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-[400px] flex flex-col transition-all hover:shadow-md">
+        <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-gray-800 flex items-center gap-2">
-              <Gift size={20} className="text-pink-500" />
+            <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
+              <div className="p-2 bg-[#F4F7FE] rounded-lg">
+                <Gift size={20} className="text-[#EE5D50]" />
+              </div>
               Khách hàng sinh nhật
             </h3>
           </div>
-          <div className="flex-1 space-y-4 overflow-y-auto">
+          <div className="flex-1 space-y-4 overflow-y-auto pr-2">
             {birthdays.length > 0 ? (
               birthdays.map((person, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-dashed border-gray-100 hover:bg-pink-50 transition-colors group">
+                <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-black text-xs group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-full bg-[#4318FF]/10 flex items-center justify-center text-[#4318FF] font-bold text-sm group-hover:scale-110 transition-transform">
                       {person.name.split(' ').pop().charAt(0)}
                     </div>
                     <div>
-                      <p className="text-sm font-black text-gray-700">{person.name}</p>
-                      <p className="text-[11px] text-gray-400 font-bold">{person.date} • {person.age} tuổi</p>
+                      <p className="text-sm font-bold text-[#2B3674]">{person.name}</p>
+                      <p className="text-[12px] text-[#A3AED0] font-medium">{person.date} • {person.age} tuổi</p>
                     </div>
                   </div>
-                  <button className="p-2 text-pink-400 hover:text-pink-600 transition-colors">
-                    <Gift size={16} />
+                  <button className="p-2 text-[#A3AED0] hover:text-[#4318FF] transition-colors">
+                    <Gift size={18} />
                   </button>
                 </div>
               ))
             ) : (
-              <div className="h-full flex items-center justify-center text-gray-400 text-sm font-medium">
+              <div className="h-full flex items-center justify-center text-[#A3AED0] text-sm font-medium">
                 Không có sinh nhật nào trong tháng
               </div>
             )}
           </div>
-          <button className="mt-6 w-full py-3 bg-pink-50 text-pink-600 rounded-xl text-xs font-black hover:bg-pink-100 transition-all active:scale-95">
+          <button className="mt-6 w-full py-3 bg-[#4318FF]/10 text-[#4318FF] rounded-xl text-sm font-bold hover:bg-[#4318FF] hover:text-[#FFFFFF] transition-all active:scale-95">
             Gửi lời chúc hàng loạt
           </button>
         </div>

@@ -87,7 +87,7 @@ export default function ProductCard({
             className="font-bold text-base md:text-lg"
             style={{ color: THEME.primary }}
           >
-            {price.toLocaleString('vi-VN')}₫
+            {price ? price.toLocaleString('vi-VN') : '0'}₫
           </div>
         </div>
 
