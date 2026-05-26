@@ -35,6 +35,12 @@ export default function AdminProducts() {
     image: ''
   });
 
+  // State for inventory transactions
+  const [txProductId, setTxProductId] = useState('');
+  const [txQuantity, setTxQuantity] = useState(1);
+  const [txPrice, setTxPrice] = useState('');
+  const [txNote, setTxNote] = useState('');
+
   // Khởi tạo các hook
   const { formatCurrency, formatNumber } = useFormat();
   const { 
@@ -53,8 +59,14 @@ export default function AdminProducts() {
       const category = categories.find(c => c.name === selectedBrand);
       if (category) {
         try {
-          const data = await productService.getByCategory(category.id);
-          setProducts(Array.isArray(data) ? data : []);
+          // Do backend không có endpoint getByCategory nên ta lấy tất cả và lọc ở client
+          const allProducts = await productService.getAll();
+          if (Array.isArray(allProducts)) {
+            const filtered = allProducts.filter(p => p.categoryId === category.id || p.CategoryId === category.id);
+            setProducts(filtered);
+          } else {
+            setProducts([]);
+          }
         } catch (err) {
           console.error("Lỗi tải sản phẩm:", err);
           setProducts([]);
@@ -86,8 +98,8 @@ export default function AdminProducts() {
 
   const stats = [
     { label: 'Tổng sản phẩm', value: products.length, icon: 'Package', bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#4318FF' },
-    { label: 'Giá trị tồn kho', value: products.reduce((acc, p) => acc + ((p.basePrice || p.price || 0) * (p.stock || p.stockQuantity || 0)), 0), icon: 'Layout', bgColor: '#FFFFFF', textColor: '#2B3674', isCurrency: true, iconColor: '#01B574' },
-    { label: 'Sắp hết hàng', value: products.filter(p => (p.stock || p.stockQuantity || 0) < 5).length, icon: 'Bell', bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#FFB547' },
+    { label: 'Giá trị tồn kho', value: products.reduce((acc, p) => acc + ((p.basePrice || p.price || 0) * (p.totalStock ?? p.stock ?? p.stockQuantity ?? 0)), 0), icon: 'Layout', bgColor: '#FFFFFF', textColor: '#2B3674', isCurrency: true, iconColor: '#01B574' },
+    { label: 'Sắp hết hàng', value: products.filter(p => (p.totalStock ?? p.stock ?? p.stockQuantity ?? 0) < 5).length, icon: 'Bell', bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#FFB547' },
     { label: 'Đã bán tháng này', value: 24, icon: 'ShoppingCart', bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#39B8FF' },
   ];
 
@@ -98,7 +110,7 @@ export default function AdminProducts() {
         name: product.name,
         price: product.basePrice || product.price || 0,
         originalPrice: product.originalPrice || product.basePrice || product.price || 0,
-        stockQuantity: product.stock || product.stockQuantity || 0,
+        stockQuantity: product.totalStock ?? product.stock ?? product.stockQuantity ?? 0,
         categoryId: product.categoryId || (categories.find(c => c.name === selectedBrand)?.id || ''),
         description: product.description || '',
         image: product.thumbnailImage || product.image || ''
@@ -127,7 +139,7 @@ export default function AdminProducts() {
         slug: productFormData.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
         description: productFormData.description,
         basePrice: productFormData.price,
-        stock: productFormData.stockQuantity,
+        totalStock: productFormData.stockQuantity,
         isActive: true,
         shopId: 1, // Defaulting to shop 1 for now
         categoryId: parseInt(productFormData.categoryId) || 1,
@@ -163,6 +175,65 @@ export default function AdminProducts() {
     }
   };
 
+  const handleExecuteTransaction = async () => {
+    if (!txProductId) {
+      alert('Vui lòng chọn sản phẩm!');
+      return;
+    }
+    const product = products.find(p => p.id === parseInt(txProductId));
+    if (!product) {
+      alert('Sản phẩm không hợp lệ!');
+      return;
+    }
+
+    const txConf = TRANSACTIONS.find(t => t.id === activeTxTab);
+    const quantity = parseInt(txQuantity);
+    if (isNaN(quantity) || quantity <= 0) {
+      alert('Số lượng phải lớn hơn 0!');
+      return;
+    }
+
+    let newStock = product.totalStock ?? product.stock ?? product.stockQuantity ?? 0;
+    if (txConf.type === 'IN') {
+      newStock += quantity;
+    } else {
+      if (newStock < quantity) {
+        alert(`Số lượng xuất vượt quá tồn kho hiện tại (${newStock} sản phẩm)!`);
+        return;
+      }
+      newStock -= quantity;
+    }
+
+    try {
+      const payload = {
+        name: product.name,
+        slug: product.slug || product.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+        description: product.description || '',
+        basePrice: product.basePrice || product.price || 0,
+        totalStock: newStock,
+        isActive: product.isActive !== undefined ? product.isActive : true,
+        shopId: product.shopId || 1,
+        categoryId: product.categoryId || 1,
+        thumbnailImage: product.thumbnailImage || "",
+        mainImage: product.mainImage || "",
+        images: product.images || ""
+      };
+
+      await productService.update(product.id, payload);
+      alert(`${txConf.name} thành công! Tồn kho mới: ${newStock}`);
+      setActiveTxTab(null);
+      // Reset form
+      setTxProductId('');
+      setTxQuantity(1);
+      setTxPrice('');
+      setTxNote('');
+      fetchProducts();
+    } catch (err) {
+      console.error("Lỗi thực hiện giao dịch kho:", err);
+      alert('Giao dịch thất bại: ' + (err.message || JSON.stringify(err)));
+    }
+  };
+
   // Tái sử dụng form giao dịch chung cho cả 4 loại
   const renderReusableTransactionForm = () => {
     if (!activeTxTab) return null;
@@ -186,31 +257,54 @@ export default function AdminProducts() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-bold text-[#2B3674] mb-2">Chọn sản phẩm</label>
-            <select className="w-full border border-[#E0E5F2] text-[#A3AED0] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]">
-              <option>-- Chọn sản phẩm {selectedBrand} --</option>
+            <select 
+              value={txProductId}
+              onChange={(e) => setTxProductId(e.target.value)}
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+            >
+              <option value="">-- Chọn sản phẩm {selectedBrand} --</option>
               {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-bold text-[#2B3674] mb-2">Số lượng</label>
-            <input type="number" min="1" defaultValue="1" className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" />
+            <input 
+              type="number" 
+              min="1" 
+              value={txQuantity} 
+              onChange={(e) => setTxQuantity(e.target.value)}
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" 
+            />
           </div>
 
           <div>
             <label className="block text-sm font-bold text-[#2B3674] mb-2">
               {txConf.type === 'IN' ? 'Giá nhập (VNĐ)' : 'Giá xuất/Bán (VNĐ)'}
             </label>
-            <input type="text" placeholder="VD: 25.000.000" className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" />
+            <input 
+              type="text" 
+              placeholder="VD: 25.000.000" 
+              value={txPrice}
+              onChange={(e) => setTxPrice(e.target.value)}
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" 
+            />
           </div>
 
           <div>
             <label className="block text-sm font-bold text-[#2B3674] mb-2">Ghi chú</label>
-            <input type="text" placeholder="Lý do, mã phiếu..." className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" />
+            <input 
+              type="text" 
+              placeholder="Lý do, mã phiếu..." 
+              value={txNote}
+              onChange={(e) => setTxNote(e.target.value)}
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" 
+            />
           </div>
         </div>
 
         <div className="mt-8 flex justify-end">
           <button
+            onClick={handleExecuteTransaction}
             className="px-6 py-3 rounded-xl font-bold transition-all hover:opacity-90 shadow-sm bg-[#4318FF] text-[#FFFFFF]"
           >
             Xác nhận {txConf.type === 'IN' ? 'Nhập Kho' : 'Xuất Kho'}
@@ -225,9 +319,9 @@ export default function AdminProducts() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-full gap-6">
+    <div className="flex flex-col md:flex-row min-h-full gap-6">
       {/* Sidebar chọn thương hiệu */}
-      <div className="w-full md:w-64 flex-shrink-0 bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden h-fit">
+      <div className="w-full md:w-64 flex-shrink-0 bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden h-fit md:h-auto">
         <div className="px-6 py-5 border-b border-[#E0E5F2] font-bold text-[#2B3674] flex items-center text-lg">
           <FolderTree className="w-5 h-5 mr-3 text-[#4318FF]" />
           Thương hiệu
@@ -340,11 +434,11 @@ export default function AdminProducts() {
                     paginatedProducts.map((product) => (
                       <tr key={product.id} className="border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group">
                         <td className="py-4 px-2 font-bold text-[#2B3674]">{product.name}</td>
-                        <td className="py-4 px-2 text-center font-bold text-[#2B3674]">{product.stock ?? product.stockQuantity ?? 0}</td>
+                        <td className="py-4 px-2 text-center font-bold text-[#2B3674]">{product.totalStock ?? product.stock ?? product.stockQuantity ?? 0}</td>
                         <td className="py-4 px-2 font-bold text-[#2B3674]">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
                         <td className="py-4 px-2 text-center">
-                          <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${(product.stock ?? product.stockQuantity ?? 0) > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
-                            {(product.stock ?? product.stockQuantity ?? 0) > 0 ? 'Còn hàng' : 'Hết hàng'}
+                          <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${(product.totalStock ?? product.stock ?? product.stockQuantity ?? 0) > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                            {(product.totalStock ?? product.stock ?? product.stockQuantity ?? 0) > 0 ? 'Còn hàng' : 'Hết hàng'}
                           </span>
                         </td>
                         <td className="py-4 px-2">

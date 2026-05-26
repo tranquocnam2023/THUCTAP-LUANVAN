@@ -1,52 +1,639 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../components/Breadcrumb';
 import { authService } from '../services/authService';
+import { userService } from '../services/userService';
+import { shippingInfoService } from '../services/shippingInfoService';
+import { User, MapPin, Key, Trash2, Edit2, Plus, Check, X, ShieldAlert, LogOut, CheckCircle } from 'lucide-react';
+import { useFormat } from '../hooks/useFormat';
 
 export default function AuthPage() {
+  const navigate = useNavigate();
+
+  // Auth state
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  // Check login state
+  const token = localStorage.getItem('token');
+  const userJson = localStorage.getItem('user');
+  const initialUser = userJson ? JSON.parse(userJson) : null;
+  const isLoggedIn = !!(initialUser && token);
+
+  // Profile management state
+  const [profileTab, setProfileTab] = useState('info'); // 'info', 'addresses', 'password'
+  const [userProfile, setUserProfile] = useState(initialUser);
+  const [shippingInfos, setShippingInfos] = useState([]);
+  const [infoLoading, setInfoLoading] = useState(false);
+
+  // Profile edit state
+  const [editProfileData, setEditProfileData] = useState({ username: '', email: '' });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  // Password change state
+  const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+
+  // Address Form state
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+  const [addressForm, setAddressForm] = useState({
+    recipientName: '',
+    phoneNumber: '',
+    addressLine: '',
+    ward: '',
+    province: '',
+    isDefault: false
+  });
+
+  const { formatDate } = useFormat();
+
+  // Fetch user profile from API to sync
+  const fetchProfile = () => {
+    if (!isLoggedIn) return;
+    userService.getProfile()
+      .then(res => {
+        if (res) {
+          setUserProfile(res);
+          setEditProfileData({ username: res.username, email: res.email });
+          // Đồng bộ lại localStorage
+          const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+          localStorage.setItem('user', JSON.stringify({ ...localUser, ...res }));
+        }
+      })
+      .catch(err => console.error("Lỗi đồng bộ profile:", err));
+  };
+
+  // Fetch shipping info
+  const fetchShippingInfos = () => {
+    if (!isLoggedIn) return;
+    setInfoLoading(true);
+    shippingInfoService.getAll()
+      .then(res => {
+        if (Array.isArray(res)) setShippingInfos(res);
+      })
+      .catch(err => console.error("Lỗi tải danh sách địa chỉ:", err))
+      .finally(() => setInfoLoading(false));
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchProfile();
+      fetchShippingInfos();
+    }
+  }, [isLoggedIn]);
+
+  // Handle Login / Register
+  const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const data = await authService.login({
-        username: username,
-        password: password
-      });
+      if (isLogin) {
+        const data = await authService.login({
+          username: username,
+          password: password
+        });
 
-      // Đảm bảo lấy đúng key token
-      const token = data.token || data.accessToken || (data.data && data.data.token);
-      if (token) {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(data));
-        window.location.reload(); // Reload lại để các trang khác nhận token mới
+        const userToken = data.token || data.accessToken || (data.data && data.data.token);
+        if (userToken) {
+          data.username = username;
+          localStorage.setItem('token', userToken);
+          localStorage.setItem('user', JSON.stringify(data));
+          window.location.href = '/';
+        } else {
+          setError('Không nhận được token từ server!');
+          setLoading(false);
+          return;
+        }
       } else {
-        setError('Không nhận được token từ server!');
-        setLoading(false);
-        return;
-      }
+        await authService.register({
+          username: username,
+          email: email,
+          password: password
+        });
 
-      // Điều hướng sẽ chạy sau reload
-      // if (data.role === 'Admin' || data.role === 'Staff') {
-      //   navigate('/admin');
-      // } else {
-      //   navigate('/');
-      // }
+        alert('Đăng ký thành công! Vui lòng đăng nhập.');
+        setIsLogin(true);
+      }
     } catch (err) {
-      setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại.');
+      if (err.response && err.response.data) {
+        setError(typeof err.response.data === 'string' ? err.response.data : 'Lỗi từ server');
+      } else {
+        setError(err.message || (isLogin ? 'Đăng nhập thất bại. Vui lòng kiểm tra lại.' : 'Đăng ký thất bại.'));
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle Logout
+  const handleLogout = () => {
+    if (window.confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+      authService.logout();
+      window.location.href = '/';
+    }
+  };
+
+  // Update profile info
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await userService.updateProfile({
+        username: editProfileData.username,
+        email: editProfileData.email
+      });
+      alert('Cập nhật thông tin cá nhân thành công!');
+      setIsEditingProfile(false);
+      fetchProfile();
+    } catch (err) {
+      alert('Cập nhật thất bại: ' + (err.message || JSON.stringify(err)));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Change password
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('Mật khẩu mới nhập lại không khớp!');
+      return;
+    }
+    setLoading(true);
+    try {
+      await userService.changePassword({
+        oldPassword: passwordData.oldPassword,
+        newPassword: passwordData.newPassword
+      });
+      alert('Đổi mật khẩu thành công!');
+      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      alert('Đổi mật khẩu thất bại: ' + (err.message || JSON.stringify(err)));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Address actions
+  const handleOpenAddressForm = (address = null) => {
+    if (address) {
+      setEditingAddressId(address.id);
+      setAddressForm({
+        recipientName: address.recipientName,
+        phoneNumber: address.phoneNumber,
+        addressLine: address.addressLine,
+        ward: address.ward,
+        province: address.province,
+        isDefault: address.isDefault
+      });
+    } else {
+      setEditingAddressId(null);
+      setAddressForm({
+        recipientName: '',
+        phoneNumber: '',
+        addressLine: '',
+        ward: '',
+        province: '',
+        isDefault: shippingInfos.length === 0 // Default true if first address
+      });
+    }
+    setIsAddressFormOpen(true);
+  };
+
+  const handleSaveAddress = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const payload = {
+        recipientName: addressForm.recipientName,
+        phoneNumber: addressForm.phoneNumber,
+        addressLine: addressForm.addressLine,
+        ward: addressForm.ward,
+        province: addressForm.province,
+        isDefault: addressForm.isDefault
+      };
+
+      if (editingAddressId) {
+        await shippingInfoService.update(editingAddressId, payload);
+        alert('Cập nhật địa chỉ thành công!');
+      } else {
+        await shippingInfoService.create(payload);
+        alert('Thêm địa chỉ giao hàng thành công!');
+      }
+      setIsAddressFormOpen(false);
+      fetchShippingInfos();
+    } catch (err) {
+      alert('Lưu địa chỉ thất bại: ' + (err.message || JSON.stringify(err)));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAddress = async (id) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) {
+      try {
+        await shippingInfoService.delete(id);
+        alert('Đã xóa địa chỉ thành công!');
+        fetchShippingInfos();
+      } catch (err) {
+        alert('Lỗi: ' + (err.message || 'Không thể xóa địa chỉ.'));
+      }
+    }
+  };
+
+  // ================= IF LOBBED IN: RENDER PROFILE PANEL (TGDĐ / ĐMX Style) =================
+  if (isLoggedIn) {
+    return (
+      <div className="flex flex-col h-full w-full max-w-5xl mx-auto">
+        <Breadcrumb items={[{ label: 'Trang cá nhân của bạn' }]} />
+
+        <div className="flex flex-col md:flex-row gap-6 mt-6">
+          {/* Sidebar */}
+          <aside className="w-full md:w-64 shrink-0 bg-white rounded-xl border border-gray-200 shadow-sm p-4 h-fit">
+            <div className="flex items-center space-x-3 pb-4 mb-4 border-b border-gray-100">
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center font-bold text-white text-lg">
+                {(userProfile?.username || 'U')[0].toUpperCase()}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-gray-800 truncate">{userProfile?.username}</span>
+                <span className="text-xs text-gray-500 truncate">{userProfile?.email}</span>
+                <span className="text-[10px] uppercase font-bold text-primary mt-0.5">{userProfile?.role}</span>
+              </div>
+            </div>
+
+            <nav className="flex flex-col space-y-1">
+              <button
+                onClick={() => setProfileTab('info')}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold transition-all text-left ${profileTab === 'info'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                <User size={18} />
+                <span>Thông tin tài khoản</span>
+              </button>
+
+              <button
+                onClick={() => setProfileTab('addresses')}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold transition-all text-left ${profileTab === 'addresses'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                <MapPin size={18} />
+                <span>Sổ địa chỉ nhận hàng</span>
+              </button>
+
+              <button
+                onClick={() => setProfileTab('password')}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold transition-all text-left ${profileTab === 'password'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                <Key size={18} />
+                <span>Đổi mật khẩu</span>
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold text-red-600 hover:bg-red-50 transition-all text-left mt-4 border-t border-gray-100 pt-4"
+              >
+                <LogOut size={18} />
+                <span>Đăng xuất</span>
+              </button>
+            </nav>
+          </aside>
+
+          {/* Main Panel Content */}
+          <main className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+
+            {/* 1. Account Info Tab */}
+            {profileTab === 'info' && (
+              <div className="space-y-6">
+                <div className="border-b border-gray-100 pb-3">
+                  <h3 className="text-xl font-bold text-gray-800">Thông tin tài khoản cá nhân</h3>
+                  <p className="text-xs text-gray-500">Quản lý tên hiển thị và email nhận hóa đơn của bạn</p>
+                </div>
+
+                {!isEditingProfile ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-xl border border-gray-100">
+                    <div className="space-y-1">
+                      <span className="text-xs text-gray-400 font-bold uppercase">Họ và tên</span>
+                      <p className="font-bold text-gray-800 text-lg">{userProfile?.username}</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-xs text-gray-400 font-bold uppercase">Email</span>
+                      <p className="font-bold text-gray-800 text-lg">{userProfile?.email}</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-xs text-gray-400 font-bold uppercase">Ngày đăng ký</span>
+                      <p className="font-bold text-gray-800">{formatDate(userProfile?.createdAt)}</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-xs text-gray-400 font-bold uppercase">Vai trò tài khoản</span>
+                      <p className="font-bold text-primary">{userProfile?.role}</p>
+                    </div>
+
+                    <div className="md:col-span-2 pt-4 border-t border-gray-200/50 flex justify-end">
+                      <button
+                        onClick={() => setIsEditingProfile(true)}
+                        className="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                      >
+                        Chỉnh sửa thông tin
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-md">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Tên tài khoản (Họ tên)</label>
+                      <input
+                        type="text"
+                        required
+                        className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                        value={editProfileData.username}
+                        onChange={(e) => setEditProfileData({ ...editProfileData, username: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Email liên lạc</label>
+                      <input
+                        type="email"
+                        required
+                        className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                        value={editProfileData.email}
+                        onChange={(e) => setEditProfileData({ ...editProfileData, email: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingProfile(false)}
+                        className="px-5 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition text-sm"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                      >
+                        {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {/* 2. Addresses Tab */}
+            {profileTab === 'addresses' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Sổ địa chỉ nhận hàng</h3>
+                    <p className="text-xs text-gray-500">Quản lý danh sách các địa chỉ giao nhận hàng của bạn</p>
+                  </div>
+                  {!isAddressFormOpen && (
+                    <button
+                      onClick={() => handleOpenAddressForm()}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                    >
+                      <Plus size={16} />
+                      <span>Thêm địa chỉ</span>
+                    </button>
+                  )}
+                </div>
+
+                {isAddressFormOpen ? (
+                  <form onSubmit={handleSaveAddress} className="space-y-4 max-w-lg bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <h4 className="font-bold text-gray-800 border-b border-gray-200 pb-2">
+                      {editingAddressId ? 'Cập nhật địa chỉ nhận hàng' : 'Thêm địa chỉ nhận hàng mới'}
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1">Tên người nhận</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Họ và tên..."
+                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          value={addressForm.recipientName}
+                          onChange={(e) => setAddressForm({ ...addressForm, recipientName: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1">Số điện thoại</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="SĐT liên hệ..."
+                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          value={addressForm.phoneNumber}
+                          onChange={(e) => setAddressForm({ ...addressForm, phoneNumber: e.target.value })}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-gray-700 mb-1">Địa chỉ chi tiết (Số nhà, tên đường)</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Ví dụ: 120/5 Nguyễn Văn Cừ..."
+                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          value={addressForm.addressLine}
+                          onChange={(e) => setAddressForm({ ...addressForm, addressLine: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1">Phường / Xã</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Phường/Xã..."
+                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          value={addressForm.ward}
+                          onChange={(e) => setAddressForm({ ...addressForm, ward: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1">Quận / Huyện / Tỉnh</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Quận/Huyện, Tỉnh/TP..."
+                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          value={addressForm.province}
+                          onChange={(e) => setAddressForm({ ...addressForm, province: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2">
+                      <input
+                        type="checkbox"
+                        id="isDefault"
+                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                        checked={addressForm.isDefault}
+                        disabled={!editingAddressId && shippingInfos.length === 0} // Lock to true if first address
+                        onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+                      />
+                      <label htmlFor="isDefault" className="text-xs font-bold text-gray-700 cursor-pointer">Đặt làm địa chỉ nhận hàng mặc định</label>
+                    </div>
+
+                    <div className="flex gap-3 pt-2 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddressFormOpen(false)}
+                        className="px-5 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-100 transition text-sm"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                      >
+                        {loading ? 'Đang lưu...' : 'Lưu địa chỉ'}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-4">
+                    {infoLoading ? (
+                      <div className="flex justify-center items-center py-10 text-primary gap-2">
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <span className="font-bold text-xs">Đang tải sổ địa chỉ...</span>
+                      </div>
+                    ) : shippingInfos.length > 0 ? (
+                      shippingInfos.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`p-5 rounded-xl border flex justify-between items-start transition-all ${item.isDefault
+                              ? 'border-primary bg-primary/5 shadow-sm'
+                              : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                        >
+                          <div className="space-y-1 text-sm">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-800 text-base">{item.recipientName}</span>
+                              {item.isDefault && (
+                                <span className="flex items-center gap-0.5 px-2 py-0.5 bg-primary text-white font-bold text-[10px] rounded-full uppercase">
+                                  <Check size={8} /> Mặc định
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-gray-500 font-medium">Số điện thoại: <strong className="text-gray-700">{item.phoneNumber}</strong></p>
+                            <p className="text-gray-600">Địa chỉ: {item.addressLine}, {item.ward}, {item.province}</p>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleOpenAddressForm(item)}
+                              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                              title="Sửa địa chỉ"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteAddress(item.id)}
+                              disabled={item.isDefault && shippingInfos.length > 1} // Can't delete default unless it's the last one
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30"
+                              title="Xóa địa chỉ"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-10 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
+                        <MapPin size={48} className="mb-2 opacity-50 text-gray-300" />
+                        <p className="font-bold text-gray-600">Bạn chưa có địa chỉ nhận hàng nào</p>
+                        <p className="text-xs mt-0.5">Vui lòng bấm nút "Thêm địa chỉ" để nhận hàng khi đặt sản phẩm</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 3. Password Tab */}
+            {profileTab === 'password' && (
+              <div className="space-y-6">
+                <div className="border-b border-gray-100 pb-3">
+                  <h3 className="text-xl font-bold text-gray-800">Đổi mật khẩu tài khoản</h3>
+                  <p className="text-xs text-gray-500">Nên sử dụng mật khẩu mạnh có chứa chữ, số và ký tự đặc biệt</p>
+                </div>
+
+                <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Mật khẩu hiện tại</label>
+                    <input
+                      type="password"
+                      required
+                      className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                      value={passwordData.oldPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Mật khẩu mới</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Nhập lại mật khẩu mới</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                    >
+                      {loading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // ================= IF NOT LOGGED IN: RENDER LOGIN/REGISTER FORM =================
   return (
     <div className="flex flex-col h-full w-full">
       <Breadcrumb items={[{ label: isLogin ? 'Đăng nhập' : 'Đăng ký' }]} />
@@ -62,25 +649,32 @@ export default function AuthPage() {
             </div>
           )}
 
-          <form className="flex flex-col space-y-4" onSubmit={isLogin ? handleLogin : undefined}>
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium mb-1">Họ và tên</label>
-                <input type="text" placeholder="Nhập họ và tên" className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary" />
-              </div>
-            )}
-
+          <form className="flex flex-col space-y-4" onSubmit={handleAuth}>
             <div>
-              <label className="block text-sm font-medium mb-1">Số điện thoại hoặc Email</label>
+              <label className="block text-sm font-medium mb-1">Tên đăng nhập</label>
               <input
                 type="text"
-                placeholder="Nhập SĐT hoặc Email"
+                placeholder="Nhập tên đăng nhập"
                 className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
+
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  placeholder="Nhập địa chỉ Email"
+                  className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium mb-1">Mật khẩu</label>
@@ -108,7 +702,8 @@ export default function AuthPage() {
               <p>Chưa có tài khoản? <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => setIsLogin(false)}>Đăng ký ngay</span></p>
             ) : (
               <p>Đã có tài khoản? <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => setIsLogin(true)}>Đăng nhập</span></p>
-            )}
+            )
+            }
           </div>
         </div>
       </div>

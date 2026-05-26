@@ -6,4 +6,6 @@ export const orderService = {
   getById: (id) => api.get(`/Order/${id}`),
   
   updateStatus: (id, status) => api.patch(`/Order/${id}/status`, { status }),
+
+  checkout: (data) => api.post('/Order/checkout', data),
 };

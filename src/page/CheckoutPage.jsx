@@ -2,19 +2,49 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Breadcrumb from '../components/Breadcrumb';
-import { CreditCard, Truck, MapPin, FileText, CheckCircle2, ChevronRight, AlertCircle, Palette } from 'lucide-react';
+import { CreditCard, Truck, MapPin, FileText, CheckCircle2, ChevronRight, AlertCircle, Palette, Check } from 'lucide-react';
+import { shippingInfoService } from '../services/shippingInfoService';
+import { orderService } from '../services/orderService';
+import api from '../services/api';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const navigate = useNavigate();
   
-  // Giả lập trạng thái đăng nhập (sau này lấy từ context auth)
-  const isLoggedIn = false; 
+  // Lấy thông tin user từ localStorage an toàn hơn
+  let currentUser = null;
+  try {
+    const userJson = localStorage.getItem('user');
+    if (userJson && userJson !== 'undefined' && userJson !== 'null') {
+      currentUser = JSON.parse(userJson);
+      
+      // Thử lấy username từ token nếu chưa có trong user object
+      const token = localStorage.getItem('token');
+      if (!currentUser.username && token) {
+        try {
+          const payloadBase64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+          const payloadJson = decodeURIComponent(atob(payloadBase64).split('').map(function(c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          const payload = JSON.parse(payloadJson);
+          currentUser.username = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || payload.unique_name || payload.name || payload.sub;
+        } catch (e) {
+          console.error("Lỗi decode token:", e);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Lỗi parse user từ localStorage:", err);
+    localStorage.removeItem('user'); // Xóa nếu hỏng
+  }
+  
+  // Kiểm tra đăng nhập cực kỳ nghiêm ngặt
+  const isLoggedIn = !!(currentUser && (currentUser.id || currentUser.Id)); 
 
   const [formData, setFormData] = useState({
-    fullName: '',
+    fullName: currentUser?.username || currentUser?.name || '',
     phone: '',
-    email: '',
+    email: currentUser?.email || '',
     address: '',
     city: 'Hồ Chí Minh',
     district: '',
@@ -22,8 +52,33 @@ export default function CheckoutPage() {
     paymentMethod: isLoggedIn ? 'cod' : 'transfer' // Khách vãng lai mặc định là transfer
   });
 
+  const [shippingAddresses, setShippingAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      shippingInfoService.getAll()
+        .then(res => {
+          if (Array.isArray(res) && res.length > 0) {
+            setShippingAddresses(res);
+            // Tìm địa chỉ mặc định
+            const defaultAddr = res.find(addr => addr.isDefault) || res[0];
+            setSelectedAddressId(defaultAddr.id);
+            
+            // Cập nhật formData với địa chỉ này
+            setFormData(prev => ({
+              ...prev,
+              fullName: defaultAddr.recipientName || prev.fullName,
+              phone: defaultAddr.phoneNumber || prev.phone,
+              address: `${defaultAddr.addressLine}, ${defaultAddr.ward}, ${defaultAddr.province}`
+            }));
+          }
+        })
+        .catch(err => console.error("Lỗi lấy danh sách địa chỉ nhận hàng:", err));
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (cartItems.length === 0 && !isFinished) {
@@ -50,13 +105,127 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      alert("Vui lòng đăng nhập tài khoản để tiến hành đặt hàng!");
+      navigate('/auth');
+      return;
+    }
+
     if (validateForm()) {
-      // Xử lý đặt hàng ở đây (gọi API)
-      console.log('Order submitted:', { items: cartItems, customer: formData });
-      setIsFinished(true);
-      clearCart();
+      setIsSubmitting(true);
+      try {
+        console.log("Bắt đầu đồng bộ giỏ hàng...", cartItems);
+        // 1. Đồng bộ giỏ hàng từ localStorage lên database cart trước khi checkout
+        // Xóa giỏ hàng cũ trên DB
+        await api.delete('/Cart/clear');
+        console.log("Đã xóa giỏ hàng cũ trên DB");
+
+        // Thêm từng sản phẩm từ local cart vào DB cart
+        for (const item of cartItems) {
+          const productId = item.id || item.Id;
+          console.log(`Đang xử lý sản phẩm ID: ${productId}`, item);
+          
+          if (!productId) {
+            console.error("Không tìm thấy ID sản phẩm!", item);
+            continue;
+          }
+
+          // Lấy danh sách variants của product từ DB
+          let variants = await api.get(`/ProductVariant?productId=${productId}`);
+          console.log(`Đã tải variants cho sản phẩm ${productId}:`, variants);
+
+          let matchedVariant = null;
+          if (Array.isArray(variants) && variants.length > 0) {
+            // Tìm variant khớp với cấu hình/màu sắc chọn ở front-end
+            matchedVariant = variants.find(v => 
+              v.name && (
+                (item.selectedStorage && v.name.toLowerCase().includes(item.selectedStorage.toLowerCase())) ||
+                (item.selectedColor && v.name.toLowerCase().includes(item.selectedColor.toLowerCase()))
+              )
+            );
+            // Fallback nếu không khớp: Lấy variant đầu tiên
+            if (!matchedVariant) {
+              matchedVariant = variants[0];
+            }
+          } else {
+            // Nếu sản phẩm chưa có biến thể trong DB, tự động tạo mới một biến thể mặc định từ frontend
+            console.log(`Sản phẩm ${productId} chưa có biến thể nào trong DB. Tiến hành tạo mới...`);
+            const variantName = `${item.selectedStorage || 'Standard'} - ${item.selectedColor || 'Mặc định'}`;
+            try {
+              await api.post('/ProductVariant', {
+                name: variantName,
+                price: item.price,
+                totalStock: 100,
+                productId: productId,
+                imageId: item.image || ''
+              });
+              // Tải lại danh sách biến thể sau khi tạo
+              variants = await api.get(`/ProductVariant?productId=${productId}`);
+              if (Array.isArray(variants) && variants.length > 0) {
+                matchedVariant = variants[0];
+              }
+            } catch (createErr) {
+              console.error(`Lỗi tạo biến thể tự động cho sản phẩm ${productId}:`, createErr);
+            }
+          }
+
+          if (matchedVariant) {
+            console.log(`Đồng bộ variant:`, matchedVariant);
+            const cartItemRes = await api.post('/CartItem', {
+              variantId: matchedVariant.id,
+              quantity: item.quantity
+            });
+            console.log(`Đã thêm vào DB cart:`, cartItemRes);
+          } else {
+            console.warn(`Không tìm thấy hoặc không tạo được variant nào cho sản phẩm ID ${productId}`);
+          }
+        }
+
+        // 2. Tiến hành gọi API checkout
+        const checkoutPayload = {
+          shippingInfoId: selectedAddressId && selectedAddressId !== 'new' ? selectedAddressId : null,
+          recipientName: formData.fullName,
+          phoneNumber: formData.phone,
+          addressLine: formData.address,
+          ward: formData.district || '',
+          province: formData.city || 'Hồ Chí Minh',
+          promotionCode: '',
+          items: cartItems.map(item => ({
+            productId: item.id || item.Id,
+            storage: item.selectedStorage || '',
+            color: item.selectedColor || '',
+            quantity: item.quantity,
+            price: item.price
+          }))
+        };
+
+        console.log("Đang tiến hành checkout với payload:", checkoutPayload);
+        const res = await orderService.checkout(checkoutPayload);
+        console.log('Order submitted successfully:', res);
+        setIsFinished(true);
+        clearCart();
+      } catch (err) {
+        console.error('Order submission error:', err);
+        let errorMsg = 'Lỗi hệ thống, vui lòng thử lại sau.';
+        if (typeof err === 'string') {
+          errorMsg = err;
+        } else if (err && typeof err === 'object') {
+          if (err.errors) {
+            errorMsg = Object.entries(err.errors)
+              .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+              .join('\n');
+          } else {
+            errorMsg = err.title || err.message || JSON.stringify(err);
+          }
+        }
+        alert('Đặt hàng thất bại:\n' + errorMsg);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -114,6 +283,56 @@ export default function CheckoutPage() {
                       </span>
                     )}
                   </div>
+
+                  {isLoggedIn && shippingAddresses.length > 0 && (
+                    <div className="space-y-4 border-b border-gray-50 pb-8">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Chọn địa chỉ nhận hàng đã lưu *</label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {shippingAddresses.map((addr) => (
+                          <div 
+                            key={addr.id}
+                            onClick={() => {
+                              setSelectedAddressId(addr.id);
+                              setFormData(prev => ({
+                                ...prev,
+                                fullName: addr.recipientName,
+                                phone: addr.phoneNumber,
+                                address: `${addr.addressLine}, ${addr.ward}, ${addr.province}`
+                              }));
+                            }}
+                            className={`p-5 rounded-[2rem] border-2 cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-blue-500 bg-blue-50/50 shadow-lg shadow-blue-50/20' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-black text-gray-800 text-sm flex items-center gap-1.5">
+                                {selectedAddressId === addr.id && <Check size={14} className="text-blue-500" strokeWidth={3} />}
+                                {addr.recipientName}
+                              </span>
+                              {addr.isDefault && (
+                                <span className="text-[9px] font-black bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-200">Mặc định</span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 font-bold">{addr.phoneNumber}</p>
+                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">{addr.addressLine}, {addr.ward}, {addr.province}</p>
+                          </div>
+                        ))}
+                        <div 
+                          onClick={() => {
+                            setSelectedAddressId('new');
+                            setFormData(prev => ({
+                              ...prev,
+                              fullName: currentUser?.username || currentUser?.name || '',
+                              phone: '',
+                              address: ''
+                            }));
+                          }}
+                          className={`p-5 rounded-[2rem] border-2 border-dashed cursor-pointer flex flex-col items-center justify-center text-center transition-all ${selectedAddressId === 'new' ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200 hover:border-gray-300'}`}
+                        >
+                          <span className="font-black text-sm text-gray-700">Khác / Địa chỉ mới</span>
+                          <span className="text-[10px] text-gray-400 font-medium mt-1">Nhập thông tin giao hàng khác</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2.5">
@@ -305,10 +524,11 @@ export default function CheckoutPage() {
 
                   <button 
                     onClick={handleSubmit}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-6 rounded-[2rem] text-xl uppercase shadow-2xl shadow-blue-200 transition-all transform active:scale-95 mt-10 flex items-center justify-center gap-3 group"
+                    disabled={isSubmitting}
+                    className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-6 rounded-[2rem] text-xl uppercase shadow-2xl shadow-blue-200 transition-all transform active:scale-95 mt-10 flex items-center justify-center gap-3 group ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
-                    XÁC NHẬN ĐẶT HÀNG
-                    <ChevronRight size={24} className="group-hover:translate-x-2 transition-transform" />
+                    {isSubmitting ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN ĐẶT HÀNG'}
+                    {!isSubmitting && <ChevronRight size={24} className="group-hover:translate-x-2 transition-transform" />}
                   </button>
                 </div>
                 

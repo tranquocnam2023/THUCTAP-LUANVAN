@@ -51,7 +51,7 @@ export default function AdminDashboard() {
           data.forEach(p => {
             const brand = p.categoryName || 'Khác';
             if (!performance[brand]) performance[brand] = { brand, stock: 0, sold: 0 };
-            performance[brand].stock += p.stockQuantity || 0;
+            performance[brand].stock += p.availableStock ?? p.totalStock ?? p.stockQuantity ?? p.stock ?? 0;
             performance[brand].sold += 5; // Dummy sold count for visual
           });
           setBrandPerformance(Object.values(performance));

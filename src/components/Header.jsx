@@ -19,6 +19,21 @@ export default function Header() {
     const userJson = localStorage.getItem('user');
     if (userJson && userJson !== 'undefined' && userJson !== 'null') {
       user = JSON.parse(userJson);
+      
+      // Thử lấy username từ token nếu chưa có trong user object
+      const token = localStorage.getItem('token');
+      if (!user.username && token) {
+        try {
+          const payloadBase64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+          const payloadJson = decodeURIComponent(atob(payloadBase64).split('').map(function(c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          const payload = JSON.parse(payloadJson);
+          user.username = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || payload.unique_name || payload.name || payload.sub;
+        } catch (e) {
+          console.error("Lỗi decode token:", e);
+        }
+      }
     }
   } catch (err) {
     console.error("Lỗi parse user từ localStorage:", err);
@@ -32,6 +47,7 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('cart');
     window.location.href = '/'; // Reload để xóa state
   };
 
@@ -78,12 +94,12 @@ export default function Header() {
             {isLoggedIn ? (
               <div className="flex items-center px-3 py-1 rounded bg-white/10 gap-3">
                  <div className="flex flex-col items-end">
-                    <span className="font-bold opacity-80">Chào, {user.username || user.name || 'User'}</span>
+                    <span className="font-bold opacity-80">Chào {user.username || user.name || 'User'}</span>
                     <button onClick={handleLogout} className="text-[10px] hover:underline text-yellow-300 font-bold uppercase">Đăng xuất</button>
                  </div>
-                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
+                 <Link to="/profile" className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm hover:bg-white/30 cursor-pointer transition-colors" title="Quản lý thông tin tài khoản">
                     {(user.username || 'U')[0].toUpperCase()}
-                 </div>
+                 </Link>
               </div>
             ) : (
               <Link 

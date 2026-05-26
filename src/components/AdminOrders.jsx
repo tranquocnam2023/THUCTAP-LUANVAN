@@ -30,12 +30,34 @@ export default function AdminOrders() {
   const { formatCurrency, formatDate } = useFormat();
 
   useEffect(() => {
+    console.log("AdminOrders: Bắt đầu tải danh sách đơn hàng...");
     orderService.getAll()
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) setOrders(data);
+        console.log("AdminOrders: Đã tải dữ liệu thành công từ API:", data);
+        if (Array.isArray(data)) {
+          if (data.length > 0) {
+            const mappedOrders = data.map(order => ({
+              id: order.id,
+              customer: order.customerName || 'Khách hàng',
+              phone: order.customerPhone || 'N/A',
+              date: order.createdAt,
+              payment: order.status === 'Confirmed' || order.status === 'Delivered' || order.status === 'confirmed' || order.status === 'delivered' ? 'Đã thanh toán' : 'Chờ thanh toán',
+              amount: order.totalPrice,
+              status: order.status?.toLowerCase() || 'pending'
+            }));
+            console.log("AdminOrders: Mapped orders:", mappedOrders);
+            setOrders(mappedOrders);
+          } else {
+            console.log("AdminOrders: Không có đơn hàng nào trong database.");
+            setOrders([]);
+          }
+        } else {
+          console.error("AdminOrders: Dữ liệu trả về không phải là mảng!", data);
+          setOrders([]);
+        }
       })
       .catch(err => {
-        console.error("Lỗi tải đơn hàng:", err);
+        console.error("AdminOrders: Lỗi tải đơn hàng:", err);
         setOrders([]);
       });
   }, []);
@@ -75,15 +97,24 @@ export default function AdminOrders() {
   };
 
   const handleStatusChange = (orderId, newStatus) => {
-    console.log(`Updating order ${orderId} to status ${newStatus}`);
-    // Thực hiện gọi API cập nhật ở đây
+    orderService.updateStatus(orderId, newStatus)
+      .then(() => {
+        alert('Cập nhật trạng thái đơn hàng thành công!');
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      })
+      .catch(err => {
+        console.error("Lỗi cập nhật trạng thái đơn hàng:", err);
+        alert('Cập nhật trạng thái thất bại: ' + (err.message || JSON.stringify(err)));
+      });
   };
 
   const counts = {
     all: orders.length,
     pending: orders.filter(o => o.status === 'pending').length,
+    confirmed: orders.filter(o => o.status === 'confirmed').length,
     shipping: orders.filter(o => o.status === 'shipping').length,
     delivered: orders.filter(o => o.status === 'delivered').length,
+    cancelled: orders.filter(o => o.status === 'cancelled').length,
   };
 
   return (
@@ -150,8 +181,8 @@ export default function AdminOrders() {
             >
               {Icon && <Icon className={`w-4 h-4 mr-3 ${isActive ? 'text-[#FFFFFF]' : tab.color}`} />}
               {tab.name}
-              <span className={`ml-3 px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
-                {tab.count}
+               <span className={`ml-3 px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
+                {counts[tab.id]}
               </span>
             </button>
           );

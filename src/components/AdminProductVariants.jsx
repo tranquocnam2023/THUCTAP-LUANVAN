@@ -35,14 +35,14 @@ export default function AdminProductVariants({ product, onBack }) {
     <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-6 pb-20 bg-gray-50/50 min-h-screen">
       {/* Header & Back Button */}
       <div className="flex items-center justify-between">
-        <button 
+        <button
           onClick={onBack}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors group"
         >
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
           <span className="font-bold text-sm uppercase tracking-widest">Quay lại danh sách</span>
         </button>
-        <button 
+        <button
           onClick={() => setShowAddModal(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center gap-2"
         >
@@ -118,7 +118,7 @@ export default function AdminProductVariants({ product, onBack }) {
                       <button className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
                         <Edit2 size={18} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(v.id)}
                         className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                       >
@@ -144,7 +144,7 @@ export default function AdminProductVariants({ product, onBack }) {
                 <X size={20} />
               </button>
             </div>
-            
+
             <form onSubmit={handleAddVariant} className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 {/* Color Input - HEX Picker */}
@@ -153,25 +153,25 @@ export default function AdminProductVariants({ product, onBack }) {
                   <div className="flex gap-4">
                     <div className="flex-1 space-y-2">
                       <p className="text-[9px] font-bold text-gray-400 uppercase ml-1">Tên màu</p>
-                      <input 
+                      <input
                         type="text"
                         required
                         placeholder="VD: Xanh Titan, Đen Nhám..."
                         className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-gray-700"
                         value={newVariant.color}
-                        onChange={(e) => setNewVariant({...newVariant, color: e.target.value})}
+                        onChange={(e) => setNewVariant({ ...newVariant, color: e.target.value })}
                       />
                     </div>
                     <div className="w-24 space-y-2">
                       <p className="text-[9px] font-bold text-gray-400 uppercase ml-1">Mã HEX</p>
                       <div className="relative group">
-                        <input 
+                        <input
                           type="color"
                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                           value={newVariant.colorCode}
-                          onChange={(e) => setNewVariant({...newVariant, colorCode: e.target.value})}
+                          onChange={(e) => setNewVariant({ ...newVariant, colorCode: e.target.value })}
                         />
-                        <div 
+                        <div
                           className="w-full h-[52px] rounded-2xl border border-gray-200 shadow-sm"
                           style={{ backgroundColor: newVariant.colorCode }}
                         ></div>
@@ -188,7 +188,7 @@ export default function AdminProductVariants({ product, onBack }) {
                       <button
                         key={cap}
                         type="button"
-                        onClick={() => setNewVariant({...newVariant, capacity: cap})}
+                        onClick={() => setNewVariant({ ...newVariant, capacity: cap })}
                         className={`py-3.5 rounded-2xl text-xs font-bold border transition-all ${newVariant.capacity === cap ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-gray-50 border-gray-100 text-gray-500 hover:border-gray-200'}`}
                       >
                         {cap}
@@ -200,22 +200,22 @@ export default function AdminProductVariants({ product, onBack }) {
                 {/* Price & Stock */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Giá bán</label>
-                  <input 
+                  <input
                     type="number"
                     required
                     className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-gray-800"
                     value={newVariant.price}
-                    onChange={(e) => setNewVariant({...newVariant, price: parseInt(e.target.value)})}
+                    onChange={(e) => setNewVariant({ ...newVariant, price: parseInt(e.target.value) })}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tồn kho</label>
-                  <input 
+                  <input
                     type="number"
                     required
                     className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-gray-800"
                     value={newVariant.stock}
-                    onChange={(e) => setNewVariant({...newVariant, stock: parseInt(e.target.value)})}
+                    onChange={(e) => setNewVariant({ ...newVariant, stock: parseInt(e.target.value) })}
                   />
                 </div>
 
@@ -229,14 +229,14 @@ export default function AdminProductVariants({ product, onBack }) {
               </div>
 
               <div className="pt-4 flex gap-4">
-                <button 
+                <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all"
                 >
                   HỦY BỎ
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2"
                 >

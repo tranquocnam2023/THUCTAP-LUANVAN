@@ -270,8 +270,8 @@ export default function AdminCategories() {
                                         {prod.basePrice?.toLocaleString('vi-VN')} ₫
                                       </p>
                                       <div className="flex items-center gap-2 mt-1">
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${prod.stock > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
-                                          {prod.stock > 0 ? `Còn ${prod.stock}` : 'Hết hàng'}
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${(prod.availableStock ?? prod.totalStock ?? prod.stock ?? prod.stockQuantity ?? 0) > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                                          {(prod.availableStock ?? prod.totalStock ?? prod.stock ?? prod.stockQuantity ?? 0) > 0 ? `Còn ${prod.availableStock ?? prod.totalStock ?? prod.stock ?? prod.stockQuantity ?? 0}` : 'Hết hàng'}
                                         </span>
                                       </div>
                                     </div>

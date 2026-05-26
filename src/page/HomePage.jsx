@@ -28,7 +28,7 @@ export default function HomePage() {
             ...p,
             price: p.price || p.basePrice,
             image: p.image || p.thumbnailImage || p.mainImage,
-            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : p.stock
+            stockQuantity: p.availableStock ?? p.totalStock ?? p.stockQuantity ?? p.stock ?? 0
           }));
           setProducts(normalizedData);
         } else {

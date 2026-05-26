@@ -55,6 +55,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/profile" element={<AuthPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/donate" element={<DonatePage />} />

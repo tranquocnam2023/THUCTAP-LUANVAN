@@ -19,7 +19,7 @@ const DASHBOARD_STATS = [
 
 export default function AdminPage() {
   const [activeAdminTab, setActiveAdminTab] = useState('dashboard');
-  
+
   // Khởi tạo state trống để sau này truyền API
   const [stats, setStats] = useState({ users: 0, revenue: 0, orders: 0, products: 0 });
   const [recentOrders, setRecentOrders] = useState([]);
@@ -56,13 +56,12 @@ export default function AdminPage() {
   };
 
   const SidebarItem = ({ id, icon: Icon, label }) => (
-    <button 
+    <button
       onClick={() => setActiveAdminTab(id)}
-      className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 font-bold ${
-        activeAdminTab === id 
-        ? 'bg-[#F4F7FE] text-[#4318FF] border-r-4 border-[#4318FF]' 
+      className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 font-bold ${activeAdminTab === id
+        ? 'bg-[#F4F7FE] text-[#4318FF] border-r-4 border-[#4318FF]'
         : 'text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#2B3674]'
-      }`}
+        }`}
     >
       <Icon className={`w-5 h-5 mr-3 ${activeAdminTab === id ? 'text-[#4318FF]' : 'text-[#A3AED0]'}`} />
       <span className="text-sm">{label}</span>
@@ -75,11 +74,11 @@ export default function AdminPage() {
       <aside className="w-64 bg-[#FFFFFF] flex flex-col hidden md:flex shrink-0 border-r border-[#E0E5F2] shadow-sm">
         <div className="h-20 flex items-center px-8 border-b border-[#E0E5F2]">
           <div className="w-8 h-8 bg-[#4318FF] rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-[#4318FF]/30">
-            <span className="font-bold text-lg text-[#FFFFFF]">Ad</span>
+            <span className="font-bold text-lg text-[#FFFFFF]">AD</span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[#2B3674] uppercase">PhoneShop</h1>
         </div>
-        
+
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Chính</p>
           <SidebarItem id="dashboard" icon={Layout} label="Bảng thống kê" />
@@ -89,7 +88,7 @@ export default function AdminPage() {
           <SidebarItem id="reviews" icon={Star} label="Đánh giá" />
           <SidebarItem id="orders" icon={ShoppingCart} label="Đơn hàng" />
           <SidebarItem id="customers" icon={Users} label="Khách hàng" />
-          
+
           <div className="pt-6">
             <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Hệ thống</p>
             <SidebarItem id="settings" icon={Settings} label="Cài đặt" />
@@ -101,7 +100,7 @@ export default function AdminPage() {
             <Layout className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform" />
             Thoát về cửa hàng
           </a>
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#EE5D50] transition-colors rounded-xl hover:bg-[#FFF5F5] group"
           >
@@ -123,7 +122,7 @@ export default function AdminPage() {
               <p className="text-sm font-medium text-[#A3AED0]">Trang chủ / {getHeaderTitle()}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center bg-[#FFFFFF] rounded-full px-4 py-2 shadow-sm border border-[#E0E5F2]">
             <div className="flex items-center bg-[#F4F7FE] rounded-full px-4 py-2 mr-4">
               <svg className="w-4 h-4 text-[#2B3674]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
