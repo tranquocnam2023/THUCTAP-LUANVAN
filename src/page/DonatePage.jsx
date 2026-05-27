@@ -24,10 +24,9 @@ const DonatePage = () => {
         </div>
 
         <div className="pt-16 pb-10 px-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Donate ủng hộ cho thằng thiết kế giao diện</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Donate ủng hộ cho thằng thiết kế Frontend</h1>
           <p className="text-gray-500 mb-8 leading-relaxed">
-            Nếu bạn cảm thấy giao diện này hữu ích và muốn tiếp thêm động lực cho mình,
-            bạn có thể gửi mình một ly cà phê!
+            Cảm ơn nhiều!
           </p>
 
           {/* QR Code Container */}
@@ -48,7 +47,7 @@ const DonatePage = () => {
               </div>
               <div className="mt-4 flex items-center text-sm font-medium text-gray-600">
                 <QrCode className="w-4 h-4 mr-2 text-primary" />
-                Quét mã để chuyển khoản
+                Tùy lòng hảo tâm
               </div>
             </div>
           </div>

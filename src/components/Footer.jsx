@@ -2,15 +2,15 @@
 import { Link } from 'react-router-dom';
 
 const THEME = {
-  primary: '#288ad6', 
-  footerBg: '#ffffff', 
-  border: '#e5e7eb', 
-  textDark: '#333333', 
+  primary: '#288ad6',
+  footerBg: '#ffffff',
+  border: '#e5e7eb',
+  textDark: '#333333',
 };
 
 export default function Footer() {
   return (
-    <footer 
+    <footer
       className="w-full mt-auto text-sm border-t pt-6"
       style={{ backgroundColor: THEME.footerBg, borderColor: THEME.border }}
     >
@@ -31,7 +31,7 @@ export default function Footer() {
           <a href="#" className="hover:text-primary transition">Tuyển dụng</a>
           <a href="#" className="hover:text-primary transition">Gửi góp ý, khiếu nại</a>
           <a href="#" className="hover:text-primary transition">Tìm siêu thị (3.300+ shop)</a>
-          <Link to="/donate" className="hover:text-primary text-xs transition">Donate cho thằng thiết kế giao diện</Link>
+          <Link to="/donate" className="hover:text-primary text-xs transition">Donate cho thằng thiết kế Frontend</Link>
         </div>
 
         {/* Col 3 */}
@@ -61,7 +61,7 @@ export default function Footer() {
       </div>
 
       {/* Copyright row */}
-      <div 
+      <div
         className="mt-4 py-4 text-xs border-t text-center"
         style={{ backgroundColor: 'rgba(0,0,0,0.03)', borderColor: THEME.border, color: '#666' }}
       >

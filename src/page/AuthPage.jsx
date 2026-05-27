@@ -651,10 +651,10 @@ export default function AuthPage() {
 
           <form className="flex flex-col space-y-4" onSubmit={handleAuth}>
             <div>
-              <label className="block text-sm font-medium mb-1">Tên đăng nhập</label>
+              <label className="block text-sm font-medium mb-1">Địa chỉ Email hoặc Tên đăng nhập</label>
               <input
                 type="text"
-                placeholder="Nhập tên đăng nhập"
+                placeholder="Nhập email hoặc tên đăng nhập"
                 className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}

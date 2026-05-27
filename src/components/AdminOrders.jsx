@@ -25,12 +25,14 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState(null);
   
   // Khởi tạo các hook
   const { formatCurrency, formatDate } = useFormat();
 
   useEffect(() => {
     console.log("AdminOrders: Bắt đầu tải danh sách đơn hàng...");
+    setError(null);
     orderService.getAll()
       .then(data => {
         console.log("AdminOrders: Đã tải dữ liệu thành công từ API:", data);
@@ -53,11 +55,13 @@ export default function AdminOrders() {
           }
         } else {
           console.error("AdminOrders: Dữ liệu trả về không phải là mảng!", data);
+          setError("Dữ liệu trả về không phải là mảng: " + JSON.stringify(data));
           setOrders([]);
         }
       })
       .catch(err => {
         console.error("AdminOrders: Lỗi tải đơn hàng:", err);
+        setError(typeof err === 'object' ? JSON.stringify(err) : String(err));
         setOrders([]);
       });
   }, []);
@@ -119,6 +123,11 @@ export default function AdminOrders() {
 
   return (
     <div className="animate-in fade-in duration-500 space-y-6">
+      {error && (
+        <div className="p-5 bg-[#EE5D50]/10 border border-[#EE5D50]/20 text-[#EE5D50] rounded-[20px] font-bold text-sm">
+          ⚠️ Có lỗi xảy ra khi tải dữ liệu đơn hàng: {error}
+        </div>
+      )}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-[#2B3674]">Danh sách đơn hàng</h2>
