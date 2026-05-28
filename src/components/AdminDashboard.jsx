@@ -3,10 +3,11 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   ComposedChart, Line
 } from 'recharts';
-import { ShoppingCart, Gift, Package, TrendingUp } from 'lucide-react';
+import { ShoppingCart, Gift, Package, TrendingUp, ShoppingBag } from 'lucide-react';
 // import { MOCK_DASHBOARD } from '../utils/mockData'; // Removed mock data
 import { dashboardService } from '../services/dashboardService';
 import { productService } from '../services/productService';
+import { orderService } from '../services/orderService';
 
 const THEME = {
   primary: '#4318FF',
@@ -23,7 +24,7 @@ const THEME = {
 
 export default function AdminDashboard() {
   const [revenueData, setRevenueData] = useState([]);
-  const [birthdays, setBirthdays] = useState([]);
+  const [productStats, setProductStats] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [brandPerformance, setBrandPerformance] = useState([]);
   const [stats, setStats] = useState({ totalRevenue: 0, totalOrders: 0, totalProducts: 0, totalUsers: 0 });
@@ -57,6 +58,38 @@ export default function AdminDashboard() {
           setBrandPerformance(Object.values(performance));
         }
       });
+
+    // Thống kê theo từng mặt hàng từ tất cả đơn hàng
+    orderService.getAll()
+      .then(data => {
+        if (data && data.length > 0) {
+          const statsMap = {};
+          data.forEach(order => {
+            // Bỏ qua đơn hàng đã hủy
+            const isCancelled = order.status && (order.status.toLowerCase() === 'cancelled' || order.status === 'Đã hủy');
+            if (isCancelled) return;
+
+            if (order.items && order.items.length > 0) {
+              order.items.forEach(item => {
+                const name = item.productName || 'Sản phẩm không tên';
+                if (!statsMap[name]) {
+                  statsMap[name] = {
+                    name,
+                    quantity: 0,
+                    revenue: 0
+                  };
+                }
+                statsMap[name].quantity += item.quantity || 0;
+                statsMap[name].revenue += (item.quantity || 0) * (item.priceAtPurchase || 0);
+              });
+            }
+          });
+          // Sắp xếp giảm dần theo số lượng đã bán
+          const sortedStats = Object.values(statsMap).sort((a, b) => b.quantity - a.quantity);
+          setProductStats(sortedStats);
+        }
+      })
+      .catch(e => console.error("Lỗi tải Thống kê mặt hàng:", e));
   }, []);
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
@@ -189,43 +222,72 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 4. KHÁCH HÀNG SINH NHẬT */}
+        {/* 4. THỐNG KÊ THEO TỪNG MẶT HÀNG */}
         <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
               <div className="p-2 bg-[#F4F7FE] rounded-lg">
-                <Gift size={20} className="text-[#EE5D50]" />
+                <ShoppingBag size={20} className="text-[#4318FF]" />
               </div>
-              Khách hàng sinh nhật
+              Thống kê theo từng mặt hàng
             </h3>
           </div>
-          <div className="flex-1 space-y-4 overflow-y-auto pr-2">
-            {birthdays.length > 0 ? (
-              birthdays.map((person, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#4318FF]/10 flex items-center justify-center text-[#4318FF] font-bold text-sm group-hover:scale-110 transition-transform">
-                      {person.name.split(' ').pop().charAt(0)}
+          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4">
+            {productStats.length > 0 ? (
+              productStats.map((item, idx) => {
+                const colorPalette = ['#4318FF', '#39B8FF', '#01B574', '#FFB547', '#EE5D50', '#707EAE'];
+                const itemColor = colorPalette[idx % colorPalette.length];
+                const maxQty = productStats[0].quantity || 1;
+                const percentage = Math.round((item.quantity / maxQty) * 100);
+
+                return (
+                  <div key={idx} className="p-3 rounded-xl border border-[#E0E5F2] hover:border-[#E0E5F2] hover:bg-[#F4F7FE]/40 transition-all flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {/* Color Picker Dot representing the item */}
+                        <div 
+                          className="w-3.5 h-3.5 rounded-full flex-shrink-0 shadow-sm transition-transform hover:scale-125 cursor-pointer" 
+                          style={{ backgroundColor: itemColor }}
+                          title={`Mã màu: ${itemColor}`}
+                        />
+                        <span className="text-sm font-bold text-[#2B3674] truncate" title={item.name}>
+                          {item.name}
+                        </span>
+                      </div>
+                      <span 
+                        className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full whitespace-nowrap"
+                        style={{ backgroundColor: `${itemColor}15`, color: itemColor }}
+                      >
+                        Đã bán: {item.quantity}
+                      </span>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-[#2B3674]">{person.name}</p>
-                      <p className="text-[12px] text-[#A3AED0] font-medium">{person.date} • {person.age} tuổi</p>
+
+                    <div className="flex justify-between items-center text-[12px] text-[#A3AED0] font-semibold">
+                      <span>Doanh thu</span>
+                      <span className="text-[#2B3674] font-bold">
+                        {item.revenue.toLocaleString('vi-VN')}đ
+                      </span>
+                    </div>
+
+                    {/* Progress bar using the item's corresponding color */}
+                    <div className="w-full h-2 bg-[#F4F7FE] rounded-full overflow-hidden">
+                      <div 
+                        className="h-full rounded-full transition-all duration-1000"
+                        style={{ 
+                          width: `${percentage}%`,
+                          backgroundColor: itemColor
+                        }}
+                      ></div>
                     </div>
                   </div>
-                  <button className="p-2 text-[#A3AED0] hover:text-[#4318FF] transition-colors">
-                    <Gift size={18} />
-                  </button>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="h-full flex items-center justify-center text-[#A3AED0] text-sm font-medium">
-                Không có sinh nhật nào trong tháng
+                Chưa có dữ liệu bán hàng
               </div>
             )}
           </div>
-          <button className="mt-6 w-full py-3 bg-[#4318FF]/10 text-[#4318FF] rounded-xl text-sm font-bold hover:bg-[#4318FF] hover:text-[#FFFFFF] transition-all active:scale-95">
-            Gửi lời chúc hàng loạt
-          </button>
         </div>
 
       </div>

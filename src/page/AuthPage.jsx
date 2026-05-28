@@ -104,7 +104,12 @@ export default function AuthPage() {
           data.username = username;
           localStorage.setItem('token', userToken);
           localStorage.setItem('user', JSON.stringify(data));
-          window.location.href = '/';
+          
+          if (data.role === 'Admin' || data.role === 'Staff') {
+            window.location.href = '/admin';
+          } else {
+            window.location.href = '/';
+          }
         } else {
           setError('Không nhận được token từ server!');
           setLoading(false);

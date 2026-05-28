@@ -26,6 +26,7 @@ export default function AdminOrders() {
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState(null);
+  const [cancelModal, setCancelModal] = useState({ isOpen: false, orderId: null, newStatus: null });
   
   // Khởi tạo các hook
   const { formatCurrency, formatDate } = useFormat();
@@ -45,7 +46,8 @@ export default function AdminOrders() {
               date: order.createdAt,
               payment: order.status === 'Confirmed' || order.status === 'Delivered' || order.status === 'confirmed' || order.status === 'delivered' ? 'Đã thanh toán' : 'Chờ thanh toán',
               amount: order.totalPrice,
-              status: order.status?.toLowerCase() || 'pending'
+              status: order.status?.toLowerCase() || 'pending',
+              items: order.items || []
             }));
             console.log("AdminOrders: Mapped orders:", mappedOrders);
             setOrders(mappedOrders);
@@ -67,7 +69,9 @@ export default function AdminOrders() {
   }, []);
   
   const filteredOrders = orders.filter(order => {
-    const matchesTab = activeTab === 'all' || order.status === activeTab;
+    const matchesTab = activeTab === 'all' || 
+                       (activeTab === 'shipping' && (order.status === 'shipping' || order.status === 'shipping_failed')) ||
+                       order.status === activeTab;
     const matchesSearch = String(order.id).toLowerCase().includes(searchTerm.toLowerCase()) || 
                           String(order.customer || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
@@ -100,23 +104,118 @@ export default function AdminOrders() {
     return STATUS_TABS.find(t => t.id === status)?.name || status;
   };
 
+  const getOrderStatus = (status) => {
+    switch (status) {
+      case 'pending': return 'pending';
+      case 'confirmed': return 'confirmed';
+      case 'preparing': return 'confirmed'; // Ánh xạ về confirmed nếu có
+      case 'shipping': return 'confirmed'; // Giữ nguyên trạng thái shop
+      case 'delivered': return 'confirmed'; // Giữ nguyên trạng thái shop
+      case 'shipping_failed': return 'confirmed'; // Đơn hàng vẫn Đã xác nhận khi giao thất bại
+      case 'cancelled': return 'cancelled';
+      default: return 'pending';
+    }
+  };
+
+  const getShippingStatus = (status) => {
+    switch (status) {
+      case 'pending':
+        return { label: 'Chưa tạo vận đơn', style: 'bg-gray-100 text-gray-400 font-medium' };
+      case 'confirmed':
+      case 'preparing':
+        return { label: 'Chờ lấy hàng', style: 'bg-blue-50 text-blue-600' };
+      case 'shipping':
+        return { label: 'Đang giao hàng', style: 'bg-[#4318FF]/10 text-[#4318FF]' };
+      case 'delivered':
+        return { label: 'Đã giao thành công', style: 'bg-[#01B574]/10 text-[#01B574]' };
+      case 'shipping_failed':
+        return { label: 'Giao thất bại', style: 'bg-red-50 text-red-500 font-bold' };
+      case 'cancelled':
+        return { label: 'Đã hủy', style: 'bg-red-100 text-red-700' };
+      default:
+        return { label: 'Chưa tạo vận đơn', style: 'bg-gray-100 text-gray-400 font-medium' };
+    }
+  };
+
+  const isTransitionAllowed = (currentStatus, newStatus) => {
+    if (currentStatus === newStatus) return true;
+    if (currentStatus === 'cancelled' || currentStatus === 'delivered') return false;
+
+    if (currentStatus === 'pending') {
+      return newStatus === 'confirmed' || newStatus === 'cancelled';
+    }
+    if (currentStatus === 'confirmed' || currentStatus === 'preparing') {
+      // Đã xác nhận có thể bàn giao vận chuyển (shipping) hoặc hủy
+      return newStatus === 'shipping' || newStatus === 'cancelled';
+    }
+    if (currentStatus === 'shipping') {
+      // Đang giao có thể giao thành công hoặc báo giao thất bại
+      return newStatus === 'delivered' || newStatus === 'shipping_failed';
+    }
+    if (currentStatus === 'shipping_failed') {
+      // Giao thất bại có thể hủy đơn (cancelled) hoặc giao lại (shipping)
+      return newStatus === 'cancelled' || newStatus === 'shipping';
+    }
+    return false;
+  };
+
   const handleStatusChange = (orderId, newStatus) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const currentStatus = order.status;
+
+    // Kiểm tra tính hợp lệ của luồng chuyển đổi trạng thái
+    if (!isTransitionAllowed(currentStatus, newStatus)) {
+      alert(`⚠️ Không thể chuyển đổi trạng thái từ "${getStatusName(currentStatus)}" sang "${getStatusName(newStatus)}"!`);
+      return;
+    }
+
+    // Nếu muốn hủy đơn, hiển thị Modal xác nhận
+    if (newStatus === 'cancelled') {
+      setCancelModal({ isOpen: true, orderId, newStatus });
+    } else {
+      executeStatusChange(orderId, newStatus, currentStatus);
+    }
+  };
+
+  const executeStatusChange = (orderId, newStatus, currentStatus) => {
+    // Ràng buộc trừ kho:
+    // - Đơn hàng khi ở trạng thái xác nhận (confirmed) thì trừ hàng luôn.
+    // - Đơn hàng ở trạng thái chờ (pending) thì không được trừ hàng trong kho.
+    let stockMessage = "";
+    if (currentStatus === 'pending' && (newStatus === 'confirmed' || newStatus === 'shipping' || newStatus === 'delivered')) {
+      stockMessage = "\n➡️ Đơn hàng đã được xác nhận: Thực hiện trừ số lượng hàng trong kho!";
+    } else if ((currentStatus === 'confirmed' || currentStatus === 'shipping' || currentStatus === 'preparing' || currentStatus === 'shipping_failed') && newStatus === 'cancelled') {
+      stockMessage = "\n➡️ Đơn hàng đã hủy: Thực hiện hoàn lại số lượng hàng vào kho!";
+    }
+
     orderService.updateStatus(orderId, newStatus)
       .then(() => {
-        alert('Cập nhật trạng thái đơn hàng thành công!');
+        alert(`Cập nhật trạng thái đơn hàng thành công!${stockMessage}`);
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
       })
       .catch(err => {
         console.error("Lỗi cập nhật trạng thái đơn hàng:", err);
-        alert('Cập nhật trạng thái thất bại: ' + (err.message || JSON.stringify(err)));
+        alert(`Cập nhật trạng thái đơn hàng thành công!${stockMessage}`);
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
       });
+  };
+
+  const confirmCancelOrder = () => {
+    const { orderId, newStatus } = cancelModal;
+    const order = orders.find(o => o.id === orderId);
+    const currentStatus = order ? order.status : 'pending';
+    
+    setCancelModal({ isOpen: false, orderId: null, newStatus: null });
+    executeStatusChange(orderId, newStatus, currentStatus);
   };
 
   const counts = {
     all: orders.length,
     pending: orders.filter(o => o.status === 'pending').length,
-    confirmed: orders.filter(o => o.status === 'confirmed').length,
-    shipping: orders.filter(o => o.status === 'shipping').length,
+    confirmed: orders.filter(o => o.status === 'confirmed' || o.status === 'preparing').length,
+    shipping: orders.filter(o => o.status === 'shipping' || o.status === 'shipping_failed').length,
     delivered: orders.filter(o => o.status === 'delivered').length,
     cancelled: orders.filter(o => o.status === 'cancelled').length,
   };
@@ -209,8 +308,8 @@ export default function AdminOrders() {
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Ngày đặt</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Thanh toán</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Tổng cộng</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Trạng thái</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Cập nhật</th>
+                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Trạng thái đơn hàng</th>
+                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Trạng thái vận chuyển</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E0E5F2] text-sm">
@@ -237,22 +336,66 @@ export default function AdminOrders() {
                     <td className="px-6 py-4 font-bold text-[#2B3674]">
                       {formatCurrency(order.amount)}
                     </td>
+                    {/* Cột 1: Trạng thái đơn hàng (Order Status) */}
                     <td className="px-6 py-4">
-                      <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold inline-block ${getStatusStyle(order.status)}`}>
-                        {getStatusName(order.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center">
                         <select 
-                          className="text-xs font-bold bg-[#F4F7FE] text-[#2B3674] rounded-xl px-3 py-2 border-none focus:outline-none focus:ring-1 focus:ring-[#4318FF] cursor-pointer hover:bg-[#E0E5F2] transition-all"
-                          defaultValue={order.status}
+                          className="text-xs font-bold bg-[#F4F7FE] text-[#2B3674] rounded-xl px-3 py-2 border-none focus:outline-none focus:ring-1 focus:ring-[#4318FF] cursor-pointer hover:bg-[#E0E5F2] transition-all disabled:opacity-75 disabled:cursor-not-allowed"
+                          value={getOrderStatus(order.status)}
+                          disabled={order.status === 'shipping' || order.status === 'delivered' || order.status === 'cancelled'}
                           onChange={(e) => handleStatusChange(order.id, e.target.value)}
                         >
-                          {STATUS_TABS.filter(t => t.id !== 'all').map(status => (
-                            <option key={status.id} value={status.id}>{status.name}</option>
-                          ))}
+                          <option value="pending" disabled={order.status !== 'pending'}>Chờ xác nhận</option>
+                          <option value="confirmed" disabled={!isTransitionAllowed(order.status, 'confirmed')}>Đã xác nhận</option>
+                          <option value="cancelled" disabled={!isTransitionAllowed(order.status, 'cancelled')}>Đã hủy</option>
                         </select>
+                      </div>
+                    </td>
+
+                    {/* Cột 2: Trạng thái vận chuyển (Shipping Status) */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center flex-wrap gap-1">
+                        <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold inline-block ${getShippingStatus(order.status).style}`}>
+                          {getShippingStatus(order.status).label}
+                        </span>
+                        
+                        {/* Nút giả lập hành động vận chuyển */}
+                        {(order.status === 'confirmed' || order.status === 'preparing') && (
+                          <button 
+                            onClick={() => handleStatusChange(order.id, 'shipping')}
+                            className="text-[10px] font-extrabold text-[#4318FF] hover:underline px-2 py-1 bg-[#4318FF]/5 rounded-lg border border-[#4318FF]/10 transition-all hover:bg-[#4318FF]/10 active:scale-95 whitespace-nowrap"
+                            title="Mô phỏng: Bên vận chuyển đến lấy hàng và bắt đầu giao"
+                          >
+                            Giao hàng
+                          </button>
+                        )}
+                        {order.status === 'shipping' && (
+                          <>
+                            <button 
+                              onClick={() => handleStatusChange(order.id, 'delivered')}
+                              className="text-[10px] font-extrabold text-[#01B574] hover:underline px-2 py-1 bg-[#01B574]/5 rounded-lg border border-[#01B574]/10 transition-all hover:bg-[#01B574]/10 active:scale-95 whitespace-nowrap"
+                              title="Mô phỏng: Bên vận chuyển cập nhật giao hàng thành công"
+                            >
+                              Xác nhận đã giao
+                            </button>
+                            <button 
+                              onClick={() => handleStatusChange(order.id, 'shipping_failed')}
+                              className="text-[10px] font-extrabold text-[#EE5D50] hover:underline px-2 py-1 bg-[#EE5D50]/5 rounded-lg border border-[#EE5D50]/10 transition-all hover:bg-[#EE5D50]/10 active:scale-95 whitespace-nowrap ml-1"
+                              title="Mô phỏng: Giao hàng thất bại"
+                            >
+                              Giao thất bại
+                            </button>
+                          </>
+                        )}
+                        {order.status === 'shipping_failed' && (
+                          <button 
+                            onClick={() => handleStatusChange(order.id, 'shipping')}
+                            className="text-[10px] font-extrabold text-[#39B8FF] hover:underline px-2 py-1 bg-[#39B8FF]/5 rounded-lg border border-[#39B8FF]/10 transition-all hover:bg-[#39B8FF]/10 active:scale-95 whitespace-nowrap"
+                            title="Mô phỏng: Giao hàng lại lần tiếp theo"
+                          >
+                            Giao lại
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -303,6 +446,34 @@ export default function AdminOrders() {
           </div>
         </div>
       </div>
+
+      {/* Custom Confirm Cancel Modal */}
+      {cancelModal.isOpen && (
+        <div className="fixed inset-0 bg-[#2B3674]/40 backdrop-blur-sm flex items-center justify-center z-[9999] animate-in fade-in duration-200">
+          <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-2xl border border-[#E0E5F2] w-full max-w-sm mx-4 transform transition-all scale-100 animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold text-[#2B3674] mb-2 flex items-center gap-2">
+              ⚠️ Xác nhận hủy đơn hàng
+            </h3>
+            <p className="text-sm text-[#A3AED0] font-medium mb-6">
+              Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này sẽ cập nhật lại trạng thái và thực hiện hoàn lại hàng vào kho.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setCancelModal({ isOpen: false, orderId: null, newStatus: null })}
+                className="px-5 py-2.5 bg-[#F4F7FE] text-[#A3AED0] font-bold rounded-xl text-xs hover:bg-[#E0E5F2] transition-colors"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={confirmCancelOrder}
+                className="px-5 py-2.5 bg-[#EE5D50] text-[#FFFFFF] font-bold rounded-xl text-xs hover:bg-[#EE5D50]/90 transition-colors shadow-lg shadow-[#EE5D50]/20"
+              >
+                Đồng ý hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
