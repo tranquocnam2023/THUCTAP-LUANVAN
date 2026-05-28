@@ -27,10 +27,10 @@ export default function Footer() {
         {/* Col 2 */}
         <div className="flex flex-col space-y-3">
           <h3 className="font-bold text-gray-800 uppercase mb-2">Thông tin công ty</h3>
-          <a href="#" className="hover:text-primary transition">Giới thiệu công ty (MWG)</a>
-          <a href="#" className="hover:text-primary transition">Tuyển dụng</a>
-          <a href="#" className="hover:text-primary transition">Gửi góp ý, khiếu nại</a>
-          <a href="#" className="hover:text-primary transition">Tìm siêu thị (3.300+ shop)</a>
+          <a href="https://mwg.vn" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">Giới thiệu công ty (MWG)</a>
+          <a href="https://vieclam.thegioididong.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">Tuyển dụng</a>
+          <a href="https://www.thegioididong.com/lien-he" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">Gửi góp ý, khiếu nại</a>
+          <a href="https://www.thegioididong.com/he-thong-sieu-thi-the-gioi-di-dong" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">Tìm siêu thị (3.300+ shop)</a>
           <Link to="/donate" className="hover:text-primary text-xs transition">Donate cho thằng thiết kế Frontend</Link>
         </div>
 
