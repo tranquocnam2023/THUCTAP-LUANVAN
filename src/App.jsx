@@ -17,6 +17,7 @@ import DonatePage from './page/DonatePage';
 import ProductDetailPage from './page/ProductDetailPage';
 import PolicyPage from './page/PolicyPage';
 import CheckoutPage from './page/CheckoutPage';
+import OrderTrackingPage from './page/OrderTrackingPage';
 
 
 
@@ -62,8 +63,7 @@ function App() {
               <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/chinh-sach/:type" element={<PolicyPage />} />
               <Route path="/danh-muc/:brand" element={<HomePage />} />
-
-
+              <Route path="/track" element={<OrderTrackingPage />} />
             </Routes>
           </main>
         </div>

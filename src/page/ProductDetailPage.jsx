@@ -1,9 +1,11 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { productService } from '../services/productService';
+import api from '../services/api';
+import { Check, X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const THEME = {
   primary: '#288ad6',
@@ -15,22 +17,79 @@ const THEME = {
   textGray: '#6c757d'
 };
 
+// Hàm phụ trợ phân loại màu sang mã HEX tương đương
+const getHexForColor = (colorName) => {
+  const c = colorName.toLowerCase();
+  if (c.includes('đen') || c.includes('black')) return '#1a1a1a';
+  if (c.includes('titan') || c.includes('xám') || c.includes('gray')) return '#bebebe';
+  if (c.includes('xanh') || c.includes('blue')) return '#4682b4';
+  if (c.includes('trắng') || c.includes('white')) return '#f8f9fa';
+  if (c.includes('vàng') || c.includes('gold')) return '#ffd700';
+  if (c.includes('đỏ') || c.includes('red')) return '#e63946';
+  if (c.includes('hồng') || c.includes('pink')) return '#ffb6c1';
+  return '#bebebe'; // Mặc định là titan/xám
+};
+
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [activeTab, setActiveTab] = useState('specs');
-  const [selectedStorage, setSelectedStorage] = useState('');
-  const [selectedColor, setSelectedColor] = useState('Đen bóng');
   const [loading, setLoading] = useState(true);
 
+  // States chọn biến thể
+  const [selectedStorage, setSelectedStorage] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [variants, setVariants] = useState([]);
+
+  // States Thư viện hình ảnh động
+  const [activeImage, setActiveImage] = useState('');
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [isFading, setIsFading] = useState(false);
+
+  // States Lightbox popup "Xem hình thực tế"
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxActiveIndex, setLightboxActiveIndex] = useState(0);
+
+  // Phân tách ảnh chung (Master Images)
+  const getMasterImages = (prod) => {
+    if (!prod) return [];
+    let list = [];
+    try {
+      if (prod.images) {
+        if (Array.isArray(prod.images)) {
+          list = prod.images;
+        } else if (typeof prod.images === 'string') {
+          if (prod.images.trim().startsWith('[')) {
+            list = JSON.parse(prod.images);
+          } else {
+            list = prod.images.split(',').map(img => img.trim());
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Lỗi phân tách ảnh sản phẩm:", e);
+    }
+
+    if (list.length === 0) {
+      list = [prod.image || prod.thumbnailImage || prod.mainImage];
+    }
+
+    // Đảm bảo dải thumbnail có tối thiểu 4 hình ảnh phong phú
+    const baseImg = prod.image || prod.thumbnailImage || prod.mainImage;
+    while (list.length < 4) {
+      list.push(baseImg);
+    }
+    return list;
+  };
+
+  // Tải dữ liệu Product & danh sách Variants
   useEffect(() => {
     setLoading(true);
     productService.getById(id)
-      .then(data => {
+      .then(async (data) => {
         if (data) {
-          // Chuẩn hóa dữ liệu API
           const normalized = {
             ...data,
             price: data.price || data.basePrice || 0,
@@ -38,30 +97,227 @@ export default function ProductDetailPage() {
             stockQuantity: data.availableStock ?? data.totalStock ?? data.stockQuantity ?? data.stock ?? 0
           };
           setProduct(normalized);
+          setActiveImage(normalized.image);
+
+          // Lấy dải ảnh mặc định (Ảnh chung)
+          const masterImgs = getMasterImages(normalized);
+          setGalleryImages(masterImgs);
+
+          // Gọi API tải danh sách biến thể
+          try {
+            const vData = await api.get(`/ProductVariant?productId=${data.id}`);
+            if (Array.isArray(vData)) {
+              setVariants(vData);
+            }
+          } catch (vErr) {
+            console.error("Lỗi lấy danh sách biến thể:", vErr);
+          }
+        } else {
+          const localData = productsData.find((p) => p.id === parseInt(id));
+          setProduct(localData);
+          if (localData) {
+            setActiveImage(localData.image);
+            setGalleryImages(getMasterImages(localData));
+          }
         }
-        else setProduct(productsData.find((p) => p.id === parseInt(id)));
       })
       .catch(() => {
-        setProduct(productsData.find((p) => p.id === parseInt(id)));
+        const localData = productsData.find((p) => p.id === parseInt(id));
+        setProduct(localData);
+        if (localData) {
+          setActiveImage(localData.image);
+          setGalleryImages(getMasterImages(localData));
+        }
       })
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleAddToCart = () => {
-    if (product) {
-      addToCart({
-        ...product,
-        selectedStorage,
-        selectedColor
+  // Cuộn trang lên đầu khi tải xong
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [product]);
+
+  // Trích xuất các tuỳ chọn màu sắc động từ các biến thể (variants) của API
+  const colorVariants = React.useMemo(() => {
+    if (variants.length === 0) {
+      return [
+        { name: 'Đen bóng', hex: '#1a1a1a' },
+        { name: 'Titan Tự nhiên', hex: '#bebebe' },
+        { name: 'Xanh dương', hex: '#4682b4' },
+        { name: 'Trắng Pearl', hex: '#f8f9fa' }
+      ];
+    }
+    
+    const extracted = [];
+    const colorsSeen = new Set();
+    
+    variants.forEach(v => {
+      if (v.name) {
+        const parts = v.name.split(' - ');
+        const colorName = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+        
+        // Loại bỏ trường hợp trùng bộ nhớ
+        const isStorage = /^\d+(GB|TB)$/i.test(colorName);
+        if (!isStorage && !colorsSeen.has(colorName) && colorName !== 'Mặc định') {
+          colorsSeen.add(colorName);
+          extracted.push({
+            name: colorName,
+            hex: getHexForColor(colorName)
+          });
+        }
+      }
+    });
+
+    return extracted.length > 0 ? extracted : [
+      { name: 'Đen bóng', hex: '#1a1a1a' },
+      { name: 'Titan Tự nhiên', hex: '#bebebe' },
+      { name: 'Xanh dương', hex: '#4682b4' },
+      { name: 'Trắng Pearl', hex: '#f8f9fa' }
+    ];
+  }, [variants]);
+
+  // Trích xuất các tuỳ chọn dung lượng động từ variants
+  const storageVariants = React.useMemo(() => {
+    if (variants.length === 0) {
+      return ['128GB', '256GB', '512GB', '1TB'];
+    }
+    const storages = new Set();
+    variants.forEach(v => {
+      if (v.name) {
+        const parts = v.name.split(' - ');
+        const storagePart = parts.length > 1 ? parts[0].trim() : '';
+        if (/^\d+(GB|TB)$/i.test(storagePart)) {
+          storages.add(storagePart);
+        }
+      }
+    });
+    return storages.size > 0 ? Array.from(storages) : ['128GB', '256GB', '512GB', '1TB'];
+  }, [variants]);
+
+  // Tính toán Giá và Tồn kho hiển thị thời gian thực theo biến thể
+  const displayDetails = React.useMemo(() => {
+    if (!product) return { price: 0, originalPrice: 0, stock: 0 };
+    
+    if (selectedColor) {
+      // Tìm variant khớp màu sắc (và dung lượng nếu có chọn)
+      const matched = variants.find(v => {
+        const nameLower = v.name.toLowerCase();
+        const matchesColor = nameLower.includes(selectedColor.toLowerCase());
+        const matchesStorage = selectedStorage ? nameLower.includes(selectedStorage.toLowerCase()) : true;
+        return matchesColor && matchesStorage;
       });
-      alert('Đã thêm sản phẩm vào giỏ hàng!');
+      
+      if (matched) {
+        return {
+          price: matched.price,
+          originalPrice: matched.price * 1.12, 
+          stock: matched.totalStock - matched.reservedStock
+        };
+      }
+    }
+    
+    return {
+      price: product.price,
+      originalPrice: product.originalPrice || (product.price * 1.1),
+      stock: product.stockQuantity
+    };
+  }, [product, selectedColor, selectedStorage, variants]);
+
+  // Xử lý chọn màu sắc & Hủy chọn (Deselect)
+  const handleColorClick = (colorName) => {
+    // 1. Trường hợp click lại màu đang chọn -> HỦY CHỌN (Deselect)
+    if (selectedColor === colorName) {
+      setIsFading(true);
+      setTimeout(() => {
+        setSelectedColor('');
+        setActiveImage(product.image);
+        
+        // Reset dải ảnh thumbnail về bộ ảnh chung
+        const masterImgs = getMasterImages(product);
+        setGalleryImages(masterImgs);
+        setIsFading(false);
+      }, 150);
+      return;
+    }
+
+    // 2. Chọn màu mới
+    setIsFading(true);
+    setTimeout(() => {
+      setSelectedColor(colorName);
+      
+      // Tìm hình ảnh của màu sắc biến thể vừa chọn
+      const matchedVariant = variants.find(v => 
+        v.name && v.name.toLowerCase().includes(colorName.toLowerCase())
+      );
+      
+      if (matchedVariant && matchedVariant.imageId) {
+        const varImg = matchedVariant.imageId;
+        setActiveImage(varImg);
+        
+        // Cập nhật thư viện ảnh: ảnh biến thể đưa lên đầu, kèm theo ảnh chung
+        const masterImgs = getMasterImages(product);
+        setGalleryImages([varImg, ...masterImgs.slice(1)]);
+      } else {
+        setActiveImage(product.image);
+        setGalleryImages(getMasterImages(product));
+      }
+      setIsFading(false);
+    }, 150);
+  };
+
+  // Xử lý chọn dung lượng & Hủy chọn
+  const handleStorageClick = (storage) => {
+    if (selectedStorage === storage) {
+      setSelectedStorage('');
+    } else {
+      setSelectedStorage(storage);
     }
   };
 
-  const handleBuyNow = () => {
+  // Nhấp ảnh thumbnail để xem
+  const handleThumbnailClick = (img) => {
+    setIsFading(true);
+    setTimeout(() => {
+      setActiveImage(img);
+      setIsFading(false);
+    }, 120);
+  };
+
+  // Thêm vào giỏ hàng
+  const handleAddToCart = () => {
+    if (!selectedColor) {
+      alert('Vui lòng chọn màu sắc trước khi thêm vào giỏ hàng!');
+      return;
+    }
+    if (!selectedStorage) {
+      alert('Vui lòng chọn dung lượng trước khi thêm vào giỏ hàng!');
+      return;
+    }
     if (product) {
       addToCart({
         ...product,
+        price: displayDetails.price, // Cập nhật đúng giá của biến thể đã chọn
+        selectedStorage,
+        selectedColor
+      });
+      alert('Đã thêm sản phẩm vào giỏ hàng thành công!');
+    }
+  };
+
+  // Mua ngay
+  const handleBuyNow = () => {
+    if (!selectedColor) {
+      alert('Vui lòng chọn màu sắc trước khi tiến hành đặt hàng!');
+      return;
+    }
+    if (!selectedStorage) {
+      alert('Vui lòng chọn dung lượng trước khi tiến hành đặt hàng!');
+      return;
+    }
+    if (product) {
+      addToCart({
+        ...product,
+        price: displayDetails.price,
         selectedStorage,
         selectedColor
       });
@@ -69,49 +325,22 @@ export default function ProductDetailPage() {
     }
   };
 
-  useEffect(() => {
-    if (product && product.specs) {
-      setSelectedStorage(product.specs[3] || 'Standard');
-    }
-    window.scrollTo(0, 0);
-  }, [product]);
+  // Lightbox navigation
+  const handleLightboxPrev = () => {
+    setLightboxActiveIndex(prev => (prev === 0 ? galleryImages.length - 1 : prev - 1));
+  };
+
+  const handleLightboxNext = () => {
+    setLightboxActiveIndex(prev => (prev === galleryImages.length - 1 ? 0 : prev + 1));
+  };
 
   if (loading) return <div className="py-20 text-center font-bold text-gray-500">Đang tải thông tin sản phẩm...</div>;
-
-  if (!product) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 min-h-[60vh]">
-        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-gray-400">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Sản phẩm không tồn tại</h2>
-        <p className="text-gray-500 mb-6 text-center max-w-xs">Có vẻ như sản phẩm này đã ngừng kinh doanh hoặc đường dẫn không chính xác.</p>
-        <Link
-          to="/"
-          className="px-8 py-3 rounded-full font-bold transition-all transform active:scale-95 shadow-lg"
-          style={{ backgroundColor: THEME.primary, color: '#fff' }}
-        >
-          Quay lại trang chủ
-        </Link>
-      </div>
-    );
-  }
+  if (!product) return <div className="py-20 text-center font-bold text-red-500">Sản phẩm không tồn tại.</div>;
 
   const breadcrumbItems = [
     { label: 'Điện thoại', link: '/' },
     { label: product.brand || 'Thương hiệu', link: `/danh-muc/${(product.brand || '').toLowerCase()}` },
     { label: product.name }
-  ];
-
-  // Variants
-  const storageVariants = ['128GB', '256GB', '512GB', '1TB'];
-  const colorVariants = [
-    { name: 'Đen bóng', hex: '#1a1a1a' },
-    { name: 'Titan Tự nhiên', hex: '#bebebe' },
-    { name: 'Xanh dương', hex: '#4682b4' },
-    { name: 'Trắng Pearl', hex: '#f8f9fa' }
   ];
 
   const promotions = [
@@ -126,7 +355,7 @@ export default function ProductDetailPage() {
       <div className="max-w-7xl mx-auto px-4 w-full">
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Header Section */}
+        {/* Tiêu đề sản phẩm */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 pb-6 mb-8 mt-4 gap-4">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">{product.name}</h1>
@@ -142,63 +371,81 @@ export default function ProductDetailPage() {
               <span className="text-sm text-gray-400">|</span>
               <span className="text-sm text-blue-600 font-bold">52 hỏi đáp</span>
               <span className="text-sm text-gray-400">|</span>
-              <span className={`text-sm font-bold ${product.stockQuantity > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                {product.stockQuantity > 0 ? `Còn ${product.stockQuantity} sản phẩm` : 'Hết hàng'}
+              <span className={`text-sm font-bold ${displayDetails.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {displayDetails.stock > 0 ? `Còn ${displayDetails.stock} sản phẩm` : 'Hết hàng'}
               </span>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="p-2.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-600">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
-              </svg>
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all font-bold text-sm text-gray-600">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-              </svg>
-              So sánh
-            </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Visuals & Content */}
-          <div className="lg:col-span-7 space-y-10">
-            {/* Gallery Section */}
-            <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm flex flex-col items-center">
-              <div className="relative w-full aspect-square max-w-[450px] mb-8">
-                <img src={product.image} alt={product.name} className="w-full h-full object-contain drop-shadow-2xl" />
+          {/* CỘT TRÁI: THƯ VIỆN ẢNH ĐỘNG (Ảnh chính + Thumbnails + Lightbox) */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-white rounded-[3rem] border border-gray-100 p-8 shadow-sm flex flex-col items-center relative">
+              {/* Khung ảnh chính có hiệu ứng fade-in mượt mà */}
+              <div className="relative w-full aspect-square max-w-[420px] mb-6 flex items-center justify-center overflow-hidden">
+                <img 
+                  src={activeImage} 
+                  alt={product.name} 
+                  className={`max-w-full max-h-full object-contain drop-shadow-2xl transition-all duration-200 transform ${
+                    isFading ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
+                  }`}
+                />
+                
                 {product.discount && (
-                  <div className="absolute top-0 right-0 bg-red-600 text-white font-black text-xl px-4 py-2 rounded-2xl shadow-xl transform rotate-3">
+                  <div className="absolute top-0 right-0 bg-red-600 text-white font-black text-base px-3.5 py-1.5 rounded-2xl shadow-xl transform rotate-3 z-10">
                     -{product.discount}%
                   </div>
                 )}
               </div>
-              <div className="flex gap-4 overflow-x-auto w-full pb-4 scroll-smooth">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex-shrink-0 w-20 h-20 rounded-2xl border-2 border-gray-100 p-2 cursor-pointer hover:border-blue-500 transition-all">
-                    <img src={product.image} className="w-full h-full object-contain" />
-                  </div>
-                ))}
+
+              {/* Dải ảnh nhỏ bên dưới */}
+              <div className="w-full space-y-4">
+                <div className="flex gap-3 overflow-x-auto w-full py-2 justify-center scroll-smooth">
+                  {galleryImages.map((img, idx) => (
+                    <div 
+                      key={idx} 
+                      onClick={() => handleThumbnailClick(img)}
+                      className={`flex-shrink-0 w-16 h-16 rounded-2xl border-2 p-1.5 cursor-pointer bg-white transition-all hover:scale-105 active:scale-95 ${
+                        activeImage === img 
+                          ? 'border-blue-500 ring-2 ring-blue-50' 
+                          : 'border-gray-100 hover:border-blue-200'
+                      }`}
+                    >
+                      <img src={img} className="w-full h-full object-contain" alt="" />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Nút Xem hình thực tế (Lightbox) */}
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => {
+                      setLightboxActiveIndex(galleryImages.indexOf(activeImage) !== -1 ? galleryImages.indexOf(activeImage) : 0);
+                      setIsLightboxOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 hover:border-blue-500 hover:text-blue-600 text-gray-500 rounded-full text-xs font-black transition-colors"
+                  >
+                    <Maximize2 size={13} />
+                    <span>Xem hình thực tế {selectedColor && `màu ${selectedColor}`}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Content Tabs */}
+            {/* Content Tabs (Specs / Info) */}
             <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
               <div className="flex border-b border-gray-100 bg-gray-50/50">
                 <button
                   onClick={() => setActiveTab('specs')}
-                  className={`flex-1 py-4 font-bold text-sm transition-all relative ${activeTab === 'specs' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
-                    }`}
+                  className={`flex-1 py-4 font-bold text-xs transition-all relative tracking-wider ${activeTab === 'specs' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   ĐẶC ĐIỂM NỔI BẬT
                   {activeTab === 'specs' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-600 rounded-t-full"></div>}
                 </button>
                 <button
                   onClick={() => setActiveTab('info')}
-                  className={`flex-1 py-4 font-bold text-sm transition-all relative ${activeTab === 'info' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
-                    }`}
+                  className={`flex-1 py-4 font-bold text-xs transition-all relative tracking-wider ${activeTab === 'info' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   THÔNG SỐ KỸ THUẬT
                   {activeTab === 'info' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-600 rounded-t-full"></div>}
@@ -208,20 +455,20 @@ export default function ProductDetailPage() {
               <div className="p-8">
                 {activeTab === 'specs' ? (
                   <div className="prose prose-blue max-w-none animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <h3 className="text-2xl font-black text-gray-800 mb-6">Trải nghiệm đẳng cấp cùng {product.name}</h3>
-                    <p className="text-gray-600 leading-relaxed text-lg">
+                    <h3 className="text-xl font-black text-gray-800 mb-4">Trải nghiệm đẳng cấp cùng {product.name}</h3>
+                    <p className="text-gray-600 leading-relaxed text-sm">
                       Sản phẩm mang đến sự đột phá về mặt hiệu năng với con chip thế hệ mới nhất,
                       kết hợp cùng hệ thống camera chuyên nghiệp giúp bạn bắt trọn mọi khoảnh khắc.
                       Thiết kế titan siêu bền và nhẹ tạo nên vẻ ngoài sang trọng bậc nhất.
                     </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
-                      <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                        <h4 className="font-bold text-blue-700 mb-2">Màn hình sống động</h4>
-                        <p className="text-sm text-gray-600">Công nghệ LTPO giúp tiết kiệm pin tối đa trong khi vẫn đảm bảo tần số quét 120Hz mượt mà.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                      <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                        <h4 className="font-bold text-blue-700 mb-2 text-sm">Màn hình sống động</h4>
+                        <p className="text-xs text-gray-600">Công nghệ LTPO giúp tiết kiệm pin tối đa trong khi vẫn đảm bảo tần số quét 120Hz mượt mà.</p>
                       </div>
-                      <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                        <h4 className="font-bold text-blue-700 mb-2">Pin ấn tượng</h4>
-                        <p className="text-sm text-gray-600">Thời lượng sử dụng lên đến 30 giờ phát video liên tục, hỗ trợ sạc siêu nhanh.</p>
+                      <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                        <h4 className="font-bold text-blue-700 mb-2 text-sm">Pin ấn tượng</h4>
+                        <p className="text-xs text-gray-600">Thời lượng sử dụng lên đến 30 giờ phát video liên tục, hỗ trợ sạc siêu nhanh.</p>
                       </div>
                     </div>
                   </div>
@@ -240,8 +487,8 @@ export default function ProductDetailPage() {
                           { label: 'Dung lượng pin', value: '4422 mAh' }
                         ].map((row, idx) => (
                           <tr key={idx} className="group">
-                            <td className="py-4 font-bold text-gray-500 w-1/3 group-hover:text-blue-600 transition-colors">{row.label}</td>
-                            <td className="py-4 text-gray-800 font-semibold">{row.value}</td>
+                            <td className="py-3.5 font-bold text-gray-500 w-1/3 group-hover:text-blue-600 transition-colors text-xs">{row.label}</td>
+                            <td className="py-3.5 text-gray-800 font-semibold text-xs">{row.value}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -252,76 +499,92 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Right Column: Buying Section */}
+          {/* CỘT PHẢI: KHU VỰC CHỌN BIẾN THỂ & ĐẶT MUA */}
           <div className="lg:col-span-5 space-y-8">
             <div className="sticky top-10 space-y-6">
-              {/* Selection Card */}
-              <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-xl shadow-gray-100 space-y-8">
-                {/* Variants */}
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Dung lượng:</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {storageVariants.map((storage) => (
+              <div className="bg-white rounded-[3rem] border border-gray-100 p-8 shadow-xl shadow-gray-100 space-y-8">
+                {/* 1. Chọn Dung lượng */}
+                <div>
+                  <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Dung lượng:</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {storageVariants.map((storage) => {
+                      const isSelected = selectedStorage === storage;
+                      return (
                         <button
                           key={storage}
-                          onClick={() => setSelectedStorage(storage)}
-                          className={`py-3 rounded-2xl border-2 font-black transition-all ${selectedStorage === storage || (product.specs?.[3] && product.specs[3].includes(storage))
+                          type="button"
+                          onClick={() => handleStorageClick(storage)}
+                          className={`py-3 rounded-2xl border-2 font-black transition-all ${
+                            isSelected
                               ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-md transform scale-[1.02]'
                               : 'border-gray-100 text-gray-500 hover:border-blue-200'
-                            }`}
+                          }`}
                         >
                           {storage}
                         </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Màu sắc:</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {colorVariants.map((color) => (
-                        <button
-                          key={color.name}
-                          onClick={() => setSelectedColor(color.name)}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 font-bold transition-all ${selectedColor === color.name
-                              ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-md transform scale-[1.02]'
-                              : 'border-gray-100 text-gray-500 hover:border-blue-200'
-                            }`}
-                        >
-                          <div className="w-5 h-5 rounded-full border border-black/10 shadow-inner" style={{ backgroundColor: color.hex }}></div>
-                          <span className="text-xs">{color.name}</span>
-                        </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* Pricing */}
+                {/* 2. Chọn Màu sắc: Vòng tròn màu HEX (HEX pickingcolor) */}
+                <div>
+                  <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Màu sắc:</h4>
+                  <div className="flex flex-wrap items-center gap-5">
+                    {colorVariants.map((color) => {
+                      const isSelected = selectedColor === color.name;
+                      return (
+                        <div key={color.name} className="flex flex-col items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleColorClick(color.name)}
+                            className={`w-11 h-11 rounded-full border-2 transition-all shadow-sm hover:scale-105 active:scale-95 flex items-center justify-center ${
+                              isSelected 
+                                ? 'border-blue-600 ring-4 ring-blue-100 scale-105 shadow-md' 
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            style={{ backgroundColor: color.hex }}
+                            title={color.name}
+                          >
+                            {isSelected && (
+                              <Check 
+                                size={16} 
+                                className={color.hex === '#f8f9fa' ? 'text-gray-800 stroke-[3.5]' : 'text-white stroke-[3.5]'} 
+                              />
+                            )}
+                          </button>
+                          <span className="text-[10px] font-bold text-gray-500 tracking-tight">{color.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Hiển thị Giá và Tồn kho động */}
                 <div className="bg-gray-50 rounded-3xl p-6 space-y-2 border border-gray-100">
                   <div className="flex items-baseline flex-wrap gap-3">
-                    <span className="text-4xl font-black text-red-600">
-                      {product.price.toLocaleString('vi-VN')}₫
+                    <span className="text-3xl font-black text-red-600">
+                      {displayDetails.price.toLocaleString('vi-VN')}₫
                     </span>
-                    {product.originalPrice && (
-                      <span className="text-lg text-gray-400 line-through">
-                        {product.originalPrice.toLocaleString('vi-VN')}₫
+                    {displayDetails.originalPrice && (
+                      <span className="text-sm text-gray-400 line-through">
+                        {displayDetails.originalPrice.toLocaleString('vi-VN')}₫
                       </span>
                     )}
                   </div>
                   <div className="flex items-center flex-wrap gap-2">
-                    {product.originalPrice > product.price && (
-                      <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-lg uppercase whitespace-nowrap">
-                        TIẾT KIỆM {((product.originalPrice - product.price) || 0).toLocaleString('vi-VN')}₫
+                    {displayDetails.originalPrice > displayDetails.price && (
+                      <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-lg uppercase whitespace-nowrap">
+                        TIẾT KIỆM {((displayDetails.originalPrice - displayDetails.price) || 0).toLocaleString('vi-VN')}₫
                       </span>
                     )}
-                    <span className={`text-xs font-bold italic ${product.stockQuantity > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                      {product.stockQuantity > 0 ? `Sẵn hàng (Còn ${product.stockQuantity} máy)` : 'Tạm hết hàng'}
+                    <span className={`text-xs font-bold italic ${displayDetails.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {displayDetails.stock > 0 ? `Sẵn hàng (Còn ${displayDetails.stock} máy)` : 'Tạm hết hàng'}
                     </span>
                   </div>
                 </div>
 
-                {/* Promotions */}
+                {/* Khuyến mãi */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-black text-gray-800 uppercase tracking-widest flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500">
@@ -342,23 +605,23 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* CTAs */}
-                <div className="space-y-4 pt-4">
+                <div className="space-y-4 pt-2">
                   <button
                     onClick={handleBuyNow}
-                    disabled={product.stockQuantity === 0}
-                    className={`w-full bg-gradient-to-r ${product.stockQuantity > 0 ? 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800' : 'from-gray-400 to-gray-500 cursor-not-allowed'} text-white font-black py-5 rounded-3xl text-2xl uppercase shadow-2xl transition-all transform active:scale-95 flex flex-col items-center`}
+                    disabled={displayDetails.stock === 0}
+                    className={`w-full bg-gradient-to-r ${displayDetails.stock > 0 ? 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800' : 'from-gray-400 to-gray-500 cursor-not-allowed'} text-white font-black py-4.5 rounded-[2rem] text-xl uppercase shadow-2xl transition-all transform active:scale-95 flex flex-col items-center`}
                   >
-                    {product.stockQuantity > 0 ? 'MUA NGAY' : 'HẾT HÀNG'}
-                    <span className="text-[11px] font-bold opacity-80 normal-case mt-1">
-                      {product.stockQuantity > 0 ? '(Giao tận nơi hoặc nhận tại siêu thị)' : '(Vui lòng quay lại sau)'}
+                    {displayDetails.stock > 0 ? 'MUA NGAY' : 'HẾT HÀNG'}
+                    <span className="text-[10px] font-bold opacity-80 normal-case mt-0.5">
+                      {displayDetails.stock > 0 ? '(Giao tận nơi hoặc nhận tại siêu thị)' : '(Vui lòng quay lại sau)'}
                     </span>
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    disabled={product.stockQuantity === 0}
-                    className={`w-full border-2 ${product.stockQuantity > 0 ? 'border-blue-600 text-blue-600 hover:bg-blue-50' : 'border-gray-300 text-gray-400 cursor-not-allowed'} font-black py-4 rounded-3xl text-lg uppercase transition-all flex items-center justify-center gap-2`}
+                    disabled={displayDetails.stock === 0}
+                    className={`w-full border-2 ${displayDetails.stock > 0 ? 'border-blue-600 text-blue-600 hover:bg-blue-50' : 'border-gray-300 text-gray-400 cursor-not-allowed'} font-black py-3.5 rounded-[2rem] text-md uppercase transition-all flex items-center justify-center gap-2`}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                     </svg>
                     THÊM VÀO GIỎ HÀNG
@@ -366,7 +629,7 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Store Info */}
+              {/* Siêu thị gần bạn */}
               <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-600">
@@ -377,7 +640,7 @@ export default function ProductDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Hỗ trợ nhanh</p>
-                    <p className="text-lg font-black text-gray-800">Tìm siêu thị gần bạn</p>
+                    <p className="text-base font-black text-gray-800">Tìm siêu thị gần bạn</p>
                   </div>
                 </div>
               </div>
@@ -385,6 +648,78 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* POPUP LIGHTBOX "XEM HÌNH THỰC TẾ" (Fullscreen Carousel Modal) */}
+      {isLightboxOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 md:p-6 animate-in fade-in duration-300"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Header Lightbox */}
+          <div className="flex items-center justify-between text-white py-2 shrink-0">
+            <span className="font-bold text-xs uppercase tracking-widest text-gray-400">
+              Hình thực tế {selectedColor ? `màu ${selectedColor}` : 'sản phẩm'} ({lightboxActiveIndex + 1}/{galleryImages.length})
+            </span>
+            <button 
+              onClick={() => setIsLightboxOpen(false)}
+              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors focus:outline-none"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Main Content: Carousel Container */}
+          <div className="flex-1 flex items-center justify-between relative max-h-[70vh] md:max-h-[75vh]">
+            {/* Button Prev */}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleLightboxPrev(); }}
+              className="absolute left-2 md:left-4 z-10 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors focus:outline-none"
+            >
+              <ChevronLeft size={24} strokeWidth={2.5} />
+            </button>
+
+            {/* Large Active Image wrapper */}
+            <div 
+              className="w-full h-full flex items-center justify-center px-12 md:px-20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={galleryImages[lightboxActiveIndex]} 
+                alt="" 
+                className="max-w-full max-h-full object-contain rounded-lg drop-shadow-2xl animate-in zoom-in-95 duration-200"
+              />
+            </div>
+
+            {/* Button Next */}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleLightboxNext(); }}
+              className="absolute right-2 md:right-4 z-10 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors focus:outline-none"
+            >
+              <ChevronRight size={24} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {/* Bottom strip: Thumbnails carousel scroll */}
+          <div 
+            className="py-4 border-t border-white/10 shrink-0 w-full flex justify-center gap-3 overflow-x-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {galleryImages.map((img, idx) => (
+              <div 
+                key={idx}
+                onClick={() => setLightboxActiveIndex(idx)}
+                className={`w-14 h-14 rounded-xl p-1 bg-white cursor-pointer transition-all ${
+                  lightboxActiveIndex === idx 
+                    ? 'ring-4 ring-blue-500 opacity-100 scale-105' 
+                    : 'opacity-50 hover:opacity-80'
+                }`}
+              >
+                <img src={img} className="w-full h-full object-contain rounded" alt="" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -91,6 +91,14 @@ export default function Header() {
 
         {/* Right Icons: Orders, Cart, Account */}
         <div className="flex items-center space-x-3 text-xs shrink-0">
+            <Link 
+              to="/track" 
+              className="flex items-center px-3 py-2 rounded transition text-center hover:bg-white/20 font-bold"
+              style={{ color: THEME.textLight }}
+            >
+              Tra cứu<br/>đơn hàng
+            </Link>
+
             {isLoggedIn ? (
               <div className="flex items-center px-3 py-1 rounded bg-white/10 gap-3">
                  <div className="flex flex-col items-end">
