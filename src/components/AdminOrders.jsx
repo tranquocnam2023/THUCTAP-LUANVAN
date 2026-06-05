@@ -47,6 +47,7 @@ export default function AdminOrders() {
               payment: order.status === 'Confirmed' || order.status === 'Delivered' || order.status === 'confirmed' || order.status === 'delivered' ? 'Đã thanh toán' : 'Chờ thanh toán',
               amount: order.totalPrice,
               status: order.status?.toLowerCase() || 'pending',
+              failedDeliveryCount: order.failedDeliveryCount || 0,
               items: order.items || []
             }));
             console.log("AdminOrders: Mapped orders:", mappedOrders);
@@ -137,7 +138,7 @@ export default function AdminOrders() {
     }
   };
 
-  const isTransitionAllowed = (currentStatus, newStatus) => {
+  const isTransitionAllowed = (currentStatus, newStatus, failedCount = 0) => {
     if (currentStatus === newStatus) return true;
     if (currentStatus === 'cancelled' || currentStatus === 'delivered') return false;
 
@@ -153,8 +154,8 @@ export default function AdminOrders() {
       return newStatus === 'delivered' || newStatus === 'shipping_failed';
     }
     if (currentStatus === 'shipping_failed') {
-      // Giao thất bại có thể hủy đơn (cancelled) hoặc giao lại (shipping)
-      return newStatus === 'cancelled' || newStatus === 'shipping';
+      // Giao thất bại có thể hủy đơn (cancelled - chỉ khi failedCount >= 3) hoặc giao lại (shipping)
+      return newStatus === 'shipping' || (newStatus === 'cancelled' && failedCount >= 3);
     }
     return false;
   };
@@ -166,8 +167,12 @@ export default function AdminOrders() {
     const currentStatus = order.status;
 
     // Kiểm tra tính hợp lệ của luồng chuyển đổi trạng thái
-    if (!isTransitionAllowed(currentStatus, newStatus)) {
-      alert(`⚠️ Không thể chuyển đổi trạng thái từ "${getStatusName(currentStatus)}" sang "${getStatusName(newStatus)}"!`);
+    if (!isTransitionAllowed(currentStatus, newStatus, order.failedDeliveryCount)) {
+      if (newStatus === 'cancelled' && (currentStatus === 'shipping' || currentStatus === 'shipping_failed')) {
+        alert(`⚠️ Đơn hàng giao thất bại mới được ${order.failedDeliveryCount}/3 lần. Phải giao thất bại đủ 3 lần mới được hủy đơn!`);
+      } else {
+        alert(`⚠️ Không thể chuyển đổi trạng thái từ "${getStatusName(currentStatus)}" sang "${getStatusName(newStatus)}"!`);
+      }
       return;
     }
 
@@ -191,14 +196,25 @@ export default function AdminOrders() {
     }
 
     orderService.updateStatus(orderId, newStatus)
-      .then(() => {
+      .then((res) => {
         alert(`Cập nhật trạng thái đơn hàng thành công!${stockMessage}`);
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+        const data = res?.data || res;
+        const nextFailedCount = (data && typeof data.failedDeliveryCount === 'number') 
+          ? data.failedDeliveryCount 
+          : (newStatus === 'shipping_failed' 
+            ? (orders.find(o => o.id === orderId)?.failedDeliveryCount || 0) + 1 
+            : (orders.find(o => o.id === orderId)?.failedDeliveryCount || 0));
+
+        setOrders(prev => prev.map(o => o.id === orderId ? { 
+          ...o, 
+          status: newStatus,
+          failedDeliveryCount: nextFailedCount
+        } : o));
       })
       .catch(err => {
         console.error("Lỗi cập nhật trạng thái đơn hàng:", err);
-        alert(`Cập nhật trạng thái đơn hàng thành công!${stockMessage}`);
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+        const errorMsg = err.response?.data?.message || err.response?.data || err.message;
+        alert(`Cập nhật trạng thái đơn hàng thất bại: ${errorMsg}`);
       });
   };
 
@@ -342,12 +358,12 @@ export default function AdminOrders() {
                         <select 
                           className="text-xs font-bold bg-[#F4F7FE] text-[#2B3674] rounded-xl px-3 py-2 border-none focus:outline-none focus:ring-1 focus:ring-[#4318FF] cursor-pointer hover:bg-[#E0E5F2] transition-all disabled:opacity-75 disabled:cursor-not-allowed"
                           value={getOrderStatus(order.status)}
-                          disabled={order.status === 'shipping' || order.status === 'delivered' || order.status === 'cancelled'}
+                          disabled={order.status === 'shipping' || order.status === 'shipping_failed' || order.status === 'delivered' || order.status === 'cancelled'}
                           onChange={(e) => handleStatusChange(order.id, e.target.value)}
                         >
                           <option value="pending" disabled={order.status !== 'pending'}>Chờ xác nhận</option>
-                          <option value="confirmed" disabled={!isTransitionAllowed(order.status, 'confirmed')}>Đã xác nhận</option>
-                          <option value="cancelled" disabled={!isTransitionAllowed(order.status, 'cancelled')}>Đã hủy</option>
+                          <option value="confirmed" disabled={!isTransitionAllowed(order.status, 'confirmed', order.failedDeliveryCount)}>Đã xác nhận</option>
+                          <option value="cancelled" disabled={!isTransitionAllowed(order.status, 'cancelled', order.failedDeliveryCount)}>Đã hủy</option>
                         </select>
                       </div>
                     </td>
@@ -356,7 +372,9 @@ export default function AdminOrders() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center flex-wrap gap-1">
                         <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold inline-block ${getShippingStatus(order.status).style}`}>
-                          {getShippingStatus(order.status).label}
+                          {order.status === 'shipping_failed' 
+                            ? `Giao thất bại (${order.failedDeliveryCount}/3 lần)` 
+                            : getShippingStatus(order.status).label}
                         </span>
                         
                         {/* Nút giả lập hành động vận chuyển */}
@@ -388,13 +406,27 @@ export default function AdminOrders() {
                           </>
                         )}
                         {order.status === 'shipping_failed' && (
-                          <button 
-                            onClick={() => handleStatusChange(order.id, 'shipping')}
-                            className="text-[10px] font-extrabold text-[#39B8FF] hover:underline px-2 py-1 bg-[#39B8FF]/5 rounded-lg border border-[#39B8FF]/10 transition-all hover:bg-[#39B8FF]/10 active:scale-95 whitespace-nowrap"
-                            title="Mô phỏng: Giao hàng lại lần tiếp theo"
-                          >
-                            Giao lại
-                          </button>
+                          <div className="flex gap-1.5 items-center">
+                            <button 
+                              onClick={() => handleStatusChange(order.id, 'shipping')}
+                              className="text-[10px] font-extrabold text-[#39B8FF] hover:underline px-2 py-1 bg-[#39B8FF]/5 rounded-lg border border-[#39B8FF]/10 transition-all hover:bg-[#39B8FF]/10 active:scale-95 whitespace-nowrap"
+                              title="Mô phỏng: Giao hàng lại lần tiếp theo"
+                            >
+                              Giao lại
+                            </button>
+                            <button 
+                              onClick={() => handleStatusChange(order.id, 'cancelled')}
+                              disabled={order.failedDeliveryCount < 3}
+                              className={`text-[10px] font-extrabold px-2 py-1 rounded-lg border transition-all whitespace-nowrap ${
+                                order.failedDeliveryCount >= 3 
+                                  ? 'text-[#EE5D50] hover:underline bg-[#EE5D50]/5 border-[#EE5D50]/10 hover:bg-[#EE5D50]/10 active:scale-95' 
+                                  : 'text-gray-300 bg-gray-50 border-gray-100 cursor-not-allowed'
+                              }`}
+                              title={order.failedDeliveryCount >= 3 ? "Hủy đơn hàng" : "Hủy đơn (chỉ khả dụng sau khi giao thất bại đủ 3 lần)"}
+                            >
+                              Hủy đơn
+                            </button>
+                          </div>
                         )}
                       </div>
                     </td>

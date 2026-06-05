@@ -20,6 +20,13 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Forgot password state
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [resetUsername, setResetUsername] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+
   // Check login state
   const token = localStorage.getItem('token');
   const userJson = localStorage.getItem('user');
@@ -150,6 +157,41 @@ export default function AuthPage() {
         setError(typeof err.response.data === 'string' ? err.response.data : 'Lỗi từ server');
       } else {
         setError(err.message || (isLogin ? 'Đăng nhập thất bại. Vui lòng kiểm tra lại.' : 'Đăng ký thất bại.'));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Forgot Password Submit
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (resetNewPassword !== resetConfirmPassword) {
+      setError('Mật khẩu nhập lại không khớp!');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await authService.forgotPassword({
+        username: resetUsername,
+        email: resetEmail,
+        newPassword: resetNewPassword
+      });
+      alert('Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.');
+      setIsForgotPassword(false);
+      setUsername(resetUsername);
+      setIsLogin(true);
+      // Clear fields
+      setResetUsername('');
+      setResetEmail('');
+      setResetNewPassword('');
+      setResetConfirmPassword('');
+    } catch (err) {
+      if (err.response && err.response.data) {
+        setError(typeof err.response.data === 'string' ? err.response.data : 'Lỗi từ server');
+      } else {
+        setError(err.message || 'Đặt lại mật khẩu thất bại.');
       }
     } finally {
       setLoading(false);
@@ -742,6 +784,96 @@ export default function AuthPage() {
   }
 
   // ================= IF NOT LOGGED IN: RENDER LOGIN/REGISTER FORM =================
+  if (isForgotPassword) {
+    return (
+      <div className="flex flex-col h-full w-full">
+        <Breadcrumb items={[{ label: 'Quên mật khẩu' }]} />
+        <div className="flex justify-center items-start pt-6 w-full">
+          <div className="bg-white border border-bordercustom p-8 rounded-lg shadow-sm w-full max-w-md">
+            <h2 className="text-2xl font-bold text-primary mb-6 text-center">
+              Đặt Lại Mật Khẩu
+            </h2>
+
+            {error && (
+              <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm font-medium border border-red-100">
+                {error}
+              </div>
+            )}
+
+            <form className="flex flex-col space-y-4" onSubmit={handleForgotPasswordSubmit}>
+              <div>
+                <label className="block text-sm font-medium mb-1">Tên đăng nhập</label>
+                <input
+                  type="text"
+                  placeholder="Nhập tên đăng nhập"
+                  className="w-full border border-gray-300 p-2.5 rounded focus:outline-none focus:border-primary text-sm font-semibold"
+                  value={resetUsername}
+                  onChange={(e) => setResetUsername(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  placeholder="Nhập địa chỉ email đăng ký"
+                  className="w-full border border-gray-300 p-2.5 rounded focus:outline-none focus:border-primary text-sm font-semibold"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Mật khẩu mới</label>
+                <input
+                  type="password"
+                  placeholder="Nhập mật khẩu mới"
+                  className="w-full border border-gray-300 p-2.5 rounded focus:outline-none focus:border-primary text-sm font-semibold"
+                  value={resetNewPassword}
+                  onChange={(e) => setResetNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Xác nhận mật khẩu mới</label>
+                <input
+                  type="password"
+                  placeholder="Nhập lại mật khẩu mới"
+                  className="w-full border border-gray-300 p-2.5 rounded focus:outline-none focus:border-primary text-sm font-semibold"
+                  value={resetConfirmPassword}
+                  onChange={(e) => setResetConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full bg-primary text-white font-bold py-2 rounded mt-4 hover:bg-secondary transition ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              >
+                {loading ? 'ĐANG XỬ LÝ...' : 'ĐẶT LẠI MẬT KHẨU'}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center text-sm">
+              <span 
+                className="text-primary font-bold cursor-pointer hover:underline" 
+                onClick={() => { setIsForgotPassword(false); setError(''); }}
+              >
+                Quay lại Đăng nhập
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full w-full">
       <Breadcrumb items={[{ label: isLogin ? 'Đăng nhập' : 'Đăng ký' }]} />
@@ -785,7 +917,17 @@ export default function AuthPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-1">Mật khẩu</label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-medium">Mật khẩu</label>
+                {isLogin && (
+                  <span 
+                    onClick={() => { setIsForgotPassword(true); setError(''); }}
+                    className="text-xs text-primary font-bold cursor-pointer hover:underline"
+                  >
+                    Quên mật khẩu?
+                  </span>
+                )}
+              </div>
               <input
                 type="password"
                 placeholder="Nhập mật khẩu"

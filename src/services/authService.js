@@ -62,5 +62,9 @@ export const authService = {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('cart');
+  },
+
+  forgotPassword: (data) => {
+    return api.post('/Auth/forgot-password', data);
   }
 };
