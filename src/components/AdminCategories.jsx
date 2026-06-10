@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit, Trash2, FolderOpen, Image as ImageIcon, X, ChevronDown, ChevronUp } from 'lucide-react';
 // import { MOCK_CATEGORIES } from '../utils/mockData'; // Removed mock data
 import { categoryService } from '../services/categoryService';
-import { shopTypeService } from '../services/shopTypeService';
 import { productService } from '../services/productService';
 
 export default function AdminCategories() {
@@ -11,7 +10,6 @@ export default function AdminCategories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({ name: '' });
-  const [shopTypes, setShopTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   
   // New states for expanding categories
@@ -42,12 +40,6 @@ export default function AdminCategories() {
 
   useEffect(() => {
     fetchCategories();
-    // Tải danh sách ShopTypes để chọn
-    shopTypeService.getAll()
-      .then(data => {
-        if (Array.isArray(data)) setShopTypes(data);
-      })
-      .catch(err => console.error("Lỗi tải ShopTypes cho dropdown:", err));
   }, []);
 
   const handleOpenModal = (category = null) => {
@@ -56,7 +48,6 @@ export default function AdminCategories() {
       setFormData({ 
         name: category.name,
         slug: category.slug || category.name.toLowerCase().replace(/ /g, '-'),
-        shopTypeId: category.shopTypeId || 1,
         description: category.description || '',
         iconUrl: category.iconUrl || '',
         metaTitle: category.metaTitle || category.name,
@@ -68,7 +59,6 @@ export default function AdminCategories() {
       setFormData({ 
         name: '',
         slug: '',
-        shopTypeId: 1,
         description: '',
         iconUrl: '',
         metaTitle: '',
@@ -87,7 +77,6 @@ export default function AdminCategories() {
       const payload = {
         ...formData,
         slug: formData.slug || formData.name.toLowerCase().replace(/ /g, '-'),
-        shopTypeId: formData.shopTypeId || 1
       };
 
       if (editingCategory) {
@@ -336,23 +325,7 @@ export default function AdminCategories() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Loại cửa hàng</label>
-                <select
-                  required
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-medium bg-[#FFFFFF] text-[#2B3674]"
-                  value={formData.shopTypeId}
-                  onChange={(e) => setFormData({ ...formData, shopTypeId: parseInt(e.target.value) })}
-                >
-                  <option value="">-- Chọn loại cửa hàng --</option>
-                  {shopTypes.map(st => (
-                    <option key={st.id} value={st.id}>{st.name}</option>
-                  ))}
-                </select>
-                {shopTypes.length === 0 && (
-                  <p className="text-[11px] text-[#EE5D50] mt-1 font-bold italic">* Bạn cần tạo ít nhất một Loại cửa hàng trước.</p>
-                )}
-              </div>
+
               <div className="pt-4 flex gap-3">
                 <button
                   type="button"

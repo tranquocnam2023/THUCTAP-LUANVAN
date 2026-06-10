@@ -8,6 +8,7 @@ export default function AdminProductVariants({ product, onBack }) {
   ]);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingVariant, setEditingVariant] = useState(null);
   const [newVariant, setNewVariant] = useState({
     capacity: '128 GB',
     color: '',
@@ -23,11 +24,22 @@ export default function AdminProductVariants({ product, onBack }) {
     }
   };
 
-  const handleAddVariant = (e) => {
+  const handleSaveVariant = (e) => {
     e.preventDefault();
-    const id = Math.floor(Math.random() * 1000);
-    setVariants([...variants, { ...newVariant, id, image: product.image }]);
+    if (editingVariant) {
+      setVariants(variants.map(v => v.id === editingVariant.id ? { ...v, ...newVariant } : v));
+    } else {
+      const id = Math.floor(Math.random() * 1000);
+      setVariants([...variants, { ...newVariant, id, image: product.image || 'https://applecenter.com.vn/uploads/2023/iphone-15-pro-max-black-titanium.jpg' }]);
+    }
     setShowAddModal(false);
+    setEditingVariant(null);
+    setNewVariant({ capacity: '128 GB', color: '', colorCode: '#007aff', price: product.price || 0, stock: 0, image: null });
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setEditingVariant(null);
     setNewVariant({ capacity: '128 GB', color: '', colorCode: '#007aff', price: product.price || 0, stock: 0, image: null });
   };
 
@@ -115,7 +127,21 @@ export default function AdminProductVariants({ product, onBack }) {
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                      <button 
+                        onClick={() => {
+                          setEditingVariant(v);
+                          setNewVariant({
+                            capacity: v.capacity,
+                            color: v.color,
+                            colorCode: v.colorCode,
+                            price: v.price,
+                            stock: v.stock,
+                            image: v.image
+                          });
+                          setShowAddModal(true);
+                        }}
+                        className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                      >
                         <Edit2 size={18} />
                       </button>
                       <button
@@ -136,16 +162,18 @@ export default function AdminProductVariants({ product, onBack }) {
       {/* Add Variant Modal - Light Theme */}
       {showAddModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-md" onClick={() => setShowAddModal(false)}></div>
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-md" onClick={handleCloseModal}></div>
           <div className="bg-white border border-gray-100 w-full max-w-lg rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="bg-blue-600 px-8 py-6 flex justify-between items-center">
-              <h3 className="text-xl font-black text-white uppercase tracking-tight">Thêm biến thể mới</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-white/60 hover:text-white transition-colors bg-white/10 p-1.5 rounded-full">
+              <h3 className="text-xl font-black text-white uppercase tracking-tight">
+                {editingVariant ? 'Cập nhật biến thể' : 'Thêm biến thể mới'}
+              </h3>
+              <button onClick={handleCloseModal} className="text-white/60 hover:text-white transition-colors bg-white/10 p-1.5 rounded-full">
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleAddVariant} className="p-8 space-y-6">
+            <form onSubmit={handleSaveVariant} className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 {/* Color Input - HEX Picker */}
                 <div className="col-span-2 space-y-3">
@@ -231,7 +259,7 @@ export default function AdminProductVariants({ product, onBack }) {
               <div className="pt-4 flex gap-4">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={handleCloseModal}
                   className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all"
                 >
                   HỦY BỎ
@@ -241,7 +269,7 @@ export default function AdminProductVariants({ product, onBack }) {
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
                   <Check size={18} />
-                  XÁC NHẬN
+                  {editingVariant ? 'LƯU THAY ĐỔI' : 'XÁC NHẬN'}
                 </button>
               </div>
             </form>

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Breadcrumb from '../components/Breadcrumb';
-import { CreditCard, Truck, MapPin, FileText, CheckCircle2, ChevronRight, AlertCircle, Palette, Check, ChevronLeft, User, Lock } from 'lucide-react';
+import { CreditCard, Truck, MapPin, FileText, CheckCircle2, ChevronRight, AlertCircle, Palette, Check, ChevronLeft, User, Lock, Gift } from 'lucide-react';
 import { shippingInfoService } from '../services/shippingInfoService';
 import { orderService } from '../services/orderService';
 import api from '../services/api';
 import PromotionSelector from '../components/PromotionSelector';
+import OtpVerification from '../components/OtpVerification';
 
 // Dữ liệu địa chỉ rút gọn của Việt Nam
 const VIETNAM_ADDRESSES = {
@@ -73,6 +74,12 @@ export default function CheckoutPage() {
     note: '',
     paymentMethod: isLoggedIn ? 'cod' : 'transfer' 
   });
+
+  // OTP Verification States
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [checkoutOtp, setCheckoutOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [pendingPayload, setPendingPayload] = useState(null);
 
   const [shippingAddresses, setShippingAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -264,7 +271,47 @@ export default function CheckoutPage() {
       }
     }
 
+    // Lấy ID địa chỉ để thanh toán
+    let checkoutAddressId = null;
+    if (selectedAddressId && selectedAddressId !== 'new') {
+      checkoutAddressId = selectedAddressId;
+    }
+
+    // Chuẩn bị payload checkout trước
+    const payload = {
+      shippingInfoId: checkoutAddressId,
+      recipientName: formData.fullName,
+      phoneNumber: formData.phone,
+      addressLine: formData.address,
+      ward: selectedAddressId === 'new' ? (selectedCity === 'Tỉnh/Thành khác' ? customWard : selectedWard) : '',
+      province: selectedAddressId === 'new' ? selectedCity : 'Hồ Chí Minh',
+      promotionCode: appliedPromo || '',
+      items: cartItems.map(item => ({
+        productId: item.id || item.Id,
+        storage: item.selectedStorage || '',
+        color: item.selectedColor || '',
+        quantity: item.quantity,
+        price: item.price
+      }))
+    };
+
+    setPendingPayload(payload);
+
+    // Tạo mã OTP ngẫu nhiên và mở Modal xác thực
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setCheckoutOtp(code);
+    setOtpError('');
+    setShowOtpModal(true);
+  };
+
+  const handleVerifyOrderOtp = async (otpCode) => {
+    if (otpCode !== checkoutOtp) {
+      setOtpError('Mã OTP không chính xác. Vui lòng nhập lại!');
+      return;
+    }
+
     setIsSubmitting(true);
+    setOtpError('');
 
     try {
       // 2. Nếu khách vãng lai, xử lý đăng ký tài khoản ngầm dưới nền
@@ -303,7 +350,7 @@ export default function CheckoutPage() {
           }));
         } catch (authErr) {
           console.error("Lỗi đăng ký/đăng nhập ngầm:", authErr);
-          alert("Lỗi tạo phiên giao dịch: " + (authErr.message || JSON.stringify(authErr)));
+          setOtpError("Lỗi tạo phiên giao dịch: " + (authErr.message || JSON.stringify(authErr)));
           setIsSubmitting(false);
           return;
         }
@@ -337,32 +384,10 @@ export default function CheckoutPage() {
         }
       }
 
-      // 4. Lấy ID địa chỉ để thanh toán
-      let checkoutAddressId = null;
-      if (selectedAddressId && selectedAddressId !== 'new') {
-        checkoutAddressId = selectedAddressId;
-      }
-
-      // 5. Chuẩn bị payload và Checkout
-      const checkoutPayload = {
-        shippingInfoId: checkoutAddressId,
-        recipientName: formData.fullName,
-        phoneNumber: formData.phone,
-        addressLine: formData.address,
-        ward: selectedAddressId === 'new' ? (selectedCity === 'Tỉnh/Thành khác' ? customWard : selectedWard) : '',
-        province: selectedAddressId === 'new' ? selectedCity : 'Hồ Chí Minh',
-        promotionCode: appliedPromo || '',
-        items: cartItems.map(item => ({
-          productId: item.id || item.Id,
-          storage: item.selectedStorage || '',
-          color: item.selectedColor || '',
-          quantity: item.quantity,
-          price: item.price
-        }))
-      };
-
-      await orderService.checkout(checkoutPayload);
+      // 5. Gửi đơn hàng (Checkout)
+      await orderService.checkout(pendingPayload);
       
+      setShowOtpModal(false);
       setIsFinished(true);
       clearCart();
     } catch (err) {
@@ -379,7 +404,7 @@ export default function CheckoutPage() {
           errorMsg = err.title || err.message || JSON.stringify(err);
         }
       }
-      alert('Đặt hàng thất bại:\n' + errorMsg);
+      setOtpError('Đặt hàng thất bại:\n' + errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -1005,6 +1030,32 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* OTP verification modal overlay */}
+      {showOtpModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[999] flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
+          <div className="w-full max-w-md my-8">
+            <OtpVerification
+              email={formData.email}
+              mockOtp={checkoutOtp}
+              onVerify={handleVerifyOrderOtp}
+              onCancel={() => {
+                setShowOtpModal(false);
+                setIsSubmitting(false);
+              }}
+              onResend={() => {
+                const code = Math.floor(100000 + Math.random() * 900000).toString();
+                setCheckoutOtp(code);
+                setOtpError('');
+              }}
+              isSubmitting={isSubmitting}
+              error={otpError}
+              title="Xác thực đơn hàng"
+              description="Để hoàn tất chốt đơn hàng, vui lòng nhập mã xác thực OTP gửi đến email nhận hàng của bạn."
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

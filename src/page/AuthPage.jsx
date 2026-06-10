@@ -8,6 +8,7 @@ import { orderService } from '../services/orderService';
 import OrderDetailsTracker from '../components/OrderDetailsTracker';
 import { User, MapPin, Key, Trash2, Edit2, Plus, Check, X, ShieldAlert, LogOut, CheckCircle, ClipboardList, ArrowLeft } from 'lucide-react';
 import { useFormat } from '../hooks/useFormat';
+import OtpVerification from '../components/OtpVerification';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -26,6 +27,9 @@ export default function AuthPage() {
   const [resetEmail, setResetEmail] = useState('');
   const [resetNewPassword, setResetNewPassword] = useState('');
   const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+  const [forgotPasswordStep, setForgotPasswordStep] = useState(1);
+  const [forgotPasswordOtp, setForgotPasswordOtp] = useState('');
+  const [forgotPasswordError, setForgotPasswordError] = useState('');
 
   // Check login state
   const token = localStorage.getItem('token');
@@ -163,7 +167,54 @@ export default function AuthPage() {
     }
   };
 
-  // Handle Forgot Password Submit
+  // Helper to generate 6-digit OTP
+  const generateOtp = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  // Step 1: Send Reset OTP
+  const handleSendResetOtp = (e) => {
+    if (e) e.preventDefault();
+    if (!resetUsername.trim() || !resetEmail.trim()) {
+      setError('Vui lòng điền đầy đủ tên đăng nhập và email.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    
+    // Simulate API delay
+    setTimeout(() => {
+      const code = generateOtp();
+      setForgotPasswordOtp(code);
+      setForgotPasswordStep(2);
+      setLoading(false);
+    }, 800);
+  };
+
+  // Step 2: Verify Reset OTP
+  const handleVerifyResetOtp = (otpCode) => {
+    setLoading(true);
+    setForgotPasswordError('');
+    
+    setTimeout(() => {
+      if (otpCode === forgotPasswordOtp) {
+        setForgotPasswordStep(3);
+        setForgotPasswordError('');
+      } else {
+        setForgotPasswordError('Mã OTP không chính xác. Vui lòng nhập lại!');
+      }
+      setLoading(false);
+    }, 600);
+  };
+
+  // Resend OTP
+  const handleResendResetOtp = () => {
+    const code = generateOtp();
+    setForgotPasswordOtp(code);
+    setForgotPasswordError('');
+  };
+
+  // Step 3: Handle Forgot Password Submit
   const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
     if (resetNewPassword !== resetConfirmPassword) {
@@ -180,6 +231,8 @@ export default function AuthPage() {
       });
       alert('Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.');
       setIsForgotPassword(false);
+      setForgotPasswordStep(1);
+      setForgotPasswordOtp('');
       setUsername(resetUsername);
       setIsLogin(true);
       // Clear fields
@@ -189,7 +242,7 @@ export default function AuthPage() {
       setResetConfirmPassword('');
     } catch (err) {
       if (err.response && err.response.data) {
-        setError(typeof err.response.data === 'string' ? err.response.data : 'Lỗi từ server');
+        setError(typeof err.response.data === 'string' ? err.response.data : 'Đặt lại mật khẩu thất bại.');
       } else {
         setError(err.message || 'Đặt lại mật khẩu thất bại.');
       }
@@ -788,86 +841,154 @@ export default function AuthPage() {
     return (
       <div className="flex flex-col h-full w-full">
         <Breadcrumb items={[{ label: 'Quên mật khẩu' }]} />
-        <div className="flex justify-center items-start pt-6 w-full">
-          <div className="bg-white border border-bordercustom p-8 rounded-lg shadow-sm w-full max-w-md">
-            <h2 className="text-2xl font-bold text-primary mb-6 text-center">
-              Đặt Lại Mật Khẩu
-            </h2>
+        <div className="flex justify-center items-start pt-6 w-full px-4">
+          <div className="bg-white/85 backdrop-blur-xl border border-[#E0E5F2] p-8 rounded-[2rem] shadow-xl w-full max-w-md space-y-6">
+            
+            {/* Step Indicators */}
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <div className="flex flex-col items-center flex-1">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${forgotPasswordStep >= 1 ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-400'}`}>1</div>
+                <span className="text-[10px] font-bold text-gray-500 mt-1">Nhập tài khoản</span>
+              </div>
+              <div className={`h-0.5 flex-1 mx-2 transition-all ${forgotPasswordStep >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+              <div className="flex flex-col items-center flex-1">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${forgotPasswordStep >= 2 ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-400'}`}>2</div>
+                <span className="text-[10px] font-bold text-gray-500 mt-1">Xác thực OTP</span>
+              </div>
+              <div className={`h-0.5 flex-1 mx-2 transition-all ${forgotPasswordStep >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+              <div className="flex flex-col items-center flex-1">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${forgotPasswordStep >= 3 ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-400'}`}>3</div>
+                <span className="text-[10px] font-bold text-gray-500 mt-1">Đổi mật khẩu</span>
+              </div>
+            </div>
 
-            {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm font-medium border border-red-100">
+            {error && forgotPasswordStep !== 2 && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-xs font-bold border border-red-100">
                 {error}
               </div>
             )}
 
-            <form className="flex flex-col space-y-4" onSubmit={handleForgotPasswordSubmit}>
-              <div>
-                <label className="block text-sm font-medium mb-1">Tên đăng nhập</label>
-                <input
-                  type="text"
-                  placeholder="Nhập tên đăng nhập"
-                  className="w-full border border-gray-300 p-2.5 rounded focus:outline-none focus:border-primary text-sm font-semibold"
-                  value={resetUsername}
-                  onChange={(e) => setResetUsername(e.target.value)}
-                  required
-                />
+            {/* STEP 1: Enter Username & Email */}
+            {forgotPasswordStep === 1 && (
+              <form className="flex flex-col space-y-4" onSubmit={handleSendResetOtp}>
+                <h2 className="text-xl font-black text-gray-900 text-center uppercase tracking-tight">Yêu Cầu Đặt Lại Mật Khẩu</h2>
+                <p className="text-xs text-gray-400 text-center font-semibold pb-2">Nhập tên tài khoản và email đã đăng ký để nhận mã xác thực OTP.</p>
+                
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1">Tên đăng nhập *</label>
+                  <input
+                    type="text"
+                    placeholder="Nhập tên đăng nhập"
+                    className="w-full border border-gray-300 p-3.5 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                    value={resetUsername}
+                    onChange={(e) => setResetUsername(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    placeholder="VD: email@example.com"
+                    className="w-full border border-gray-300 p-3.5 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-200 hover:bg-blue-700 transition active:scale-95 text-sm uppercase flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>ĐANG XỬ LÝ...</span>
+                    </>
+                  ) : (
+                    'GỬI MÃ XÁC NHẬN OTP'
+                  )}
+                </button>
+              </form>
+            )}
+
+            {/* STEP 2: Verify OTP */}
+            {forgotPasswordStep === 2 && (
+              <OtpVerification
+                email={resetEmail}
+                mockOtp={forgotPasswordOtp}
+                onVerify={handleVerifyResetOtp}
+                onCancel={() => setForgotPasswordStep(1)}
+                onResend={handleResendResetOtp}
+                isSubmitting={loading}
+                error={forgotPasswordError}
+                title="Xác thực OTP"
+                description="Hệ thống đã tạo mã xác nhận đổi mật khẩu, vui lòng nhập mã OTP để tiếp tục."
+              />
+            )}
+
+            {/* STEP 3: Change Password */}
+            {forgotPasswordStep === 3 && (
+              <form className="flex flex-col space-y-4 animate-fade-in" onSubmit={handleForgotPasswordSubmit}>
+                <h2 className="text-xl font-black text-gray-900 text-center uppercase tracking-tight">Thiết Lập Mật Khẩu Mới</h2>
+                <p className="text-xs text-gray-400 text-center font-semibold pb-2">Vui lòng nhập mật khẩu mới từ 6 ký tự để hoàn tất quy trình.</p>
+                
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1">Mật khẩu mới *</label>
+                  <input
+                    type="password"
+                    placeholder="Nhập mật khẩu mới"
+                    className="w-full border border-gray-300 p-3.5 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                    value={resetNewPassword}
+                    onChange={(e) => setResetNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1">Xác nhận mật khẩu mới *</label>
+                  <input
+                    type="password"
+                    placeholder="Nhập lại mật khẩu mới"
+                    className="w-full border border-gray-300 p-3.5 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                    value={resetConfirmPassword}
+                    onChange={(e) => setResetConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-green-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-green-200 hover:bg-green-700 transition active:scale-95 text-sm uppercase flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>ĐANG LƯU...</span>
+                    </>
+                  ) : (
+                    'CẬP NHẬT MẬT KHẨU MỚI'
+                  )}
+                </button>
+              </form>
+            )}
+
+            {forgotPasswordStep !== 2 && (
+              <div className="text-center pt-2">
+                <span 
+                  className="text-blue-600 font-extrabold text-sm cursor-pointer hover:underline" 
+                  onClick={() => { setIsForgotPassword(false); setForgotPasswordStep(1); setError(''); }}
+                >
+                  Quay lại Đăng nhập
+                </span>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
-                <input
-                  type="email"
-                  placeholder="Nhập địa chỉ email đăng ký"
-                  className="w-full border border-gray-300 p-2.5 rounded focus:outline-none focus:border-primary text-sm font-semibold"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Mật khẩu mới</label>
-                <input
-                  type="password"
-                  placeholder="Nhập mật khẩu mới"
-                  className="w-full border border-gray-300 p-2.5 rounded focus:outline-none focus:border-primary text-sm font-semibold"
-                  value={resetNewPassword}
-                  onChange={(e) => setResetNewPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Xác nhận mật khẩu mới</label>
-                <input
-                  type="password"
-                  placeholder="Nhập lại mật khẩu mới"
-                  className="w-full border border-gray-300 p-2.5 rounded focus:outline-none focus:border-primary text-sm font-semibold"
-                  value={resetConfirmPassword}
-                  onChange={(e) => setResetConfirmPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full bg-primary text-white font-bold py-2 rounded mt-4 hover:bg-secondary transition ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-              >
-                {loading ? 'ĐANG XỬ LÝ...' : 'ĐẶT LẠI MẬT KHẨU'}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center text-sm">
-              <span 
-                className="text-primary font-bold cursor-pointer hover:underline" 
-                onClick={() => { setIsForgotPassword(false); setError(''); }}
-              >
-                Quay lại Đăng nhập
-              </span>
-            </div>
+            )}
           </div>
         </div>
       </div>

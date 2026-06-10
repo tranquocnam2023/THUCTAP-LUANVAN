@@ -25,6 +25,26 @@ function App() {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith('/admin');
 
+  // Tự động chuyển hướng tài khoản quản trị sang trang quản lý
+  const userJson = localStorage.getItem('user');
+  const token = localStorage.getItem('token');
+  let isAdmin = false;
+  if (userJson && token) {
+    try {
+      const user = JSON.parse(userJson);
+      if (user.role === 'Admin' || user.role === 'Staff') {
+        isAdmin = true;
+      }
+    } catch (e) {
+      console.error("Lỗi đọc thông tin đăng nhập:", e);
+    }
+  }
+
+  if (isAdmin && !isAdminPath) {
+    window.location.replace('/admin');
+    return null;
+  }
+
   if (isAdminPath) {
     return (
       <Routes>

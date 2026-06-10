@@ -4,7 +4,6 @@ import AdminOrders from '../components/AdminOrders';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminCustomers from '../components/AdminCustomers';
 import AdminCategories from '../components/AdminCategories';
-import AdminShopTypes from '../components/AdminShopTypes';
 import AdminReviews from '../components/AdminReviews';
 import { dashboardService } from '../services/dashboardService';
 import { authService } from '../services/authService';
@@ -46,7 +45,6 @@ export default function AdminPage() {
     switch (activeAdminTab) {
       case 'products': return 'Quản lý sản phẩm';
       case 'categories': return 'Quản lý danh mục';
-      case 'shoptypes': return 'Quản lý loại cửa hàng';
       case 'reviews': return 'Quản lý đánh giá';
       case 'orders': return 'Quản lý đơn hàng';
       case 'customers': return 'Quản lý khách hàng';
@@ -83,7 +81,6 @@ export default function AdminPage() {
           <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Chính</p>
           <SidebarItem id="dashboard" icon={Layout} label="Bảng thống kê" />
           <SidebarItem id="products" icon={Package} label="Sản phẩm" />
-          <SidebarItem id="shoptypes" icon={LayoutGrid} label="Loại cửa hàng" />
           <SidebarItem id="categories" icon={FolderTree} label="Danh mục" />
           <SidebarItem id="reviews" icon={Star} label="Đánh giá" />
           <SidebarItem id="orders" icon={ShoppingCart} label="Đơn hàng" />
@@ -96,10 +93,6 @@ export default function AdminPage() {
         </nav>
 
         <div className="p-4 bg-[#FFFFFF] border-t border-[#E0E5F2] space-y-2">
-          <a href="/" className="flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#4318FF] transition-colors rounded-xl hover:bg-[#F4F7FE] group">
-            <Layout className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform" />
-            Thoát về cửa hàng
-          </a>
           <button
             onClick={handleLogout}
             className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#EE5D50] transition-colors rounded-xl hover:bg-[#FFF5F5] group"
@@ -143,7 +136,6 @@ export default function AdminPage() {
         {/* Dynamic Page Content */}
         <main className="flex-1 overflow-y-auto px-8 pb-8 pt-4 bg-[#F4F7FE] scroll-smooth">
           {activeAdminTab === 'products' && <AdminProducts />}
-          {activeAdminTab === 'shoptypes' && <AdminShopTypes />}
           {activeAdminTab === 'categories' && <AdminCategories />}
           {activeAdminTab === 'reviews' && <AdminReviews />}
           {activeAdminTab === 'orders' && <AdminOrders />}
