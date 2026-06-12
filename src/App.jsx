@@ -32,7 +32,7 @@ function App() {
   if (userJson && token) {
     try {
       const user = JSON.parse(userJson);
-      if (user.role === 'Admin' || user.role === 'Staff') {
+      if (user.role === 'Admin') {
         isAdmin = true;
       }
     } catch (e) {

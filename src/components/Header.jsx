@@ -119,8 +119,8 @@ export default function Header() {
               </Link>
             )}
 
-            {/* KIỂM TRA QUYỀN: Phải ĐĂNG NHẬP và là NHÂN VIÊN/ADMIN mới thấy Thẻ Quản Trị */}
-            {isLoggedIn && (userRole === 'Admin' || userRole === 'Staff') && (
+            {/* KIỂM TRA QUYỀN: Phải ĐĂNG NHẬP và là ADMIN mới thấy Thẻ Quản Trị */}
+            {isLoggedIn && userRole === 'Admin' && (
               <Link 
                 to="/admin" 
                 className="flex items-center px-3 py-2 rounded border font-black transition text-center shadow-lg animate-pulse hover:animate-none"

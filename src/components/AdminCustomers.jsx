@@ -8,14 +8,12 @@ import { useFormat } from '../hooks/useFormat';
 const CUSTOMER_TABS = [
   { id: 'all', name: 'Tất cả', count: 0, icon: Users, color: 'text-[#A3AED0]', bgColor: 'bg-[#F4F7FE]' },
   { id: 'User', name: 'Khách hàng', count: 0, icon: UserCheck, color: 'text-[#01B574]', bgColor: 'bg-[#01B574]/10' },
-  { id: 'Staff', name: 'Nhân viên', count: 0, icon: ShieldCheck, color: 'text-[#FFB547]', bgColor: 'bg-[#FFB547]/10' },
   { id: 'Admin', name: 'Quản trị viên', count: 0, icon: Award, color: 'text-[#4318FF]', bgColor: 'bg-[#4318FF]/10' },
 ];
 
 const CUSTOMER_STATS_CONFIG = [
   { label: 'Tổng người dùng', countKey: 'all', icon: Users, bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#4318FF' },
   { label: 'Khách hàng (User)', countKey: 'User', icon: UserCheck, bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#01B574' },
-  { label: 'Nhân viên (Staff)', countKey: 'Staff', icon: ShieldCheck, bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#FFB547' },
   { label: 'Quản trị viên (Admin)', countKey: 'Admin', icon: Award, bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#4318FF' },
 ];
 
@@ -123,14 +121,12 @@ export default function AdminCustomers() {
   const tabCounts = {
     all: customers.length,
     User: customers.filter(c => c.role === 'User').length,
-    Staff: customers.filter(c => c.role === 'Staff').length,
     Admin: customers.filter(c => c.role === 'Admin').length,
   };
 
   const getRoleBadgeStyle = (role) => {
     switch (role) {
       case 'Admin': return 'bg-[#4318FF]/10 text-[#4318FF] border border-[#4318FF]/20';
-      case 'Staff': return 'bg-[#FFB547]/10 text-[#FFB547] border border-[#FFB547]/20';
       case 'User': return 'bg-[#01B574]/10 text-[#01B574] border border-[#01B574]/20';
       default: return 'bg-[#F4F7FE] text-[#A3AED0]';
     }

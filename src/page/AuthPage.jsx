@@ -136,7 +136,7 @@ export default function AuthPage() {
           localStorage.setItem('token', userToken);
           localStorage.setItem('user', JSON.stringify(data));
           
-          if (data.role === 'Admin' || data.role === 'Staff') {
+          if (data.role === 'Admin') {
             window.location.href = '/admin';
           } else {
             window.location.href = '/';

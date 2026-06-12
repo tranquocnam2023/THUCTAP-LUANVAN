@@ -349,7 +349,7 @@ export default function AdminProducts() {
       {/* Khu vực Chính: Chức năng nhập xuất & Danh sách */}
       <div className="flex-1 flex flex-col">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý kho: {selectedBrand}</h2>
+          <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý sản phẩm: {selectedBrand}</h2>
           <button 
             onClick={() => handleOpenProductModal()}
             className="flex items-center gap-2 px-5 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 text-sm"

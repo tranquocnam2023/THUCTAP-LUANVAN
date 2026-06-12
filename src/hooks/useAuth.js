@@ -7,15 +7,12 @@ import { authService } from '../services/authService';
 export const useAuth = () => {
   const [user, setUser] = useState(authService.getCurrentUser());
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isStaff, setIsStaff] = useState(false);
 
   useEffect(() => {
     if (user) {
       setIsAdmin(user.role === 'Admin');
-      setIsStaff(user.role === 'Staff' || user.role === 'Admin');
     } else {
       setIsAdmin(false);
-      setIsStaff(false);
     }
   }, [user]);
 
@@ -28,7 +25,6 @@ export const useAuth = () => {
   return {
     user,
     isAdmin,
-    isStaff,
     isAuthenticated: !!user,
     logout
   };
