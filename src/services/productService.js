@@ -14,4 +14,24 @@ export const productService = {
   update: (id, data) => api.put(`/Product/${id}`, data),
   
   delete: (id) => api.delete(`/Product/${id}`),
+
+  uploadLocalImage: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/Upload/local', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+
+  uploadCloudImage: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/Upload/cloud', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
 };

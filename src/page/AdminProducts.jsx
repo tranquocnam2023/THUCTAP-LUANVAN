@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Layout, Bell, ShoppingCart, Settings2, Plus, Edit, Trash2, X, FolderTree } from 'lucide-react';
+import { Package, Layout, Bell, ShoppingCart, Settings2, Plus, Edit, Trash2, X, FolderTree, UploadCloud, Loader2, Link2 } from 'lucide-react';
 // import { TRANSACTIONS_MOCK } from '../utils/constants'; // Removed invalid import
 import AdminProductVariants from '../components/AdminProductVariants';
 import { categoryService } from '../services/categoryService';
@@ -21,7 +21,7 @@ export default function AdminProducts() {
   const [selectedBrand, setSelectedBrand] = useState('');
   const [activeTxTab, setActiveTxTab] = useState(null);
   const [selectedProductForVariants, setSelectedProductForVariants] = useState(null);
-  
+
   // State for Product CRUD
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -35,6 +35,53 @@ export default function AdminProducts() {
     image: ''
   });
 
+  const [imageInputMethod, setImageInputMethod] = useState('upload'); // 'upload' | 'url'
+  const [uploadType, setUploadType] = useState('local'); // 'local' | 'cloud'
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Kích thước ảnh quá lớn! Vui lòng chọn file dưới 2MB.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      let res;
+      if (uploadType === 'local') {
+        res = await productService.uploadLocalImage(file);
+      } else {
+        res = await productService.uploadCloudImage(file);
+      }
+
+      if (res && res.url) {
+        let finalUrl = res.url;
+        // Nếu là local upload và kết quả là relative path, nối thêm domain backend
+        if (uploadType === 'local' && finalUrl.startsWith('/')) {
+          const apiBase = import.meta.env.VITE_API_URL || 'https://localhost:7279/api';
+          const hostBase = apiBase.replace('/api', '');
+          finalUrl = `${hostBase}${finalUrl}`;
+        }
+        
+        setProductFormData(prev => ({
+          ...prev,
+          image: finalUrl
+        }));
+        alert('Tải ảnh lên thành công!');
+      } else {
+        alert('Tải ảnh thất bại: Phản hồi từ server không hợp lệ.');
+      }
+    } catch (err) {
+      console.error("Lỗi upload ảnh:", err);
+      alert('Lỗi khi tải ảnh lên: ' + (err.message || JSON.stringify(err)));
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // State for inventory transactions
   const [txProductId, setTxProductId] = useState('');
   const [txQuantity, setTxQuantity] = useState(1);
@@ -43,12 +90,12 @@ export default function AdminProducts() {
 
   // Khởi tạo các hook
   const { formatCurrency, formatNumber } = useFormat();
-  const { 
-    currentData: paginatedProducts, 
-    currentPage, 
-    totalPages, 
-    nextPage, 
-    prevPage, 
+  const {
+    currentData: paginatedProducts,
+    currentPage,
+    totalPages,
+    nextPage,
+    prevPage,
     goToPage,
     startIndex,
     endIndex,
@@ -56,24 +103,24 @@ export default function AdminProducts() {
   } = usePagination(products, 5); // Hiển thị 5 sản phẩm mỗi trang
 
   const fetchProducts = async () => {
-      const category = categories.find(c => c.name === selectedBrand);
-      if (category) {
-        try {
-          // Do backend không có endpoint getByCategory nên ta lấy tất cả và lọc ở client
-          const allProducts = await productService.getAll();
-          if (Array.isArray(allProducts)) {
-            const filtered = allProducts.filter(p => p.categoryId === category.id || p.CategoryId === category.id);
-            setProducts(filtered);
-          } else {
-            setProducts([]);
-          }
-        } catch (err) {
-          console.error("Lỗi tải sản phẩm:", err);
+    const category = categories.find(c => c.name === selectedBrand);
+    if (category) {
+      try {
+        // Do backend không có endpoint getByCategory nên ta lấy tất cả và lọc ở client
+        const allProducts = await productService.getAll();
+        if (Array.isArray(allProducts)) {
+          const filtered = allProducts.filter(p => p.categoryId === category.id || p.CategoryId === category.id);
+          setProducts(filtered);
+        } else {
           setProducts([]);
         }
-      } else {
+      } catch (err) {
+        console.error("Lỗi tải sản phẩm:", err);
         setProducts([]);
       }
+    } else {
+      setProducts([]);
+    }
   };
 
   useEffect(() => {
@@ -88,7 +135,7 @@ export default function AdminProducts() {
         console.log("Sử dụng dữ liệu ảo cho Danh mục");
       }
     };
-    
+
     fetchCategoriesData();
   }, []);
 
@@ -106,6 +153,7 @@ export default function AdminProducts() {
   const handleOpenProductModal = (product = null) => {
     if (product) {
       setEditingProduct(product);
+      const imgUrl = product.thumbnailImage || product.image || '';
       setProductFormData({
         name: product.name,
         price: product.basePrice || product.price || 0,
@@ -113,8 +161,14 @@ export default function AdminProducts() {
         stockQuantity: product.totalStock ?? product.stock ?? product.stockQuantity ?? 0,
         categoryId: product.categoryId || (categories.find(c => c.name === selectedBrand)?.id || ''),
         description: product.description || '',
-        image: product.thumbnailImage || product.image || ''
+        image: imgUrl
       });
+      // Tự động chọn tab URL nếu đó là link ảnh ngoài (không phải localhost hoặc cloudinary)
+      if (imgUrl.startsWith('http') && !imgUrl.includes('localhost') && !imgUrl.includes('cloudinary')) {
+        setImageInputMethod('url');
+      } else {
+        setImageInputMethod('upload');
+      }
     } else {
       setEditingProduct(null);
       setProductFormData({
@@ -126,7 +180,10 @@ export default function AdminProducts() {
         description: '',
         image: ''
       });
+      setImageInputMethod('upload');
     }
+    setUploadType('local');
+    setUploading(false);
     setIsProductModalOpen(true);
   };
 
@@ -257,7 +314,7 @@ export default function AdminProducts() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-bold text-[#2B3674] mb-2">Chọn sản phẩm</label>
-            <select 
+            <select
               value={txProductId}
               onChange={(e) => setTxProductId(e.target.value)}
               className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
@@ -268,12 +325,12 @@ export default function AdminProducts() {
           </div>
           <div>
             <label className="block text-sm font-bold text-[#2B3674] mb-2">Số lượng</label>
-            <input 
-              type="number" 
-              min="1" 
-              value={txQuantity} 
+            <input
+              type="number"
+              min="1"
+              value={txQuantity}
               onChange={(e) => setTxQuantity(e.target.value)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" 
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             />
           </div>
 
@@ -281,23 +338,23 @@ export default function AdminProducts() {
             <label className="block text-sm font-bold text-[#2B3674] mb-2">
               {txConf.type === 'IN' ? 'Giá nhập (VNĐ)' : 'Giá xuất/Bán (VNĐ)'}
             </label>
-            <input 
-              type="text" 
-              placeholder="VD: 25.000.000" 
+            <input
+              type="text"
+              placeholder="VD: 25.000.000"
               value={txPrice}
               onChange={(e) => setTxPrice(e.target.value)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" 
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             />
           </div>
 
           <div>
             <label className="block text-sm font-bold text-[#2B3674] mb-2">Ghi chú</label>
-            <input 
-              type="text" 
-              placeholder="Lý do, mã phiếu..." 
+            <input
+              type="text"
+              placeholder="Lý do, mã phiếu..."
               value={txNote}
               onChange={(e) => setTxNote(e.target.value)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]" 
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             />
           </div>
         </div>
@@ -333,8 +390,8 @@ export default function AdminProducts() {
                 key={category.id}
                 onClick={() => { setSelectedBrand(category.name); setActiveTxTab(null); }}
                 className={`px-4 py-3 text-left rounded-xl mb-1 transition-all text-sm font-bold ${selectedBrand === category.name
-                    ? 'bg-[#F4F7FE] text-[#4318FF]'
-                    : 'text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#2B3674]'
+                  ? 'bg-[#F4F7FE] text-[#4318FF]'
+                  : 'text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#2B3674]'
                   }`}
               >
                 {category.name}
@@ -350,7 +407,7 @@ export default function AdminProducts() {
       <div className="flex-1 flex flex-col">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý sản phẩm: {selectedBrand}</h2>
-          <button 
+          <button
             onClick={() => handleOpenProductModal()}
             className="flex items-center gap-2 px-5 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 text-sm"
           >
@@ -358,13 +415,13 @@ export default function AdminProducts() {
             <span>Thêm sản phẩm</span>
           </button>
         </div>
-        
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((item, i) => {
             return (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="p-5 rounded-[20px] shadow-sm transition-all hover:shadow-md flex items-center justify-between h-28 bg-[#FFFFFF]"
               >
                 <div className="flex flex-col">
@@ -376,10 +433,10 @@ export default function AdminProducts() {
                   </h3>
                 </div>
                 <div className="w-14 h-14 rounded-full bg-[#F4F7FE] flex items-center justify-center flex-shrink-0">
-                   {item.icon === 'Package' && <Package className="text-[#4318FF]" size={24} />}
-                   {item.icon === 'Layout' && <Layout className="text-[#01B574]" size={24} />}
-                   {item.icon === 'Bell' && <Bell className="text-[#FFB547]" size={24} />}
-                   {item.icon === 'ShoppingCart' && <ShoppingCart className="text-[#39B8FF]" size={24} />}
+                  {item.icon === 'Package' && <Package className="text-[#4318FF]" size={24} />}
+                  {item.icon === 'Layout' && <Layout className="text-[#01B574]" size={24} />}
+                  {item.icon === 'Bell' && <Bell className="text-[#FFB547]" size={24} />}
+                  {item.icon === 'ShoppingCart' && <ShoppingCart className="text-[#39B8FF]" size={24} />}
                 </div>
               </div>
             );
@@ -411,10 +468,10 @@ export default function AdminProducts() {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg className="w-4 h-4 text-[#A3AED0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="Tìm theo tên..." 
-                  className="bg-[#F4F7FE] border-none rounded-full pl-10 pr-4 py-2.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-[#4318FF] text-[#2B3674] placeholder-[#A3AED0]" 
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên..."
+                  className="bg-[#F4F7FE] border-none rounded-full pl-10 pr-4 py-2.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-[#4318FF] text-[#2B3674] placeholder-[#A3AED0]"
                 />
               </div>
             </div>
@@ -443,23 +500,23 @@ export default function AdminProducts() {
                         </td>
                         <td className="py-4 px-2">
                           <div className="flex items-center justify-center gap-2">
-                            <button 
+                            <button
                               onClick={() => setSelectedProductForVariants(product)}
-                              className="p-2 text-[#A3AED0] hover:text-[#4318FF] hover:bg-[#F4F7FE] rounded-lg transition-all" 
+                              className="p-2 text-[#A3AED0] hover:text-[#4318FF] hover:bg-[#F4F7FE] rounded-lg transition-all"
                               title="Quản lý biến thể"
                             >
                               <Settings2 size={18} />
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleOpenProductModal(product)}
-                              className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all" 
+                              className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
                               title="Sửa"
                             >
                               <Edit size={18} />
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleDeleteProduct(product.id)}
-                              className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all" 
+                              className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
                               title="Xóa"
                             >
                               <Trash2 size={18} />
@@ -483,7 +540,7 @@ export default function AdminProducts() {
                 Hiển thị {startIndex}-{endIndex} trên {totalItems} sản phẩm
               </div>
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={prevPage}
                   disabled={currentPage === 1}
                   className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -499,7 +556,7 @@ export default function AdminProducts() {
                     {i + 1}
                   </button>
                 ))}
-                <button 
+                <button
                   onClick={nextPage}
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -526,78 +583,202 @@ export default function AdminProducts() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Tên sản phẩm</label>
-                  <input 
+                  <input
                     type="text" required
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
                     value={productFormData.name}
-                    onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
+                    onChange={(e) => setProductFormData({ ...productFormData, name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá bán (VNĐ)</label>
-                  <input 
+                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá bán(VNĐ)</label>
+                  <input
                     type="number" required
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
                     value={productFormData.price}
-                    onChange={(e) => setProductFormData({...productFormData, price: Number(e.target.value)})}
+                    onChange={(e) => setProductFormData({ ...productFormData, price: Number(e.target.value) })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá gốc (VNĐ)</label>
-                  <input 
+                  <input
                     type="number"
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
                     value={productFormData.originalPrice}
-                    onChange={(e) => setProductFormData({...productFormData, originalPrice: Number(e.target.value)})}
+                    onChange={(e) => setProductFormData({ ...productFormData, originalPrice: Number(e.target.value) })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Số lượng tồn</label>
-                  <input 
+                  <input
                     type="number" required
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
                     value={productFormData.stockQuantity}
-                    onChange={(e) => setProductFormData({...productFormData, stockQuantity: Number(e.target.value)})}
+                    onChange={(e) => setProductFormData({ ...productFormData, stockQuantity: Number(e.target.value) })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Danh mục</label>
-                  <select 
+                  <select
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-[#FFFFFF]"
                     value={productFormData.categoryId}
-                    onChange={(e) => setProductFormData({...productFormData, categoryId: e.target.value})}
+                    onChange={(e) => setProductFormData({ ...productFormData, categoryId: e.target.value })}
                   >
                     {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                   </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Link hình ảnh</label>
-                  <input 
-                    type="text"
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
-                    placeholder="https://..."
-                    value={productFormData.image}
-                    onChange={(e) => setProductFormData({...productFormData, image: e.target.value})}
-                  />
+                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Hình ảnh sản phẩm</label>
+                  
+                  {/* Selector Tabs */}
+                  <div className="flex border-b border-[#E0E5F2] mb-4">
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMethod('upload')}
+                      className={`py-2 px-4 font-bold text-sm border-b-2 transition-colors flex items-center gap-2 ${
+                        imageInputMethod === 'upload'
+                          ? 'border-[#4318FF] text-[#4318FF]'
+                          : 'border-transparent text-[#A3AED0] hover:text-[#2B3674]'
+                      }`}
+                    >
+                      <UploadCloud size={16} />
+                      Tải lên từ máy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMethod('url')}
+                      className={`py-2 px-4 font-bold text-sm border-b-2 transition-colors flex items-center gap-2 ${
+                        imageInputMethod === 'url'
+                          ? 'border-[#4318FF] text-[#4318FF]'
+                          : 'border-transparent text-[#A3AED0] hover:text-[#2B3674]'
+                      }`}
+                    >
+                      <Link2 size={16} />
+                      Nhập liên kết URL
+                    </button>
+                  </div>
+
+                  {/* Image Tab Contents */}
+                  {imageInputMethod === 'upload' ? (
+                    <div className="space-y-4">
+                      {/* Upload Options: Local vs Cloud */}
+                      <div className="flex items-center gap-4 text-xs font-bold mb-2">
+                        <span className="text-[#A3AED0] uppercase tracking-wider">Nơi lưu trữ:</span>
+                        <label className="flex items-center gap-1.5 cursor-pointer text-[#2B3674]">
+                          <input
+                            type="radio"
+                            name="uploadType"
+                            value="local"
+                            checked={uploadType === 'local'}
+                            onChange={() => setUploadType('local')}
+                            className="w-4 h-4 text-[#4318FF] focus:ring-[#4318FF] cursor-pointer"
+                          />
+                          Lưu trên Server (Local)
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer text-[#2B3674]">
+                          <input
+                            type="radio"
+                            name="uploadType"
+                            value="cloud"
+                            checked={uploadType === 'cloud'}
+                            onChange={() => setUploadType('cloud')}
+                            className="w-4 h-4 text-[#4318FF] focus:ring-[#4318FF] cursor-pointer"
+                          />
+                          Lưu trên Cloud (Cloudinary)
+                        </label>
+                      </div>
+
+                      {/* Upload Area / Live Preview */}
+                      {productFormData.image ? (
+                        <div className="flex items-center gap-6 p-4 border border-[#E0E5F2] rounded-xl bg-[#F4F7FE]/20">
+                          <div className="w-24 h-24 rounded-lg overflow-hidden border border-[#E0E5F2] bg-white flex items-center justify-center p-1 shrink-0 shadow-sm">
+                            <img
+                              src={productFormData.image}
+                              alt="Preview"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-[#A3AED0] font-bold uppercase truncate">Đường dẫn ảnh hiện tại</p>
+                            <p className="text-sm text-[#2B3674] font-medium truncate mt-0.5" title={productFormData.image}>
+                              {productFormData.image}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setProductFormData(prev => ({ ...prev, image: '' }))}
+                              className="mt-2 text-xs font-bold text-red-500 hover:text-red-600 hover:underline"
+                            >
+                              Xóa hình ảnh
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative border-2 border-dashed border-[#E0E5F2] hover:border-[#4318FF] transition-colors rounded-xl p-8 flex flex-col items-center justify-center bg-[#F4F7FE]/10 hover:bg-[#F4F7FE]/20 group cursor-pointer h-40">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            disabled={uploading}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          />
+                          {uploading ? (
+                            <div className="flex flex-col items-center gap-2 text-[#4318FF]">
+                              <Loader2 size={36} className="animate-spin" />
+                              <span className="text-sm font-bold animate-pulse">Đang tải ảnh lên...</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center text-center">
+                              <UploadCloud size={36} className="text-[#A3AED0] group-hover:text-[#4318FF] transition-colors mb-2" />
+                              <span className="text-sm font-bold text-[#2B3674]">Click để tải lên ảnh sản phẩm từ máy</span>
+                              <span className="text-xs text-[#A3AED0] mt-1">Hỗ trợ file PNG, JPG, JPEG dưới 2MB</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                        placeholder="Dán link hình ảnh vào đây (https://...)"
+                        value={productFormData.image}
+                        onChange={(e) => setProductFormData({ ...productFormData, image: e.target.value })}
+                      />
+                      {productFormData.image && (
+                        <div className="flex items-center gap-4 p-3 border border-[#E0E5F2] rounded-xl bg-gray-50/50">
+                          <div className="w-16 h-16 rounded-lg overflow-hidden border border-[#E0E5F2] bg-white flex items-center justify-center p-1 shrink-0">
+                            <img
+                              src={productFormData.image}
+                              alt="Preview"
+                              className="w-full h-full object-contain"
+                              onError={(e) => { e.target.src = 'https://placehold.co/100x100?text=Invalid+URL'; }}
+                            />
+                          </div>
+                          <span className="text-xs text-[#A3AED0] font-bold">Hình ảnh xem trước</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Mô tả ngắn</label>
-                  <textarea 
+                  <textarea
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] h-24 resize-none"
                     value={productFormData.description}
-                    onChange={(e) => setProductFormData({...productFormData, description: e.target.value})}
+                    onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })}
                   ></textarea>
                 </div>
               </div>
               <div className="flex gap-3 justify-end mt-4">
-                <button 
+                <button
                   type="button"
                   onClick={() => setIsProductModalOpen(false)}
                   className="px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-xl font-bold hover:bg-[#E0E5F2] transition-colors"
                 >
                   Hủy
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95"
                 >

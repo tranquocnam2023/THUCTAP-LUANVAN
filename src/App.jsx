@@ -40,10 +40,7 @@ function App() {
     }
   }
 
-  if (isAdmin && !isAdminPath) {
-    window.location.replace('/admin');
-    return null;
-  }
+
 
   if (isAdminPath) {
     return (

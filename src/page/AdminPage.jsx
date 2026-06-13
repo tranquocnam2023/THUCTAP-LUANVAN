@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import AdminProducts from './AdminProducts';
 import AdminOrders from '../components/AdminOrders';
 import AdminDashboard from '../components/AdminDashboard';
@@ -93,6 +94,13 @@ export default function AdminPage() {
         </nav>
 
         <div className="p-4 bg-[#FFFFFF] border-t border-[#E0E5F2] space-y-2">
+          <Link
+            to="/"
+            className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#4318FF] transition-colors rounded-xl hover:bg-[#F4F7FE] group"
+          >
+            <LayoutGrid className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
+            Xem cửa hàng
+          </Link>
           <button
             onClick={handleLogout}
             className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#EE5D50] transition-colors rounded-xl hover:bg-[#FFF5F5] group"

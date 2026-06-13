@@ -151,36 +151,6 @@ export default function Header() {
             </Link>
         </div>
       </div>
-      
-      {/* Main Navigation Row */}
-      <div className="w-full" style={{ backgroundColor: THEME.secondary }}>
-        <div className="container-box flex items-center justify-center h-12 overflow-x-auto text-sm">
-          {BRANDS.map((brand, idx) => (
-            <Link 
-              key={idx} 
-              to={`/danh-muc/${brand.toLowerCase()}`} 
-              className="flex-1 text-center h-full flex items-center justify-center px-2 transition font-medium whitespace-nowrap"
-              style={{ color: THEME.textLight }}
-              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = THEME.primary; }}
-              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = THEME.textLight; }}
-            >
-              {brand}
-            </Link>
-          ))}
-          {OTHER_CATEGORIES.map((cat, idx) => (
-            <Link 
-              key={idx + BRANDS.length} 
-              to={`/danh-muc/${cat.toLowerCase().replace(/, /g, '-').replace(/ /g, '-')}`} 
-              className="flex-1 text-center h-full flex items-center justify-center px-2 transition font-medium whitespace-nowrap"
-              style={{ color: THEME.textLight }}
-              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = THEME.primary; }}
-              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = THEME.textLight; }}
-            >
-              {cat}
-            </Link>
-          ))}
-        </div>
-      </div>
     </header>
   );
 }

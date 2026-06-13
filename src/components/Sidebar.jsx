@@ -1,58 +1,58 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { categoryService } from '../services/categoryService';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 
-// Sidebar.jsx
-const THEME = {
-  primary: '#288ad6', 
-  sidebarBg: '#ffffff', 
-  border: '#e5e7eb', 
-  textDark: '#333333', 
-};
+const SIDEBAR_ITEMS = [
+  {
+    name: 'Điện thoại',
+    path: '/danh-muc/điện thoại'
+  },
+  {
+    name: 'Tablet',
+    path: '/danh-muc/tablet'
+  },
+  {
+    name: 'Phụ kiện',
+    path: '/danh-muc/phụ kiện'
+  },
+  {
+    name: 'Đồng hồ',
+    path: '/danh-muc/đồng hồ'
+  }
+];
 
 export default function Sidebar() {
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    categoryService.getAll()
-      .then(data => {
-        if (data && data.length > 0) {
-          setCategories(data);
-        }
-      })
-      .catch(err => console.error("Lỗi Sidebar API:", err));
-  }, []);
+  const location = useLocation();
 
   return (
     <aside 
-      className="w-64 flex-shrink-0 rounded shadow-sm border h-fit overflow-hidden"
-      style={{ backgroundColor: THEME.sidebarBg, borderColor: THEME.border }}
+      className="w-64 flex-shrink-0 bg-white rounded-xl border border-gray-200/80 shadow-sm p-1.5 space-y-1 h-fit"
     >
-      <div 
-        className="p-3 border-b font-bold text-lg flex items-center space-x-2"
-        style={{ backgroundColor: 'rgba(0,0,0,0.02)', borderColor: THEME.border, color: THEME.textDark }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" style={{ color: THEME.primary }}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-        </svg>
-        <span>Danh Mục</span>
-      </div>
-      <nav className="flex flex-col py-1">
-        {categories.map((cat, idx) => (
-          <Link
-            key={idx}
-            to={`/danh-muc/${cat.name}`}
-            className="group flex flex-col justify-center px-4 py-3 hover:bg-gray-50 transition border-b"
-            style={{ borderColor: THEME.border }}
-          >
-            <div 
-              className={`font-medium flex items-center transition group-hover:text-blue-500`}
-              style={{ color: THEME.textDark }}
+      <nav className="flex flex-col">
+        {SIDEBAR_ITEMS.map((item, idx) => {
+          const isActive = decodeURIComponent(location.pathname) === item.path;
+          
+          return (
+            <Link
+              key={idx}
+              to={item.path}
+              className={`group flex items-center justify-between px-4 py-3.5 rounded-lg transition-all duration-200 font-semibold text-sm ${
+                isActive 
+                  ? 'bg-[rgba(40,138,214,0.08)] text-[#288ad6]' 
+                  : 'text-gray-700 hover:bg-[rgba(40,138,214,0.05)] hover:text-[#288ad6]'
+              }`}
             >
-              {cat.name}
-            </div>
-          </Link>
-        ))}
+              <span className="transition-transform duration-200 group-hover:translate-x-0.5">{item.name}</span>
+              <ChevronRight 
+                className={`w-4 h-4 transition-all duration-200 ${
+                  isActive 
+                    ? 'text-[#288ad6] translate-x-0.5' 
+                    : 'text-gray-300 group-hover:text-[#288ad6] group-hover:translate-x-0.5'
+                }`} 
+              />
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );
