@@ -9,7 +9,7 @@ export const useCart = () => {
   }
   return context;
 };
-//Lưu dữ liệu
+//Lưu dữ liệu vào LocalStorage
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem('cart');

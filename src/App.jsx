@@ -50,6 +50,8 @@ function App() {
     );
   }
 
+  const isCartOrCheckout = location.pathname === '/cart' || location.pathname === '/checkout';
+
   return (
     <div
       className="w-full flex justify-center font-sans min-h-screen"
@@ -59,31 +61,37 @@ function App() {
         {/* Header full width */}
         <Header />
 
-        {/* Main Container - Giới hạn 1200px, chứa Sidebar và Routes */}
-        <div className="container-box flex flex-1 w-full my-6 flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 px-4">
-
-          {/* Sidebar danh mục (Giữ nguyên khi chuyển trang) */}
-          <div className="hidden md:flex flex-col space-y-4 w-64">
-            <Sidebar />    
-            {/*thêm danh mục thì ghi đè*/}
-          </div>
-
-          {/* Nội dung chính linh hoạt theo Route */}
-          <main className="flex-1 bg-white p-6 rounded shadow-sm border border-bordercustom min-h-[50vh]">
+        {/* Main Container */}
+        {isCartOrCheckout ? (
+          <main className="flex-1 min-h-[50vh]">
             <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/profile" element={<AuthPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/donate" element={<DonatePage />} />
-              <Route path="/product/:id" element={<ProductDetailPage />} />
-              <Route path="/chinh-sach/:type" element={<PolicyPage />} />
-              <Route path="/danh-muc/:brand" element={<HomePage />} />
-              <Route path="/track" element={<OrderTrackingPage />} />
             </Routes>
           </main>
-        </div>
+        ) : (
+          <div className="container-box flex flex-1 w-full my-6 flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 px-4">
+            {/* Sidebar danh mục (Giữ nguyên khi chuyển trang) */}
+            <div className="hidden md:flex flex-col space-y-4 w-64">
+              <Sidebar />
+              {/*thêm danh mục thì ghi đè*/}
+            </div>
+
+            {/* Nội dung chính linh hoạt theo Route */}
+            <main className="flex-1 bg-white p-6 rounded shadow-sm border border-bordercustom min-h-[50vh]">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/profile" element={<AuthPage />} />
+                <Route path="/donate" element={<DonatePage />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
+                <Route path="/chinh-sach/:type" element={<PolicyPage />} />
+                <Route path="/danh-muc/:brand" element={<HomePage />} />
+                <Route path="/track" element={<OrderTrackingPage />} />
+              </Routes>
+            </main>
+          </div>
+        )}
 
         {/* Footer full width */}
         <Footer />

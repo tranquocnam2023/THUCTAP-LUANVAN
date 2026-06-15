@@ -12,14 +12,15 @@
   --color-sidebarbg: #ffffff;
 }
 
-/* Container dùng chung cho layout 1200px (Giống web Thương mại điện tử lớn) */
+/* Container dùng chung cho layout 1200px */
 .container-box {
   width: 1200px;
   max-width: 100%;
   margin: 0 auto;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   background-color: var(--color-bg);

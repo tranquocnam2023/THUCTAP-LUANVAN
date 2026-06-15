@@ -213,8 +213,8 @@ export default function OrderDetailsTracker({ order }) {
             Thông tin nhận hàng
           </h4>
           <div className="space-y-1.5 text-xs text-gray-600 font-medium">
-            <p className="font-bold text-gray-800 text-sm">{order.customerName}</p>
-            <p>SĐT: <strong className="text-gray-800">{order.customerPhone}</strong></p>
+            <p className="font-bold text-gray-800 text-sm">{order.receiverName || order.customerName}</p>
+            <p>SĐT: <strong className="text-gray-800">{order.receiverPhone || order.customerPhone}</strong></p>
             <p className="leading-relaxed">Địa chỉ: {order.shippingAddress || order.addressLine}</p>
           </div>
         </div>

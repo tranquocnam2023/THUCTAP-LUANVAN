@@ -66,7 +66,7 @@ export default function Footer() {
         style={{ backgroundColor: 'rgba(0,0,0,0.03)', borderColor: THEME.border, color: '#666' }}
       >
         <p>© 2026. Công ty điện thoại PhoneShop (Scampuchia-Scambodia). Địa chỉ: LuanVan, TP.HCM.</p>
-        <p className="mt-1 opacity-60">Giao diện này được xây dựng bởi Trần Quốc Nam.</p>
+        <p className="mt-1 opacity-60">Giao diện này được xây dựng bởi thằng Nam.</p>
       </div>
     </footer>
   );

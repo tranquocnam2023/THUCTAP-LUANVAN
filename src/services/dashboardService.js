@@ -74,15 +74,17 @@ export const dashboardService = {
       
       return orders.slice(0, 5).map(o => {
         let statusVN = 'Chờ xác nhận';
-        const status = o.status?.toLowerCase();
-        if (status === 'confirmed') statusVN = 'Đã xác nhận';
-        else if (status === 'shipping') statusVN = 'Đang giao';
-        else if (status === 'delivered') statusVN = 'Đã giao';
-        else if (status === 'cancelled') statusVN = 'Đã hủy';
+        const statusId = o.statusId;
+        if (statusId === 2) statusVN = 'Đã xác nhận';
+        else if (statusId === 3) statusVN = 'Đang giao';
+        else if (statusId === 4) statusVN = 'Đã giao';
+        else if (statusId === 5) statusVN = 'Đã hủy';
+        else if (statusId === 6) statusVN = 'Giao thất bại';
+        else if (statusId === 7) statusVN = 'Hoàn tiền';
         
         return {
           id: o.id,
-          customer: o.customerName || 'Khách hàng',
+          customer: o.receiverName || 'Khách hàng',
           status: statusVN,
           total: o.totalPrice ? o.totalPrice.toLocaleString('vi-VN') + 'đ' : '0đ'
         };

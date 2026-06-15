@@ -147,15 +147,15 @@ export default function ProductDetailPage() {
         { name: 'Trắng Pearl', hex: '#f8f9fa' }
       ];
     }
-    
+
     const extracted = [];
     const colorsSeen = new Set();
-    
+
     variants.forEach(v => {
       if (v.name) {
         const parts = v.name.split(' - ');
         const colorName = parts.length > 1 ? parts[1].trim() : parts[0].trim();
-        
+
         // Loại bỏ trường hợp trùng bộ nhớ
         const isStorage = /^\d+(GB|TB)$/i.test(colorName);
         if (!isStorage && !colorsSeen.has(colorName) && colorName !== 'Mặc định') {
@@ -197,7 +197,7 @@ export default function ProductDetailPage() {
   // Tính toán Giá và Tồn kho hiển thị thời gian thực theo biến thể
   const displayDetails = React.useMemo(() => {
     if (!product) return { price: 0, originalPrice: 0, stock: 0 };
-    
+
     if (selectedColor) {
       // Tìm variant khớp màu sắc (và dung lượng nếu có chọn)
       const matched = variants.find(v => {
@@ -206,16 +206,16 @@ export default function ProductDetailPage() {
         const matchesStorage = selectedStorage ? nameLower.includes(selectedStorage.toLowerCase()) : true;
         return matchesColor && matchesStorage;
       });
-      
+
       if (matched) {
         return {
           price: matched.price,
-          originalPrice: matched.price * 1.12, 
+          originalPrice: matched.price * 1.12,
           stock: matched.totalStock - matched.reservedStock
         };
       }
     }
-    
+
     return {
       price: product.price,
       originalPrice: product.originalPrice || (product.price * 1.1),
@@ -231,7 +231,7 @@ export default function ProductDetailPage() {
       setTimeout(() => {
         setSelectedColor('');
         setActiveImage(product.image);
-        
+
         // Reset dải ảnh thumbnail về bộ ảnh chung
         const masterImgs = getMasterImages(product);
         setGalleryImages(masterImgs);
@@ -244,16 +244,16 @@ export default function ProductDetailPage() {
     setIsFading(true);
     setTimeout(() => {
       setSelectedColor(colorName);
-      
+
       // Tìm hình ảnh của màu sắc biến thể vừa chọn
-      const matchedVariant = variants.find(v => 
+      const matchedVariant = variants.find(v =>
         v.name && v.name.toLowerCase().includes(colorName.toLowerCase())
       );
-      
+
       if (matchedVariant && matchedVariant.imageId) {
         const varImg = matchedVariant.imageId;
         setActiveImage(varImg);
-        
+
         // Cập nhật thư viện ảnh: ảnh biến thể đưa lên đầu, kèm theo ảnh chung
         const masterImgs = getMasterImages(product);
         setGalleryImages([varImg, ...masterImgs.slice(1)]);
@@ -384,14 +384,13 @@ export default function ProductDetailPage() {
             <div className="bg-white rounded-[3rem] border border-gray-100 p-8 shadow-sm flex flex-col items-center relative">
               {/* Khung ảnh chính có hiệu ứng fade-in mượt mà */}
               <div className="relative w-full aspect-square max-w-[420px] mb-6 flex items-center justify-center overflow-hidden">
-                <img 
-                  src={activeImage} 
-                  alt={product.name} 
-                  className={`max-w-full max-h-full object-contain drop-shadow-2xl transition-all duration-200 transform ${
-                    isFading ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
-                  }`}
+                <img
+                  src={activeImage}
+                  alt={product.name}
+                  className={`max-w-full max-h-full object-contain drop-shadow-2xl transition-all duration-200 transform ${isFading ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
+                    }`}
                 />
-                
+
                 {product.discount && (
                   <div className="absolute top-0 right-0 bg-red-600 text-white font-black text-base px-3.5 py-1.5 rounded-2xl shadow-xl transform rotate-3 z-10">
                     -{product.discount}%
@@ -403,14 +402,13 @@ export default function ProductDetailPage() {
               <div className="w-full space-y-4">
                 <div className="flex gap-3 overflow-x-auto w-full py-2 justify-center scroll-smooth">
                   {galleryImages.map((img, idx) => (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       onClick={() => handleThumbnailClick(img)}
-                      className={`flex-shrink-0 w-16 h-16 rounded-2xl border-2 p-1.5 cursor-pointer bg-white transition-all hover:scale-105 active:scale-95 ${
-                        activeImage === img 
-                          ? 'border-blue-500 ring-2 ring-blue-50' 
-                          : 'border-gray-100 hover:border-blue-200'
-                      }`}
+                      className={`flex-shrink-0 w-16 h-16 rounded-2xl border-2 p-1.5 cursor-pointer bg-white transition-all hover:scale-105 active:scale-95 ${activeImage === img
+                        ? 'border-blue-500 ring-2 ring-blue-50'
+                        : 'border-gray-100 hover:border-blue-200'
+                        }`}
                     >
                       <img src={img} className="w-full h-full object-contain" alt="" />
                     </div>
@@ -514,11 +512,10 @@ export default function ProductDetailPage() {
                           key={storage}
                           type="button"
                           onClick={() => handleStorageClick(storage)}
-                          className={`py-3 rounded-2xl border-2 font-black transition-all ${
-                            isSelected
-                              ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-md transform scale-[1.02]'
-                              : 'border-gray-100 text-gray-500 hover:border-blue-200'
-                          }`}
+                          className={`py-3 rounded-2xl border-2 font-black transition-all ${isSelected
+                            ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-md transform scale-[1.02]'
+                            : 'border-gray-100 text-gray-500 hover:border-blue-200'
+                            }`}
                         >
                           {storage}
                         </button>
@@ -538,18 +535,17 @@ export default function ProductDetailPage() {
                           <button
                             type="button"
                             onClick={() => handleColorClick(color.name)}
-                            className={`w-11 h-11 rounded-full border-2 transition-all shadow-sm hover:scale-105 active:scale-95 flex items-center justify-center ${
-                              isSelected 
-                                ? 'border-blue-600 ring-4 ring-blue-100 scale-105 shadow-md' 
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                            className={`w-11 h-11 rounded-full border-2 transition-all shadow-sm hover:scale-105 active:scale-95 flex items-center justify-center ${isSelected
+                              ? 'border-blue-600 ring-4 ring-blue-100 scale-105 shadow-md'
+                              : 'border-gray-200 hover:border-gray-300'
+                              }`}
                             style={{ backgroundColor: color.hex }}
                             title={color.name}
                           >
                             {isSelected && (
-                              <Check 
-                                size={16} 
-                                className={color.hex === '#f8f9fa' ? 'text-gray-800 stroke-[3.5]' : 'text-white stroke-[3.5]'} 
+                              <Check
+                                size={16}
+                                className={color.hex === '#f8f9fa' ? 'text-gray-800 stroke-[3.5]' : 'text-white stroke-[3.5]'}
                               />
                             )}
                           </button>
@@ -613,7 +609,7 @@ export default function ProductDetailPage() {
                   >
                     {displayDetails.stock > 0 ? 'MUA NGAY' : 'HẾT HÀNG'}
                     <span className="text-[10px] font-bold opacity-80 normal-case mt-0.5">
-                      {displayDetails.stock > 0 ? '(Giao tận nơi hoặc nhận tại siêu thị)' : '(Vui lòng quay lại sau)'}
+                      {displayDetails.stock > 0 ? '(Giao tận nơi hoặc nhận tại cửa hàng)' : '(Vui lòng quay lại sau)'}
                     </span>
                   </button>
                   <button
@@ -629,7 +625,7 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Siêu thị gần bạn */}
+              {/* cửa hàng gần bạn */}
               <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-600">
@@ -640,7 +636,7 @@ export default function ProductDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Hỗ trợ nhanh</p>
-                    <p className="text-base font-black text-gray-800">Tìm siêu thị gần bạn</p>
+                    <p className="text-base font-black text-gray-800">Tìm cửa hàng gần bạn</p>
                   </div>
                 </div>
               </div>
@@ -651,7 +647,7 @@ export default function ProductDetailPage() {
 
       {/* POPUP LIGHTBOX "XEM HÌNH THỰC TẾ" (Fullscreen Carousel Modal) */}
       {isLightboxOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 md:p-6 animate-in fade-in duration-300"
           onClick={() => setIsLightboxOpen(false)}
         >
@@ -660,7 +656,7 @@ export default function ProductDetailPage() {
             <span className="font-bold text-xs uppercase tracking-widest text-gray-400">
               Hình thực tế {selectedColor ? `màu ${selectedColor}` : 'sản phẩm'} ({lightboxActiveIndex + 1}/{galleryImages.length})
             </span>
-            <button 
+            <button
               onClick={() => setIsLightboxOpen(false)}
               className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors focus:outline-none"
             >
@@ -679,13 +675,13 @@ export default function ProductDetailPage() {
             </button>
 
             {/* Large Active Image wrapper */}
-            <div 
+            <div
               className="w-full h-full flex items-center justify-center px-12 md:px-20"
               onClick={(e) => e.stopPropagation()}
             >
-              <img 
-                src={galleryImages[lightboxActiveIndex]} 
-                alt="" 
+              <img
+                src={galleryImages[lightboxActiveIndex]}
+                alt=""
                 className="max-w-full max-h-full object-contain rounded-lg drop-shadow-2xl animate-in zoom-in-95 duration-200"
               />
             </div>
@@ -700,19 +696,18 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Bottom strip: Thumbnails carousel scroll */}
-          <div 
+          <div
             className="py-4 border-t border-white/10 shrink-0 w-full flex justify-center gap-3 overflow-x-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {galleryImages.map((img, idx) => (
-              <div 
+              <div
                 key={idx}
                 onClick={() => setLightboxActiveIndex(idx)}
-                className={`w-14 h-14 rounded-xl p-1 bg-white cursor-pointer transition-all ${
-                  lightboxActiveIndex === idx 
-                    ? 'ring-4 ring-blue-500 opacity-100 scale-105' 
-                    : 'opacity-50 hover:opacity-80'
-                }`}
+                className={`w-14 h-14 rounded-xl p-1 bg-white cursor-pointer transition-all ${lightboxActiveIndex === idx
+                  ? 'ring-4 ring-blue-500 opacity-100 scale-105'
+                  : 'opacity-50 hover:opacity-80'
+                  }`}
               >
                 <img src={img} className="w-full h-full object-contain rounded" alt="" />
               </div>

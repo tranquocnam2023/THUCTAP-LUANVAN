@@ -39,17 +39,29 @@ export default function AdminOrders() {
         console.log("AdminOrders: Đã tải dữ liệu thành công từ API:", data);
         if (Array.isArray(data)) {
           if (data.length > 0) {
-            const mappedOrders = data.map(order => ({
-              id: order.id,
-              customer: order.customerName || 'Khách hàng',
-              phone: order.customerPhone || 'N/A',
-              date: order.createdAt,
-              payment: order.status === 'Confirmed' || order.status === 'Delivered' || order.status === 'confirmed' || order.status === 'delivered' ? 'Đã thanh toán' : 'Chờ thanh toán',
-              amount: order.totalPrice,
-              status: order.status?.toLowerCase() || 'pending',
-              failedDeliveryCount: order.failedDeliveryCount || 0,
-              items: order.items || []
-            }));
+            const mappedOrders = data.map(order => {
+              const statusMap = {
+                1: 'pending',
+                2: 'confirmed',
+                3: 'shipping',
+                4: 'delivered',
+                5: 'cancelled',
+                6: 'shipping_failed',
+                7: 'refunded'
+              };
+              const statusStr = statusMap[order.statusId] || 'pending';
+              return {
+                id: order.id,
+                customer: order.receiverName || 'Khách hàng',
+                phone: order.receiverPhone || 'N/A',
+                date: order.createdAt,
+                payment: order.statusId === 2 || order.statusId === 3 || order.statusId === 4 ? 'Đã thanh toán' : 'Chờ thanh toán',
+                amount: order.totalPrice,
+                status: statusStr,
+                failedDeliveryCount: order.failedDeliveryCount || 0,
+                items: order.items || []
+              };
+            });
             console.log("AdminOrders: Mapped orders:", mappedOrders);
             setOrders(mappedOrders);
           } else {
@@ -154,8 +166,8 @@ export default function AdminOrders() {
       return newStatus === 'delivered' || newStatus === 'shipping_failed';
     }
     if (currentStatus === 'shipping_failed') {
-      // Giao thất bại có thể hủy đơn (cancelled - chỉ khi failedCount >= 3) hoặc giao lại (shipping)
-      return newStatus === 'shipping' || (newStatus === 'cancelled' && failedCount >= 3);
+      // Giao thất bại có thể hủy đơn trực tiếp hoặc giao lại (shipping)
+      return newStatus === 'shipping' || newStatus === 'cancelled';
     }
     return false;
   };
@@ -414,15 +426,10 @@ export default function AdminOrders() {
                             >
                               Giao lại
                             </button>
-                            <button 
+                             <button 
                               onClick={() => handleStatusChange(order.id, 'cancelled')}
-                              disabled={order.failedDeliveryCount < 3}
-                              className={`text-[10px] font-extrabold px-2 py-1 rounded-lg border transition-all whitespace-nowrap ${
-                                order.failedDeliveryCount >= 3 
-                                  ? 'text-[#EE5D50] hover:underline bg-[#EE5D50]/5 border-[#EE5D50]/10 hover:bg-[#EE5D50]/10 active:scale-95' 
-                                  : 'text-gray-300 bg-gray-50 border-gray-100 cursor-not-allowed'
-                              }`}
-                              title={order.failedDeliveryCount >= 3 ? "Hủy đơn hàng" : "Hủy đơn (chỉ khả dụng sau khi giao thất bại đủ 3 lần)"}
+                              className="text-[10px] font-extrabold px-2 py-1 rounded-lg border transition-all whitespace-nowrap text-[#EE5D50] hover:underline bg-[#EE5D50]/5 border-[#EE5D50]/10 hover:bg-[#EE5D50]/10 active:scale-95"
+                              title="Hủy đơn hàng"
                             >
                               Hủy đơn
                             </button>

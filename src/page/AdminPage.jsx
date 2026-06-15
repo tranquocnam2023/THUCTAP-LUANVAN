@@ -6,9 +6,10 @@ import AdminDashboard from '../components/AdminDashboard';
 import AdminCustomers from '../components/AdminCustomers';
 import AdminCategories from '../components/AdminCategories';
 import AdminReviews from '../components/AdminReviews';
+import AdminPromotions from '../components/AdminPromotions';
 import { dashboardService } from '../services/dashboardService';
 import { authService } from '../services/authService';
-import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star, LayoutGrid } from 'lucide-react';
+import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star, LayoutGrid, Ticket } from 'lucide-react';
 
 const DASHBOARD_STATS = [
   { label: 'Tổng khách hàng', icon: Users, bgColor: '#5856d6', textColor: '#ffffff' },
@@ -49,6 +50,7 @@ export default function AdminPage() {
       case 'reviews': return 'Quản lý đánh giá';
       case 'orders': return 'Quản lý đơn hàng';
       case 'customers': return 'Quản lý khách hàng';
+      case 'promotions': return 'Quản lý mã khuyến mãi';
       case 'dashboard': return 'Bảng thống kê số liệu';
       default: return 'Trang quản trị';
     }
@@ -86,6 +88,7 @@ export default function AdminPage() {
           <SidebarItem id="reviews" icon={Star} label="Đánh giá" />
           <SidebarItem id="orders" icon={ShoppingCart} label="Đơn hàng" />
           <SidebarItem id="customers" icon={Users} label="Khách hàng" />
+          <SidebarItem id="promotions" icon={Ticket} label="Khuyến mãi" />
 
           <div className="pt-6">
             <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Hệ thống</p>
@@ -148,6 +151,7 @@ export default function AdminPage() {
           {activeAdminTab === 'reviews' && <AdminReviews />}
           {activeAdminTab === 'orders' && <AdminOrders />}
           {activeAdminTab === 'customers' && <AdminCustomers />}
+          {activeAdminTab === 'promotions' && <AdminPromotions />}
           {activeAdminTab === 'dashboard' && (
             <AdminDashboard />
           )}

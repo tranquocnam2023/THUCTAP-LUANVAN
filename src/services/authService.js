@@ -66,5 +66,9 @@ export const authService = {
 
   forgotPassword: (data) => {
     return api.post('/Auth/forgot-password', data);
+  },
+
+  googleLogin: (idToken) => {
+    return api.post('/Auth/google-login', { idToken });
   }
 };
