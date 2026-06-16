@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Layout, Bell, ShoppingCart, Settings2, Plus, Edit, Trash2, X, FolderTree, UploadCloud, Loader2, Link2 } from 'lucide-react';
+import { Package, Layout, Bell, ShoppingCart, Settings2, Plus, Edit, Trash2, X, FolderTree, UploadCloud, Loader2, Link2, ChevronDown, ChevronUp, Image as ImageIcon } from 'lucide-react';
 // import { TRANSACTIONS_MOCK } from '../utils/constants'; // Removed invalid import
 import AdminProductVariants from '../components/AdminProductVariants';
 import { categoryService } from '../services/categoryService';
+import { brandService } from '../services/brandService';
 import { productService } from '../services/productService';
 import { usePagination } from '../hooks/usePagination';
 import { useFormat } from '../hooks/useFormat';
+import { cleanDescription } from '../utils/productHelper';
 
 // gọi API
 const TRANSACTIONS = [
@@ -16,11 +18,11 @@ const TRANSACTIONS = [
 ];
 
 export default function AdminProducts() {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]); // Sidebar brands
+  const [dbCategories, setDbCategories] = useState([]); // Database categories
   const [products, setProducts] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState('');
   const [activeTxTab, setActiveTxTab] = useState(null);
-  const [selectedProductForVariants, setSelectedProductForVariants] = useState(null);
 
   // State for Product CRUD
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -31,9 +33,14 @@ export default function AdminProducts() {
     originalPrice: 0,
     stockQuantity: 0,
     categoryId: '',
+    brandId: '',
     description: '',
     image: ''
   });
+
+  // State for variants inside inventory
+  const [variants, setVariants] = useState([]);
+  const [expandedProducts, setExpandedProducts] = useState({});
 
   const [imageInputMethod, setImageInputMethod] = useState('upload'); // 'upload' | 'url'
   const [uploadType, setUploadType] = useState('local'); // 'local' | 'cloud'
@@ -109,7 +116,7 @@ export default function AdminProducts() {
         // Do backend không có endpoint getByCategory nên ta lấy tất cả và lọc ở client
         const allProducts = await productService.getAll();
         if (Array.isArray(allProducts)) {
-          const filtered = allProducts.filter(p => p.categoryId === category.id || p.CategoryId === category.id);
+          const filtered = allProducts.filter(p => p.brandId === category.id || p.BrandId === category.id);
           setProducts(filtered);
         } else {
           setProducts([]);
@@ -126,18 +133,40 @@ export default function AdminProducts() {
   useEffect(() => {
     const fetchCategoriesData = async () => {
       try {
-        const data = await categoryService.getAll();
-        if (data && data.length > 0) {
-          setCategories(data);
-          setSelectedBrand(data[0].name);
+        const [brandsData, catsData] = await Promise.all([
+          brandService.getAll(),
+          categoryService.getAll()
+        ]);
+        if (brandsData && brandsData.length > 0) {
+          setCategories(brandsData);
+          setSelectedBrand(brandsData[0].name);
+        }
+        if (catsData) {
+          setDbCategories(catsData);
         }
       } catch (error) {
-        console.log("Sử dụng dữ liệu ảo cho Danh mục");
+        console.log("Lỗi tải dữ liệu Thương hiệu/Danh mục", error);
       }
     };
 
     fetchCategoriesData();
   }, []);
+
+  const fetchVariants = async () => {
+    try {
+      const { variantService } = await import('../services/variantService');
+      const data = await variantService.getAll();
+      if (Array.isArray(data)) {
+        setVariants(data);
+      }
+    } catch (err) {
+      console.error("Lỗi tải biến thể:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchVariants();
+  }, [products]);
 
   useEffect(() => {
     fetchProducts();
@@ -159,8 +188,9 @@ export default function AdminProducts() {
         price: product.basePrice || product.price || 0,
         originalPrice: product.originalPrice || product.basePrice || product.price || 0,
         stockQuantity: product.totalStock ?? product.stock ?? product.stockQuantity ?? 0,
-        categoryId: product.categoryId || (categories.find(c => c.name === selectedBrand)?.id || ''),
-        description: product.description || '',
+        categoryId: product.categoryId || product.CategoryId || '',
+        brandId: product.brandId || product.BrandId || '',
+        description: cleanDescription(product.description),
         image: imgUrl
       });
       // Tự động chọn tab URL nếu đó là link ảnh ngoài (không phải localhost hoặc cloudinary)
@@ -176,7 +206,8 @@ export default function AdminProducts() {
         price: 0,
         originalPrice: 0,
         stockQuantity: 0,
-        categoryId: categories.find(c => c.name === selectedBrand)?.id || '',
+        categoryId: dbCategories[0]?.id || '',
+        brandId: categories.find(c => c.name === selectedBrand)?.id || '',
         description: '',
         image: ''
       });
@@ -194,12 +225,12 @@ export default function AdminProducts() {
       const payload = {
         name: productFormData.name,
         slug: productFormData.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
-        description: productFormData.description,
+        description: productFormData.description || '',
         basePrice: productFormData.price,
         totalStock: productFormData.stockQuantity,
         isActive: true,
-        shopId: 1, // Defaulting to shop 1 for now
         categoryId: parseInt(productFormData.categoryId) || 1,
+        brandId: parseInt(productFormData.brandId) || null,
         thumbnailImage: productFormData.image || "",
         mainImage: productFormData.image,
         images: ""
@@ -371,9 +402,7 @@ export default function AdminProducts() {
     );
   };
 
-  if (selectedProductForVariants) {
-    return <AdminProductVariants product={selectedProductForVariants} onBack={() => setSelectedProductForVariants(null)} />;
-  }
+
 
   return (
     <div className="flex flex-col md:flex-row min-h-full gap-6">
@@ -488,43 +517,57 @@ export default function AdminProducts() {
                 </thead>
                 <tbody className="text-sm">
                   {paginatedProducts.length > 0 ? (
-                    paginatedProducts.map((product) => (
-                      <tr key={product.id} className="border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group">
-                        <td className="py-4 px-2 font-bold text-[#2B3674]">{product.name}</td>
-                        <td className="py-4 px-2 text-center font-bold text-[#2B3674]">{product.totalStock ?? product.stock ?? product.stockQuantity ?? 0}</td>
-                        <td className="py-4 px-2 font-bold text-[#2B3674]">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
-                        <td className="py-4 px-2 text-center">
-                          <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${(product.totalStock ?? product.stock ?? product.stockQuantity ?? 0) > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
-                            {(product.totalStock ?? product.stock ?? product.stockQuantity ?? 0) > 0 ? 'Còn hàng' : 'Hết hàng'}
-                          </span>
-                        </td>
-                        <td className="py-4 px-2">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => setSelectedProductForVariants(product)}
-                              className="p-2 text-[#A3AED0] hover:text-[#4318FF] hover:bg-[#F4F7FE] rounded-lg transition-all"
-                              title="Quản lý biến thể"
-                            >
-                              <Settings2 size={18} />
-                            </button>
-                            <button
-                              onClick={() => handleOpenProductModal(product)}
-                              className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
-                              title="Sửa"
-                            >
-                              <Edit size={18} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(product.id)}
-                              className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
-                              title="Xóa"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                    paginatedProducts.map((product) => {
+                      const productVariants = variants.filter(v => v.productId === product.id);
+                      return (
+                        <React.Fragment key={product.id}>
+                          <tr className="border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group">
+                            <td className="py-4 px-2 font-bold text-[#2B3674]">{product.name}</td>
+                            <td className="py-4 px-2 text-center font-bold text-[#2B3674]">{product.totalStock ?? product.stock ?? product.stockQuantity ?? 0}</td>
+                            <td className="py-4 px-2 font-bold text-[#2B3674]">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
+                            <td className="py-4 px-2 text-center">
+                              <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${(product.totalStock ?? product.stock ?? product.stockQuantity ?? 0) > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                                {(product.totalStock ?? product.stock ?? product.stockQuantity ?? 0) > 0 ? 'Còn hàng' : 'Hết hàng'}
+                              </span>
+                            </td>
+                            <td className="py-4 px-2">
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => handleOpenProductModal(product)}
+                                  className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
+                                  title="Sửa"
+                                >
+                                  <Edit size={18} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                  className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
+                                  title="Xóa"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          {productVariants.length > 0 && productVariants.map((v) => (
+                            <tr key={`v-${v.id}`} className="border-b border-[#E0E5F2]/60 hover:bg-[#F4F7FE]/40 transition-colors text-xs text-gray-600 bg-gray-50/50">
+                              <td className="py-3 px-6 font-medium text-gray-700 flex items-center gap-2">
+                                <span className="text-gray-400">↳</span>
+                                <span>{v.name}</span>
+                              </td>
+                              <td className="py-3 px-2 text-center font-semibold text-gray-700">{v.totalStock}</td>
+                              <td className="py-3 px-2 font-semibold text-gray-700">{formatCurrency(v.price)}</td>
+                              <td className="py-3 px-2 text-center">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${v.totalStock > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                                  {v.totalStock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-2 text-center text-gray-400">-</td>
+                            </tr>
+                          ))}
+                        </React.Fragment>
+                      );
+                    })
                   ) : (
                     <tr>
                       <td colSpan="5" className="p-8 text-center text-gray-500 bg-white">
@@ -618,13 +661,25 @@ export default function AdminProducts() {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Thương hiệu</label>
+                  <select
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-[#FFFFFF]"
+                    value={productFormData.brandId}
+                    onChange={(e) => setProductFormData({ ...productFormData, brandId: e.target.value })}
+                  >
+                    <option value="">-- Chọn thương hiệu --</option>
+                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                  </select>
+                </div>
+                <div>
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Danh mục</label>
                   <select
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-[#FFFFFF]"
                     value={productFormData.categoryId}
                     onChange={(e) => setProductFormData({ ...productFormData, categoryId: e.target.value })}
                   >
-                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                    <option value="">-- Chọn danh mục --</option>
+                    {dbCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                   </select>
                 </div>
                 <div className="md:col-span-2">

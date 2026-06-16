@@ -76,7 +76,17 @@ export default function AdminOrders() {
       })
       .catch(err => {
         console.error("AdminOrders: Lỗi tải đơn hàng:", err);
-        setError(typeof err === 'object' ? JSON.stringify(err) : String(err));
+        let errorMsg = "Lỗi không xác định";
+        if (err?.response?.data?.message) {
+           errorMsg = err.response.data.message;
+        } else if (err?.message) {
+           errorMsg = err.message;
+        } else if (typeof err === 'string' && err.trim() !== '') {
+           errorMsg = err;
+        } else if (typeof err === 'object') {
+           errorMsg = JSON.stringify(err);
+        }
+        setError(errorMsg);
         setOrders([]);
       });
   }, []);

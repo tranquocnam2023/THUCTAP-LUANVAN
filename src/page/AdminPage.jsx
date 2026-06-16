@@ -5,11 +5,12 @@ import AdminOrders from '../components/AdminOrders';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminCustomers from '../components/AdminCustomers';
 import AdminCategories from '../components/AdminCategories';
-import AdminReviews from '../components/AdminReviews';
+import AdminBrands from '../components/AdminBrands';
 import AdminPromotions from '../components/AdminPromotions';
+import AdminProductVariants from '../components/AdminProductVariants';
 import { dashboardService } from '../services/dashboardService';
 import { authService } from '../services/authService';
-import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star, LayoutGrid, Ticket } from 'lucide-react';
+import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star, LayoutGrid, Ticket, Layers } from 'lucide-react';
 
 const DASHBOARD_STATS = [
   { label: 'Tổng khách hàng', icon: Users, bgColor: '#5856d6', textColor: '#ffffff' },
@@ -47,7 +48,8 @@ export default function AdminPage() {
     switch (activeAdminTab) {
       case 'products': return 'Quản lý sản phẩm';
       case 'categories': return 'Quản lý danh mục';
-      case 'reviews': return 'Quản lý đánh giá';
+      case 'brands': return 'Quản lý thương hiệu';
+      case 'variants': return 'Quản lý biến thể';
       case 'orders': return 'Quản lý đơn hàng';
       case 'customers': return 'Quản lý khách hàng';
       case 'promotions': return 'Quản lý mã khuyến mãi';
@@ -83,9 +85,10 @@ export default function AdminPage() {
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Chính</p>
           <SidebarItem id="dashboard" icon={Layout} label="Bảng thống kê" />
-          <SidebarItem id="products" icon={Package} label="Sản phẩm" />
           <SidebarItem id="categories" icon={FolderTree} label="Danh mục" />
-          <SidebarItem id="reviews" icon={Star} label="Đánh giá" />
+          <SidebarItem id="brands" icon={Star} label="Thương hiệu" />
+          <SidebarItem id="products" icon={Package} label="Sản phẩm" />
+          <SidebarItem id="variants" icon={Layers} label="Biến thể" />
           <SidebarItem id="orders" icon={ShoppingCart} label="Đơn hàng" />
           <SidebarItem id="customers" icon={Users} label="Khách hàng" />
           <SidebarItem id="promotions" icon={Ticket} label="Khuyến mãi" />
@@ -148,7 +151,8 @@ export default function AdminPage() {
         <main className="flex-1 overflow-y-auto px-8 pb-8 pt-4 bg-[#F4F7FE] scroll-smooth">
           {activeAdminTab === 'products' && <AdminProducts />}
           {activeAdminTab === 'categories' && <AdminCategories />}
-          {activeAdminTab === 'reviews' && <AdminReviews />}
+          {activeAdminTab === 'brands' && <AdminBrands />}
+          {activeAdminTab === 'variants' && <AdminProductVariants />}
           {activeAdminTab === 'orders' && <AdminOrders />}
           {activeAdminTab === 'customers' && <AdminCustomers />}
           {activeAdminTab === 'promotions' && <AdminPromotions />}

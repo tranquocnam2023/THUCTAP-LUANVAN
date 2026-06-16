@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductCard from '../components/product/ProductCard';
-// import productsData from '../utils/products.json'; // Removed mock data
 import Breadcrumb from '../components/Breadcrumb';
 import FilterBar from '../components/FilterBar';
 import { productService } from '../services/productService';
+import { categoryService } from '../services/categoryService';
 
 const THEME = {
   primary: '#288ad6', 
@@ -18,13 +18,16 @@ export default function HomePage() {
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [advancedFilters, setAdvancedFilters] = useState(null);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    productService.getAll()
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          // Chuẩn hóa dữ liệu từ API để khớp với props của ProductCard
-          const normalizedData = data.map(p => ({
+    Promise.all([
+      productService.getAll(),
+      categoryService.getAll().catch(() => [])
+    ])
+      .then(([productsData, categoriesData]) => {
+        if (Array.isArray(productsData) && productsData.length > 0) {
+          const normalizedData = productsData.map(p => ({
             ...p,
             price: p.price || p.basePrice,
             image: p.image || p.thumbnailImage || p.mainImage,
@@ -34,9 +37,12 @@ export default function HomePage() {
         } else {
           setProducts([]);
         }
+        if (Array.isArray(categoriesData)) {
+          setCategories(categoriesData);
+        }
       })
       .catch(err => {
-        console.error("Lỗi tải sản phẩm:", err);
+        console.error("Lỗi tải sản phẩm/danh mục:", err);
         setProducts([]);
       });
   }, []);
@@ -55,11 +61,19 @@ export default function HomePage() {
   };
 
   const filteredProducts = products.filter(product => {
-    // Quick brand filter
+    // Quick brand / category filter
     if (selectedBrand) {
       const brandLower = selectedBrand.toLowerCase();
       
+      // Check if selectedBrand is a Category name in database
+      const matchingCat = categories.find(c => c.name.toLowerCase() === brandLower);
+      if (matchingCat) {
+        return product.categoryId === matchingCat.id || product.CategoryId === matchingCat.id;
+      }
+      
       const matches = (product.brand && product.brand.toLowerCase() === brandLower) ||
+                      (product.brandName && product.brandName.toLowerCase() === brandLower) ||
+                      (product.BrandName && product.BrandName.toLowerCase() === brandLower) ||
                       product.name.toLowerCase().includes(brandLower) || 
                       (product.category && product.category.toLowerCase().includes(brandLower)) ||
                       (product.categoryName && product.categoryName.toLowerCase().includes(brandLower));

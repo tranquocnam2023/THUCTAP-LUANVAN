@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Filter, X } from 'lucide-react';
 import FilterModal from './FilterModal';
-import { BRANDS } from '../utils/constants';
+import { brandService } from '../services/brandService';
 
 const THEME = {
   primary: '#288ad6', 
@@ -10,7 +10,17 @@ const THEME = {
 
 export default function FilterBar({ selectedBrand, onSelectBrand, onApplyFilter, onClearAll }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const quickBrands = BRANDS;
+  const [quickBrands, setQuickBrands] = useState([]);
+
+  useEffect(() => {
+    brandService.getAll()
+      .then(data => {
+        if (Array.isArray(data)) {
+          setQuickBrands(data.map(b => b.name));
+        }
+      })
+      .catch(err => console.error("Lỗi tải thương hiệu cho FilterBar:", err));
+  }, []);
 
   return (
     <>

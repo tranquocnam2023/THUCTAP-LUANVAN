@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
-import { BRANDS } from '../utils/constants';
+import { brandService } from '../services/brandService';
 
 const filterData = {
-  brands: BRANDS,
   prices: ['Dưới 2 triệu', 'Từ 2 - 4 triệu', 'Từ 4 - 7 triệu', 'Từ 7 - 13 triệu', 'Từ 13 - 20 triệu', 'Trên 20 triệu'],
   types: ['Android', 'iPhone (iOS)', 'Điện thoại phổ thông', 'Điện thoại gập'],
   needs: ['Chơi game / Cấu hình cao', 'Pin khủng trên 7000 mAh', 'Chụp ảnh, quay phim', 'Livestream', 'Mỏng nhẹ'],
@@ -46,8 +45,19 @@ const FilterSection = ({ title, options, selected, onSelect, columns = 4 }) => {
 };
 
 export default function FilterModal({ onClose, onApply }) {
+  const [brands, setBrands] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [priceRange, setPriceRange] = useState([0, 54000000]);
+
+  useEffect(() => {
+    brandService.getAll()
+      .then(data => {
+        if (Array.isArray(data)) {
+          setBrands(data.map(b => b.name));
+        }
+      })
+      .catch(err => console.error("Lỗi tải thương hiệu cho FilterModal:", err));
+  }, []);
 
   const toggleFilter = (category, value) => {
     if (category === 'Giá') {
@@ -115,7 +125,7 @@ export default function FilterModal({ onClose, onApply }) {
 
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <FilterSection title="Hãng" options={filterData.brands} selected={selectedFilters['Hãng'] || []} onSelect={toggleFilter} />
+          <FilterSection title="Hãng" options={brands} selected={selectedFilters['Hãng'] || []} onSelect={toggleFilter} />
 
           <FilterSection title="Giá" options={filterData.prices} selected={selectedFilters['Giá'] || []} onSelect={toggleFilter} />
           {/* Custom price slider */}

@@ -1,48 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-
-const SIDEBAR_ITEMS = [
-  {
-    name: 'Điện thoại',
-    path: '/danh-muc/điện thoại'
-  },
-  {
-    name: 'Tablet',
-    path: '/danh-muc/tablet'
-  },
-  {
-    name: 'Phụ kiện',
-    path: '/danh-muc/phụ kiện'
-  },
-  {
-    name: 'Đồng hồ',
-    path: '/danh-muc/đồng hồ'
-  }
-];
+import { categoryService } from '../services/categoryService';
 
 export default function Sidebar() {
+  const [categories, setCategories] = useState([]);
   const location = useLocation();
+
+  useEffect(() => {
+    categoryService.getAll()
+      .then(data => {
+        if (Array.isArray(data)) {
+          setCategories(data);
+        }
+      })
+      .catch(err => console.error("Lỗi tải danh mục sidebar:", err));
+  }, []);
 
   return (
     <aside 
       className="w-64 flex-shrink-0 bg-white rounded-xl border border-gray-200/80 shadow-sm p-1.5 space-y-1 h-fit"
     >
       <nav className="flex flex-col">
-        {SIDEBAR_ITEMS.map((item, idx) => {
-          const isActive = decodeURIComponent(location.pathname) === item.path;
+        {categories.map((cat, idx) => {
+          const path = `/danh-muc/${encodeURIComponent(cat.name.toLowerCase())}`;
+          const isActive = decodeURIComponent(location.pathname).toLowerCase() === `/danh-muc/${cat.name.toLowerCase()}`;
           
           return (
             <Link
               key={idx}
-              to={item.path}
+              to={path}
               className={`group flex items-center justify-between px-4 py-3.5 rounded-lg transition-all duration-200 font-semibold text-sm ${
                 isActive 
                   ? 'bg-[rgba(40,138,214,0.08)] text-[#288ad6]' 
                   : 'text-gray-700 hover:bg-[rgba(40,138,214,0.05)] hover:text-[#288ad6]'
               }`}
             >
-              <span className="transition-transform duration-200 group-hover:translate-x-0.5">{item.name}</span>
+              <span className="transition-transform duration-200 group-hover:translate-x-0.5">{cat.name}</span>
               <ChevronRight 
                 className={`w-4 h-4 transition-all duration-200 ${
                   isActive 

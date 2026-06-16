@@ -152,19 +152,23 @@ export default function ProductDetailPage() {
     const colorsSeen = new Set();
 
     variants.forEach(v => {
-      if (v.name) {
+      let parsedAttr = {};
+      try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
+      let colorName = parsedAttr["Màu sắc"] || '';
+      
+      // Fallback
+      if (!colorName && v.name && v.name.includes(' - ')) {
         const parts = v.name.split(' - ');
-        const colorName = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+        colorName = parts[1] || '';
+      }
+      colorName = colorName.trim();
 
-        // Loại bỏ trường hợp trùng bộ nhớ
-        const isStorage = /^\d+(GB|TB)$/i.test(colorName);
-        if (!isStorage && !colorsSeen.has(colorName) && colorName !== 'Mặc định') {
-          colorsSeen.add(colorName);
-          extracted.push({
-            name: colorName,
-            hex: getHexForColor(colorName)
-          });
-        }
+      if (colorName && !colorsSeen.has(colorName) && colorName !== 'Mặc định') {
+        colorsSeen.add(colorName);
+        extracted.push({
+          name: colorName,
+          hex: getHexForColor(colorName)
+        });
       }
     });
 
@@ -183,12 +187,19 @@ export default function ProductDetailPage() {
     }
     const storages = new Set();
     variants.forEach(v => {
-      if (v.name) {
+      let parsedAttr = {};
+      try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
+      let storagePart = parsedAttr["Dung Lượng RAM - ROM"] || '';
+
+      // Fallback
+      if (!storagePart && v.name && v.name.includes(' - ')) {
         const parts = v.name.split(' - ');
-        const storagePart = parts.length > 1 ? parts[0].trim() : '';
-        if (/^\d+(GB|TB)$/i.test(storagePart)) {
-          storages.add(storagePart);
-        }
+        storagePart = parts[0] || '';
+      }
+      storagePart = storagePart.trim();
+
+      if (storagePart) {
+        storages.add(storagePart);
       }
     });
     return storages.size > 0 ? Array.from(storages) : ['128GB', '256GB', '512GB', '1TB'];
@@ -198,12 +209,24 @@ export default function ProductDetailPage() {
   const displayDetails = React.useMemo(() => {
     if (!product) return { price: 0, originalPrice: 0, stock: 0 };
 
-    if (selectedColor) {
-      // Tìm variant khớp màu sắc (và dung lượng nếu có chọn)
+    if (selectedColor || selectedStorage) {
+      // Tìm variant khớp màu sắc và dung lượng
       const matched = variants.find(v => {
-        const nameLower = v.name.toLowerCase();
-        const matchesColor = nameLower.includes(selectedColor.toLowerCase());
-        const matchesStorage = selectedStorage ? nameLower.includes(selectedStorage.toLowerCase()) : true;
+        let parsedAttr = {};
+        try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
+        let vColor = parsedAttr["Màu sắc"] || '';
+        let vStorage = parsedAttr["Dung Lượng RAM - ROM"] || '';
+        
+        // Fallback
+        if (!vColor && !vStorage && v.name && v.name.includes(' - ')) {
+            const parts = v.name.split(' - ');
+            vStorage = parts[0] || '';
+            vColor = parts[1] || '';
+        }
+
+        const matchesColor = selectedColor ? vColor.toLowerCase().includes(selectedColor.toLowerCase()) : true;
+        const matchesStorage = selectedStorage ? vStorage.toLowerCase().includes(selectedStorage.toLowerCase()) : true;
+        
         return matchesColor && matchesStorage;
       });
 
@@ -246,9 +269,15 @@ export default function ProductDetailPage() {
       setSelectedColor(colorName);
 
       // Tìm hình ảnh của màu sắc biến thể vừa chọn
-      const matchedVariant = variants.find(v =>
-        v.name && v.name.toLowerCase().includes(colorName.toLowerCase())
-      );
+      const matchedVariant = variants.find(v => {
+        let parsedAttr = {};
+        try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
+        let vColor = parsedAttr["Màu sắc"] || '';
+        if (!vColor && v.name && v.name.includes(' - ')) {
+            vColor = v.name.split(' - ')[1] || '';
+        }
+        return vColor.toLowerCase().includes(colorName.toLowerCase());
+      });
 
       if (matchedVariant && matchedVariant.imageId) {
         const varImg = matchedVariant.imageId;
