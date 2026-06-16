@@ -546,10 +546,10 @@ export default function CartPage() {
       }
 
       // 4. Place order
-      await orderService.checkout(payload);
+      const checkoutRes = await orderService.checkout(payload);
 
-      const newOrderCode = `PS${Math.floor(100000 + Math.random() * 900000)}`;
-      setOrderCode(newOrderCode);
+      const newOrderId = checkoutRes?.orderId || checkoutRes?.OrderId || `PS${Math.floor(100000 + Math.random() * 900000)}`;
+      setOrderCode(newOrderId);
       setIsFinished(true);
       clearCart();
     } catch (err) {

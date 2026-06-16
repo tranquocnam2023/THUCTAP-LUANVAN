@@ -1,7 +1,7 @@
 import api from './api';
 
 const STATIC_EMAIL_MAP = {
-  'admin@gmail.com': 'adminadmin',
+  'admin@gmail.com': 'admin',
   'staff1@gmail.com': 'Quốc Nam',
   'user01@gmail.com': 'Nguyễn Hoàng An'
 };
