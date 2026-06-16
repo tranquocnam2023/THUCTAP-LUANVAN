@@ -28,6 +28,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
+    // Nếu token hết hạn hoặc không hợp lệ (401 Unauthorized), xóa session và chuyển hướng về trang đăng nhập
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (!window.location.pathname.includes('/auth')) {
+        window.location.href = '/auth';
+      }
+    }
     return Promise.reject(error.response?.data || error.message);
   }
 );

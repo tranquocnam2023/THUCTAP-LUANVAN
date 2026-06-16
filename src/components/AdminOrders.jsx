@@ -27,7 +27,7 @@ export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState(null);
   const [cancelModal, setCancelModal] = useState({ isOpen: false, orderId: null, newStatus: null });
-  
+
   // Khởi tạo các hook
   const { formatCurrency, formatDate } = useFormat();
 
@@ -36,6 +36,7 @@ export default function AdminOrders() {
     setError(null);
     orderService.getAll()
       .then(data => {
+        // móc data sql server
         console.log("AdminOrders: Đã tải dữ liệu thành công từ API:", data);
         if (Array.isArray(data)) {
           if (data.length > 0) {
@@ -78,34 +79,34 @@ export default function AdminOrders() {
         console.error("AdminOrders: Lỗi tải đơn hàng:", err);
         let errorMsg = "Lỗi không xác định";
         if (err?.response?.data?.message) {
-           errorMsg = err.response.data.message;
+          errorMsg = err.response.data.message;
         } else if (err?.message) {
-           errorMsg = err.message;
+          errorMsg = err.message;
         } else if (typeof err === 'string' && err.trim() !== '') {
-           errorMsg = err;
+          errorMsg = err;
         } else if (typeof err === 'object') {
-           errorMsg = JSON.stringify(err);
+          errorMsg = JSON.stringify(err);
         }
         setError(errorMsg);
         setOrders([]);
       });
   }, []);
-  
+
   const filteredOrders = orders.filter(order => {
-    const matchesTab = activeTab === 'all' || 
-                       (activeTab === 'shipping' && (order.status === 'shipping' || order.status === 'shipping_failed')) ||
-                       order.status === activeTab;
-    const matchesSearch = String(order.id).toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          String(order.customer || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTab = activeTab === 'all' ||
+      (activeTab === 'shipping' && (order.status === 'shipping' || order.status === 'shipping_failed')) ||
+      order.status === activeTab;
+    const matchesSearch = String(order.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(order.customer || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
-  const { 
-    currentData: paginatedOrders, 
-    currentPage, 
-    totalPages, 
-    nextPage, 
-    prevPage, 
+  const {
+    currentData: paginatedOrders,
+    currentPage,
+    totalPages,
+    nextPage,
+    prevPage,
     goToPage,
     startIndex,
     endIndex,
@@ -221,14 +222,14 @@ export default function AdminOrders() {
       .then((res) => {
         alert(`Cập nhật trạng thái đơn hàng thành công!${stockMessage}`);
         const data = res?.data || res;
-        const nextFailedCount = (data && typeof data.failedDeliveryCount === 'number') 
-          ? data.failedDeliveryCount 
-          : (newStatus === 'shipping_failed' 
-            ? (orders.find(o => o.id === orderId)?.failedDeliveryCount || 0) + 1 
+        const nextFailedCount = (data && typeof data.failedDeliveryCount === 'number')
+          ? data.failedDeliveryCount
+          : (newStatus === 'shipping_failed'
+            ? (orders.find(o => o.id === orderId)?.failedDeliveryCount || 0) + 1
             : (orders.find(o => o.id === orderId)?.failedDeliveryCount || 0));
 
-        setOrders(prev => prev.map(o => o.id === orderId ? { 
-          ...o, 
+        setOrders(prev => prev.map(o => o.id === orderId ? {
+          ...o,
           status: newStatus,
           failedDeliveryCount: nextFailedCount
         } : o));
@@ -244,7 +245,7 @@ export default function AdminOrders() {
     const { orderId, newStatus } = cancelModal;
     const order = orders.find(o => o.id === orderId);
     const currentStatus = order ? order.status : 'pending';
-    
+
     setCancelModal({ isOpen: false, orderId: null, newStatus: null });
     executeStatusChange(orderId, newStatus, currentStatus);
   };
@@ -290,8 +291,8 @@ export default function AdminOrders() {
           const Icon = item.icon;
           const count = counts[item.countKey];
           return (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className="p-5 rounded-[20px] shadow-sm transition-all hover:shadow-md flex items-center justify-between h-28 bg-[#FFFFFF]"
             >
               <div className="flex flex-col">
@@ -319,15 +320,14 @@ export default function AdminOrders() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center px-6 py-3 rounded-[20px] text-sm font-bold transition-all whitespace-nowrap border ${
-                isActive 
-                ? 'bg-[#4318FF] text-[#FFFFFF] border-[#4318FF] shadow-md scale-[1.02]' 
-                : 'bg-[#FFFFFF] text-[#A3AED0] border-[#E0E5F2] hover:border-[#4318FF] hover:text-[#4318FF]'
-              }`}
+              className={`flex items-center px-6 py-3 rounded-[20px] text-sm font-bold transition-all whitespace-nowrap border ${isActive
+                  ? 'bg-[#4318FF] text-[#FFFFFF] border-[#4318FF] shadow-md scale-[1.02]'
+                  : 'bg-[#FFFFFF] text-[#A3AED0] border-[#E0E5F2] hover:border-[#4318FF] hover:text-[#4318FF]'
+                }`}
             >
               {Icon && <Icon className={`w-4 h-4 mr-3 ${isActive ? 'text-[#FFFFFF]' : tab.color}`} />}
               {tab.name}
-               <span className={`ml-3 px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
+              <span className={`ml-3 px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
                 {counts[tab.id]}
               </span>
             </button>
@@ -365,9 +365,8 @@ export default function AdminOrders() {
                     </td>
                     <td className="px-6 py-4 font-bold text-[#2B3674]">{formatDate(order.date)}</td>
                     <td className="px-6 py-4">
-                      <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${
-                        order.payment === 'Đã thanh toán' ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#F4F7FE] text-[#A3AED0]'
-                      }`}>
+                      <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${order.payment === 'Đã thanh toán' ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#F4F7FE] text-[#A3AED0]'
+                        }`}>
                         {order.payment}
                       </span>
                     </td>
@@ -377,7 +376,7 @@ export default function AdminOrders() {
                     {/* Cột 1: Trạng thái đơn hàng (Order Status) */}
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <select 
+                        <select
                           className="text-xs font-bold bg-[#F4F7FE] text-[#2B3674] rounded-xl px-3 py-2 border-none focus:outline-none focus:ring-1 focus:ring-[#4318FF] cursor-pointer hover:bg-[#E0E5F2] transition-all disabled:opacity-75 disabled:cursor-not-allowed"
                           value={getOrderStatus(order.status)}
                           disabled={order.status === 'shipping' || order.status === 'shipping_failed' || order.status === 'delivered' || order.status === 'cancelled'}
@@ -394,14 +393,14 @@ export default function AdminOrders() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center flex-wrap gap-1">
                         <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold inline-block ${getShippingStatus(order.status).style}`}>
-                          {order.status === 'shipping_failed' 
-                            ? `Giao thất bại (${order.failedDeliveryCount}/3 lần)` 
+                          {order.status === 'shipping_failed'
+                            ? `Giao thất bại (${order.failedDeliveryCount}/3 lần)`
                             : getShippingStatus(order.status).label}
                         </span>
-                        
+
                         {/* Nút giả lập hành động vận chuyển */}
                         {(order.status === 'confirmed' || order.status === 'preparing') && (
-                          <button 
+                          <button
                             onClick={() => handleStatusChange(order.id, 'shipping')}
                             className="text-[10px] font-extrabold text-[#4318FF] hover:underline px-2 py-1 bg-[#4318FF]/5 rounded-lg border border-[#4318FF]/10 transition-all hover:bg-[#4318FF]/10 active:scale-95 whitespace-nowrap"
                             title="Mô phỏng: Bên vận chuyển đến lấy hàng và bắt đầu giao"
@@ -411,14 +410,14 @@ export default function AdminOrders() {
                         )}
                         {order.status === 'shipping' && (
                           <>
-                            <button 
+                            <button
                               onClick={() => handleStatusChange(order.id, 'delivered')}
                               className="text-[10px] font-extrabold text-[#01B574] hover:underline px-2 py-1 bg-[#01B574]/5 rounded-lg border border-[#01B574]/10 transition-all hover:bg-[#01B574]/10 active:scale-95 whitespace-nowrap"
                               title="Mô phỏng: Bên vận chuyển cập nhật giao hàng thành công"
                             >
                               Xác nhận đã giao
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleStatusChange(order.id, 'shipping_failed')}
                               className="text-[10px] font-extrabold text-[#EE5D50] hover:underline px-2 py-1 bg-[#EE5D50]/5 rounded-lg border border-[#EE5D50]/10 transition-all hover:bg-[#EE5D50]/10 active:scale-95 whitespace-nowrap ml-1"
                               title="Mô phỏng: Giao hàng thất bại"
@@ -427,16 +426,17 @@ export default function AdminOrders() {
                             </button>
                           </>
                         )}
+
                         {order.status === 'shipping_failed' && (
                           <div className="flex gap-1.5 items-center">
-                            <button 
+                            <button
                               onClick={() => handleStatusChange(order.id, 'shipping')}
                               className="text-[10px] font-extrabold text-[#39B8FF] hover:underline px-2 py-1 bg-[#39B8FF]/5 rounded-lg border border-[#39B8FF]/10 transition-all hover:bg-[#39B8FF]/10 active:scale-95 whitespace-nowrap"
                               title="Mô phỏng: Giao hàng lại lần tiếp theo"
                             >
                               Giao lại
                             </button>
-                             <button 
+                            <button
                               onClick={() => handleStatusChange(order.id, 'cancelled')}
                               className="text-[10px] font-extrabold px-2 py-1 rounded-lg border transition-all whitespace-nowrap text-[#EE5D50] hover:underline bg-[#EE5D50]/5 border-[#EE5D50]/10 hover:bg-[#EE5D50]/10 active:scale-95"
                               title="Hủy đơn hàng"
@@ -463,13 +463,13 @@ export default function AdminOrders() {
             </tbody>
           </table>
         </div>
-        
+
         <div className="px-6 py-4 border-t border-[#E0E5F2] flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-sm font-bold text-[#A3AED0]">
             Hiển thị {startIndex}-{endIndex} trên {totalItems} đơn hàng
           </span>
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={prevPage}
               disabled={currentPage === 1}
               className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
@@ -485,7 +485,7 @@ export default function AdminOrders() {
                 {i + 1}
               </button>
             ))}
-            <button 
+            <button
               onClick={nextPage}
               disabled={currentPage === totalPages}
               className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
