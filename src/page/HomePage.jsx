@@ -106,6 +106,8 @@ export default function HomePage() {
     return true;
   });
 
+  const featuredProducts = products.filter(p => p.isFeatured || p.IsFeatured);
+
   return (
     <>
       <Breadcrumb items={[{ label: selectedBrand || advancedFilters ? 'Kết quả tìm kiếm' : 'Tất cả sản phẩm điện thoại' }]} />
@@ -121,6 +123,37 @@ export default function HomePage() {
           style={{ backgroundColor: 'rgba(40, 138, 214, 0.05)', color: THEME.secondary, borderColor: 'rgba(40, 138, 214, 0.2)' }}
         >
           Khám phá các sản phẩm điện thoại, phụ kiện và nhiều ưu đãi Mùa hè hấp dẫn.
+        </div>
+      )}
+
+      {/* SECTION SẢN PHẨM NỔI BẬT (Điện Máy Xanh Style) */}
+      {!selectedBrand && !advancedFilters && featuredProducts.length > 0 && (
+        <div className="w-full bg-gradient-to-r from-[#006ca2] via-[#0085bd] to-[#009ad3] rounded-3xl p-6 mb-8 border border-[#009ad3]/40 shadow-[0_4px_20px_rgba(0,108,162,0.25)] animate-in fade-in zoom-in-95 duration-500">
+          <div className="flex items-center justify-between mb-5 border-b border-white/20 pb-3">
+            <h3 className="text-lg font-black text-white flex items-center gap-2 drop-shadow-md">
+              <span className="animate-bounce">🌟</span>
+              <span>SẢN PHẨM NỔI BẬT NHẤT</span>
+            </h3>
+            <span className="text-[10px] bg-white/20 text-white font-black px-3 py-1 rounded-full border border-white/10 uppercase tracking-widest animate-pulse">
+              HOT SALE
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {featuredProducts.map((product) => (
+              <ProductCard 
+                 key={`featured-${product.id}`}
+                 id={product.id}
+                 name={product.name}
+                 price={product.price}
+                 originalPrice={product.originalPrice}
+                 discount={product.discount}
+                 specs={product.specs || []}
+                 image={product.image}
+                 stockQuantity={product.stockQuantity}
+                 isFeatured={true}
+              />
+            ))}
+          </div>
         </div>
       )}
       
@@ -150,6 +183,7 @@ export default function HomePage() {
                specs={product.specs || []}
                image={product.image}
                stockQuantity={product.stockQuantity}
+               isFeatured={product.isFeatured}
             />
           ))}
         </div>

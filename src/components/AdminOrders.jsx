@@ -346,8 +346,8 @@ export default function AdminOrders() {
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Ngày đặt</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Thanh toán</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Tổng cộng</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Trạng thái đơn hàng</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Trạng thái vận chuyển</th>
+                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Tình trạng đơn hàng</th>
+                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Trạng thái đơn hàng</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E0E5F2] text-sm">

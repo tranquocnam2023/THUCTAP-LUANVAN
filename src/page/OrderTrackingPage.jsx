@@ -49,6 +49,17 @@ export default function OrderTrackingPage() {
     setError('');
   };
 
+  const handleRefresh = async () => {
+    try {
+      const res = await api.get(`/Order/track?orderId=${orderId.trim()}&phoneNumber=${phone.trim()}`);
+      if (res) {
+        setOrder(res);
+      }
+    } catch (err) {
+      console.error('Lỗi khi tải lại thông tin đơn hàng:', err);
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       <Breadcrumb items={[{ label: 'Trang chủ', link: '/' }, { label: 'Tra cứu đơn hàng' }]} />
@@ -65,7 +76,7 @@ export default function OrderTrackingPage() {
               Tra cứu đơn hàng khác
             </button>
           </div>
-          <OrderDetailsTracker order={order} />
+          <OrderDetailsTracker order={order} onOrderCancelled={handleRefresh} />
         </div>
       ) : (
         // Chưa tra cứu: Hiển thị Form nhập liệu tra cứu

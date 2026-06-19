@@ -8,6 +8,8 @@ import AdminCategories from '../components/AdminCategories';
 import AdminBrands from '../components/AdminBrands';
 import AdminPromotions from '../components/AdminPromotions';
 import AdminProductVariants from '../components/AdminProductVariants';
+import AdminCreateProduct from './AdminCreateProduct';
+import AdminUpdateProduct from './AdminUpdateProduct';
 import { dashboardService } from '../services/dashboardService';
 import { authService } from '../services/authService';
 import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star, LayoutGrid, Ticket, Layers } from 'lucide-react';
@@ -21,6 +23,7 @@ const DASHBOARD_STATS = [
 
 export default function AdminPage() {
   const [activeAdminTab, setActiveAdminTab] = useState('dashboard');
+  const [editProductId, setEditProductId] = useState(null);
 
   // Khởi tạo state trống để sau này truyền API
   const [stats, setStats] = useState({ users: 0, revenue: 0, orders: 0, products: 0 });
@@ -54,6 +57,8 @@ export default function AdminPage() {
       case 'customers': return 'Quản lý khách hàng';
       case 'promotions': return 'Quản lý mã khuyến mãi';
       case 'dashboard': return 'Bảng thống kê số liệu';
+      case 'create_product': return 'Thêm sản phẩm mới';
+      case 'update_product': return 'Cập nhật sản phẩm';
       default: return 'Trang quản trị';
     }
   };
@@ -149,7 +154,9 @@ export default function AdminPage() {
 
         {/* Dynamic Page Content */}
         <main className="flex-1 overflow-y-auto px-8 pb-8 pt-4 bg-[#F4F7FE] scroll-smooth">
-          {activeAdminTab === 'products' && <AdminProducts />}
+          {activeAdminTab === 'products' && <AdminProducts onCreate={() => setActiveAdminTab('create_product')} onEdit={(id) => { setEditProductId(id); setActiveAdminTab('update_product'); }} />}
+          {activeAdminTab === 'create_product' && <AdminCreateProduct onBack={() => setActiveAdminTab('products')} />}
+          {activeAdminTab === 'update_product' && <AdminUpdateProduct productId={editProductId} onBack={() => setActiveAdminTab('products')} onCreateNew={() => setActiveAdminTab('create_product')} />}
           {activeAdminTab === 'categories' && <AdminCategories />}
           {activeAdminTab === 'brands' && <AdminBrands />}
           {activeAdminTab === 'variants' && <AdminProductVariants />}

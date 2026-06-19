@@ -1,7 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Image as ImageIcon, X, Check, Eye, FolderOpen } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Image as ImageIcon, X, FolderOpen, ChevronLeft, ChevronRight, PlusCircle, MinusCircle } from 'lucide-react';
 import { productService } from '../services/productService';
 import { variantService } from '../services/variantService';
+import { usePagination } from '../hooks/usePagination';
+
+// Helper to remove Vietnamese diacritics and generate uppercase SKU
+const generateSkuFromName = (name) => {
+  if (!name) return '';
+  let str = name.toString();
+  
+  // Remove Vietnamese accents
+  str = str.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
+  str = str.replace(/[èéẹẻẽêềếệểễ]/g, "e");
+  str = str.replace(/[ìíịỉĩ]/g, "i");
+  str = str.replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o");
+  str = str.replace(/[ùúụủũưừứựửữ]/g, "u");
+  str = str.replace(/[ỳýỵỷỹ]/g, "y");
+  str = str.replace(/đ/g, "d");
+  str = str.replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, "A");
+  str = str.replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, "E");
+  str = str.replace(/[ÌÍỊỈĨ]/g, "I");
+  str = str.replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, "O");
+  str = str.replace(/[ÙÚỤỦUƯỪỨỰỬỮ]/g, "U");
+  str = str.replace(/[ỲÝỴỶỸ]/g, "Y");
+  str = str.replace(/Đ/g, "D");
+  
+  // Remove special characters, keep letters, numbers, spaces, hyphens
+  str = str.replace(/[^A-Za-z0-9\s\-]/g, '');
+  
+  // Replace multiple spaces/hyphens with a single hyphen
+  str = str.replace(/[\s\-]+/g, '-');
+  
+  return str.toUpperCase().trim().replace(/^-+|-+$/g, '');
+};
 
 export default function AdminProductVariants() {
   const [variants, setVariants] = useState([]);
@@ -18,9 +49,8 @@ export default function AdminProductVariants() {
   const [variantImage, setVariantImage] = useState('');
   const [isActive, setIsActive] = useState(true);
 
-  // Dynamic spec states based on category
-  const [color, setColor] = useState('');
-  const [version, setVersion] = useState(''); // Used for sizes / storage / specs
+  // Dynamic attributes list [{ key: '', value: '' }]
+  const [attributes, setAttributes] = useState([]);
 
   const [imageInputMethod, setImageInputMethod] = useState('url'); // 'url' | 'upload'
   const [uploading, setUploading] = useState(false);
@@ -57,7 +87,7 @@ export default function AdminProductVariants() {
       setVariantPrice(v.price.toString());
       setVariantStock(v.totalStock.toString());
       setVariantImage(v.imageId || '');
-      setIsActive(true);
+      setIsActive(v.isActive ?? true);
 
       let parsedAttributes = {};
       try {
@@ -66,11 +96,15 @@ export default function AdminProductVariants() {
         console.error("Lỗi parse attributes", e);
       }
       
-      const vVersion = parsedAttributes["Dung Lượng RAM - ROM"] || '';
-      const vColor = parsedAttributes["Màu sắc"] || '';
+      const attrList = Object.entries(parsedAttributes)
+        .filter(([key]) => key !== 'SKU')
+        .map(([key, value]) => ({ key, value }));
 
-      setVersion(vVersion);
-      setColor(vColor);
+      if (attrList.length === 0) {
+        attrList.push({ key: 'Màu sắc', value: '' });
+        attrList.push({ key: 'Dung Lượng RAM - ROM', value: '' });
+      }
+      setAttributes(attrList);
     } else {
       setEditingVariant(null);
       setSelectedProductId(products[0]?.id?.toString() || '');
@@ -78,10 +112,27 @@ export default function AdminProductVariants() {
       setVariantStock('0');
       setVariantImage('');
       setIsActive(true);
-      setColor('');
-      setVersion('');
+      setAttributes([
+        { key: 'Màu sắc', value: '' },
+        { key: 'Dung Lượng RAM - ROM', value: '' }
+      ]);
     }
     setShowModal(true);
+  };
+
+  const handleAddAttribute = () => {
+    setAttributes([...attributes, { key: '', value: '' }]);
+  };
+
+  const handleRemoveAttribute = (index) => {
+    const updated = attributes.filter((_, i) => i !== index);
+    setAttributes(updated.length > 0 ? updated : [{ key: '', value: '' }]);
+  };
+
+  const handleAttributeChange = (index, field, val) => {
+    const updated = [...attributes];
+    updated[index][field] = val;
+    setAttributes(updated);
   };
 
   const handleFileChange = async (e) => {
@@ -109,54 +160,78 @@ export default function AdminProductVariants() {
     }
   };
 
+  // Auto-calculated fields
+  const selectedProduct = getProductById(parseInt(selectedProductId));
+  const attributeValuesStr = attributes.map(a => a.value.trim()).filter(Boolean).join(' ');
+  const generatedVariantName = selectedProduct ? (attributeValuesStr ? `${selectedProduct.name} ${attributeValuesStr}` : selectedProduct.name) : '';
+  const generatedSku = generateSkuFromName(generatedVariantName);
+
   const handleSave = async (e) => {
     e.preventDefault();
-    const product = getProductById(parseInt(selectedProductId));
-    if (!product) {
+    if (!selectedProduct) {
       alert('Vui lòng chọn sản phẩm hợp lệ!');
       return;
     }
 
-    // Construct variant name
-    const cleanVersion = version.trim() || 'Mặc định';
-    const cleanColor = color.trim();
-    const name = product.name;
-
-    // Check duplicate variant for this product
+    // Check duplicate variant configuration for this product
     const duplicate = variants.find(v => {
-      if (v.productId !== product.id) return false;
+      if (v.productId !== selectedProduct.id) return false;
       if (editingVariant && v.id === editingVariant.id) return false;
       
       let parsedAttr = {};
       try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
-      const vColor = (parsedAttr["Màu sắc"] || '').trim().toLowerCase();
-      const vVersion = (parsedAttr["Dung Lượng RAM - ROM"] || '').trim().toLowerCase();
       
-      return vColor === cleanColor.toLowerCase() && vVersion === cleanVersion.toLowerCase();
+      // Compare all non-SKU attributes
+      const currentAttrs = {};
+      attributes.forEach(a => {
+        if (a.key.trim() && a.value.trim()) {
+          currentAttrs[a.key.trim().toLowerCase()] = a.value.trim().toLowerCase();
+        }
+      });
+
+      const dbAttrs = {};
+      Object.entries(parsedAttr).forEach(([k, val]) => {
+        if (k !== 'SKU') {
+          dbAttrs[k.toLowerCase()] = String(val).toLowerCase();
+        }
+      });
+
+      const currentKeys = Object.keys(currentAttrs);
+      const dbKeys = Object.keys(dbAttrs);
+
+      if (currentKeys.length !== dbKeys.length) return false;
+      return currentKeys.every(k => currentAttrs[k] === dbAttrs[k]);
     });
 
     if (duplicate) {
-      alert(`Biến thể với cấu hình "${cleanVersion} - ${cleanColor}" đã tồn tại cho sản phẩm này!`);
+      alert(`Biến thể với cấu hình này đã tồn tại cho sản phẩm này!`);
       return;
     }
 
     // Price fallback logic
     let priceVal = parseFloat(variantPrice);
     if (isNaN(priceVal) || priceVal <= 0) {
-      priceVal = product.basePrice || product.price || 0;
+      priceVal = selectedProduct.basePrice || selectedProduct.price || 0;
     }
 
     const attributesObj = {};
-    if (cleanColor) attributesObj["Màu sắc"] = cleanColor;
-    if (cleanVersion) attributesObj["Dung Lượng RAM - ROM"] = cleanVersion;
+    attributes.forEach(a => {
+      if (a.key.trim() && a.value.trim()) {
+        attributesObj[a.key.trim()] = a.value.trim();
+      }
+    });
+    if (generatedSku) {
+      attributesObj["SKU"] = generatedSku;
+    }
 
     const payload = {
-      name,
+      name: generatedVariantName,
       price: priceVal,
       totalStock: parseInt(variantStock) || 0,
-      productId: product.id,
+      productId: selectedProduct.id,
       imageId: variantImage,
-      attributes: JSON.stringify(attributesObj)
+      attributes: JSON.stringify(attributesObj),
+      isActive: isActive
     };
 
     try {
@@ -188,15 +263,33 @@ export default function AdminProductVariants() {
     }
   };
 
-  const selectedProduct = getProductById(parseInt(selectedProductId));
-
+  // Search filtering
   const filteredVariants = variants.filter(v => {
     const product = getProductById(v.productId);
     const prodName = product ? product.name.toLowerCase() : '';
     const varName = v.name ? v.name.toLowerCase() : '';
+    let sku = '';
+    try {
+      const parsed = v.attributes ? JSON.parse(v.attributes) : {};
+      sku = (parsed["SKU"] || '').toLowerCase();
+    } catch (e) {}
+
     const query = searchTerm.toLowerCase();
-    return prodName.includes(query) || varName.includes(query);
+    return prodName.includes(query) || varName.includes(query) || sku.includes(query);
   });
+
+  // Pagination hook
+  const {
+    currentData: paginatedVariants,
+    currentPage,
+    totalPages,
+    nextPage,
+    prevPage,
+    goToPage,
+    startIndex,
+    endIndex,
+    totalItems
+  } = usePagination(filteredVariants, 10);
 
   return (
     <div className="animate-in fade-in duration-500 space-y-6">
@@ -204,7 +297,7 @@ export default function AdminProductVariants() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý Biến thể</h2>
-          <p className="text-sm text-[#A3AED0] font-medium mt-1">Quản lý kích thước, bộ nhớ, màu sắc và tồn kho của sản phẩm</p>
+          <p className="text-sm text-[#A3AED0] font-medium mt-1">Quản lý SKU, thông số, kích thước, màu sắc và tồn kho của sản phẩm</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <div className="relative group w-full md:w-80">
@@ -213,10 +306,13 @@ export default function AdminProductVariants() {
             </div>
             <input
               type="text"
-              placeholder="Tìm theo sản phẩm hoặc biến thể..."
+              placeholder="Tìm theo sản phẩm, biến thể, SKU..."
               className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] shadow-sm font-medium text-[#2B3674] placeholder-[#A3AED0]"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                goToPage(1);
+              }}
             />
           </div>
           <button
@@ -230,30 +326,36 @@ export default function AdminProductVariants() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8">
-        <div className="overflow-x-auto">
+      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8 p-6 flex flex-col">
+        <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[#E0E5F2]">
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] w-20">ID</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] w-24">Hình ảnh</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Sản phẩm gốc</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Thông số biến thể</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-right">Giá bán</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Tồn kho</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Thao tác</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] w-16">ID</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] w-24">Hình ảnh</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0]">Sản phẩm gốc</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0]">Mã SKU</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0]">Thông số biến thể</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] text-right">Giá bán</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Tồn kho</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Trạng thái</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E0E5F2] text-sm">
-              {filteredVariants.length > 0 ? (
-                filteredVariants.map((v) => {
+              {paginatedVariants.length > 0 ? (
+                paginatedVariants.map((v) => {
                   const product = getProductById(v.productId);
+                  let parsedAttr = {};
+                  try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
+                  const sku = parsedAttr["SKU"] || generateSkuFromName(v.name);
+
                   return (
                     <tr key={v.id} className="hover:bg-[#F4F7FE] transition-colors group">
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <span className="text-[#A3AED0] font-bold">#{v.id}</span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className="w-14 h-14 rounded-xl bg-[#F4F7FE] flex items-center justify-center overflow-hidden border border-[#E0E5F2] p-1">
                           {v.imageId ? (
                             <img src={v.imageId} alt="Variant" className="w-full h-full object-contain" />
@@ -262,32 +364,43 @@ export default function AdminProductVariants() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <span className="font-bold text-[#2B3674]">{product ? product.name : `Sản phẩm #${v.productId}`}</span>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="font-semibold text-gray-700 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg text-xs">
-                          {(() => {
-                            let parsedAttr = {};
-                            try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
-                            const vVersion = parsedAttr["Dung Lượng RAM - ROM"];
-                            const vColor = parsedAttr["Màu sắc"];
-                            if (vVersion && vColor) return `${vVersion} - ${vColor}`;
-                            if (vVersion) return vVersion;
-                            if (vColor) return vColor;
-                            return v.name || 'Mặc định';
-                          })()}
+                      <td className="px-4 py-4">
+                        <span className="font-mono text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-200">
+                          {sku}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap gap-1.5">
+                          {Object.entries(parsedAttr)
+                            .filter(([key]) => key !== 'SKU')
+                            .map(([key, val]) => (
+                              <span key={key} className="text-[11px] font-semibold text-gray-700 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-md">
+                                <strong className="text-gray-500">{key}:</strong> {String(val)}
+                              </span>
+                            ))
+                          }
+                          {Object.keys(parsedAttr).filter(k => k !== 'SKU').length === 0 && (
+                            <span className="text-xs text-gray-400 italic">Mặc định</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right">
                         <span className="font-bold text-[#2B3674] text-base">{v.price.toLocaleString('vi-VN')} ₫</span>
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-4 py-4 text-center">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${v.totalStock > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
                           {v.totalStock > 0 ? `Còn ${v.totalStock}` : 'Hết hàng'}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4 text-center">
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${v.isActive ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                          {v.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleOpenModal(v)}
@@ -310,7 +423,7 @@ export default function AdminProductVariants() {
                 })
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-6 py-20 text-center bg-[#FFFFFF]">
+                  <td colSpan="9" className="px-6 py-20 text-center bg-[#FFFFFF]">
                     <div className="flex flex-col items-center justify-center text-[#A3AED0]">
                       <FolderOpen size={64} strokeWidth={1} className="mb-4 opacity-50" />
                       <p className="text-lg font-bold text-[#2B3674]">Không tìm thấy biến thể nào</p>
@@ -321,6 +434,40 @@ export default function AdminProductVariants() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-[#E0E5F2] pt-4">
+            <div className="text-sm font-bold text-[#A3AED0]">
+              Hiển thị {startIndex}-{endIndex} trên {totalItems} biến thể
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={prevPage}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                <ChevronLeft size={16} /> TRƯỚC
+              </button>
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goToPage(i + 1)}
+                  className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-[#4318FF] text-[#FFFFFF] shadow-md' : 'bg-transparent text-[#A3AED0] hover:bg-[#F4F7FE]'}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={nextPage}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                SAU <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CRUD Modal */}
@@ -338,7 +485,7 @@ export default function AdminProductVariants() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Product Selection */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Sản phẩm</label>
+                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Sản phẩm gốc *</label>
                   <select
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-[#FFFFFF] font-medium"
                     value={selectedProductId}
@@ -349,31 +496,28 @@ export default function AdminProductVariants() {
                   </select>
                 </div>
 
+                {/* Variant Name & SKU Preview */}
                 <div>
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Phiên bản</label>
+                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Tên biến thể (Tự động sinh)</label>
                   <input
                     type="text"
-                    placeholder="VD: 128GB, 256GB, LTE, 40mm..."
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
-                    value={version}
-                    onChange={(e) => setVersion(e.target.value)}
-                    required
+                    readOnly
+                    className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-xl outline-none text-[#2B3674] font-medium select-all"
+                    value={generatedVariantName}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Màu sắc</label>
+                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Mã SKU (Tự động sinh)</label>
                   <input
                     type="text"
-                    placeholder="VD: Đen, Trắng, Titan Tự Nhiên..."
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    required
+                    readOnly
+                    className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-xl outline-none text-red-600 font-mono font-bold select-all"
+                    value={generatedSku}
                   />
                 </div>
 
-                {/* Price (Optional) */}
+                {/* Price */}
                 <div>
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá bán (Để trống = Theo sản phẩm gốc)</label>
                   <input
@@ -398,7 +542,7 @@ export default function AdminProductVariants() {
                 </div>
 
                 {/* Is Active */}
-                <div className="flex items-center gap-2 mt-4">
+                <div className="flex items-center gap-2 md:col-span-2">
                   <input
                     type="checkbox"
                     id="isActive"
@@ -407,6 +551,55 @@ export default function AdminProductVariants() {
                     className="w-5 h-5 rounded border-[#E0E5F2] text-[#4318FF] focus:ring-[#4318FF]"
                   />
                   <label htmlFor="isActive" className="text-sm font-bold text-[#2B3674] cursor-pointer">Hoạt động (Is Active)</label>
+                </div>
+
+                {/* Dynamic Attributes section */}
+                <div className="md:col-span-2 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-sm font-bold text-[#2B3674]">Thuộc tính của biến thể (Dynamic Attributes)</label>
+                    <button
+                      type="button"
+                      onClick={handleAddAttribute}
+                      className="text-xs font-bold text-[#4318FF] hover:text-[#3911D1] flex items-center gap-1"
+                    >
+                      <PlusCircle size={14} /> Thêm thuộc tính
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-1 border border-[#E0E5F2] rounded-xl p-3 bg-gray-50">
+                    {attributes.map((attr, index) => (
+                      <div key={index} className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-[#E0E5F2]">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            placeholder="Tên thuộc tính (VD: Màu sắc)"
+                            className="w-full px-3 py-1.5 border border-[#E0E5F2] rounded-lg text-xs font-semibold outline-none focus:border-[#4318FF]"
+                            value={attr.key}
+                            onChange={(e) => handleAttributeChange(index, 'key', e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            placeholder="Giá trị (VD: Đen)"
+                            className="w-full px-3 py-1.5 border border-[#E0E5F2] rounded-lg text-xs outline-none focus:border-[#4318FF]"
+                            value={attr.value}
+                            onChange={(e) => handleAttributeChange(index, 'value', e.target.value)}
+                            required
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAttribute(index)}
+                          className="text-[#EE5D50] hover:text-red-700 transition-colors p-1"
+                          title="Xóa thuộc tính"
+                        >
+                          <MinusCircle size={18} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Image Upload/URL Input */}

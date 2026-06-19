@@ -139,16 +139,27 @@ export default function AuthPage() {
     }
   }, [selectedProvinceId]);
 
+  const fetchMyOrders = (updatedSelectedId = null) => {
+    if (!isLoggedIn) return;
+    setOrdersLoading(true);
+    orderService.getMyOrders()
+      .then(res => {
+        if (Array.isArray(res)) {
+          setOrders(res);
+          if (updatedSelectedId) {
+            const updated = res.find(o => o.id === updatedSelectedId);
+            if (updated) setSelectedOrder(updated);
+          }
+        }
+      })
+      .catch(err => console.error("Lỗi tải lịch sử đơn hàng:", err))
+      .finally(() => setOrdersLoading(false));
+  };
+
   // Fetch lịch sử mua hàng khi chuyển sang tab history
   useEffect(() => {
-    if (profileTab === 'history' && isLoggedIn) {
-      setOrdersLoading(true);
-      orderService.getMyOrders()
-        .then(res => {
-          if (Array.isArray(res)) setOrders(res);
-        })
-        .catch(err => console.error("Lỗi tải lịch sử đơn hàng:", err))
-        .finally(() => setOrdersLoading(false));
+    if (profileTab === 'history') {
+      fetchMyOrders();
     }
   }, [profileTab, isLoggedIn]);
 
@@ -939,7 +950,7 @@ export default function AuthPage() {
                 </div>
 
                 {selectedOrder ? (
-                  <OrderDetailsTracker order={selectedOrder} />
+                  <OrderDetailsTracker order={selectedOrder} onOrderCancelled={() => fetchMyOrders(selectedOrder.id)} />
                 ) : ordersLoading ? (
                   <div className="flex justify-center items-center py-10 text-primary gap-2">
                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>

@@ -14,7 +14,8 @@ export default function ProductCard({
   originalPrice, 
   specs, 
   discount,
-  stockQuantity
+  stockQuantity,
+  isFeatured
 }) {
   return (
     <Link 
@@ -25,14 +26,19 @@ export default function ProductCard({
       onMouseOut={(e) => { e.currentTarget.style.borderColor = THEME.border; }}
     >
       
-      {/* Badge Giảm giá */}
-      {discount && (
-        <div className="absolute top-2 right-2 flex flex-col space-y-1 z-10 text-[11px] font-bold">
-          <span className="bg-red-500 text-white px-1.5 py-0.5 rounded-sm">
+      {/* Badge Giảm giá & Nổi bật */}
+      <div className="absolute top-2 right-2 flex flex-col space-y-1 z-10 text-[11px] font-bold">
+        {discount && (
+          <span className="bg-red-500 text-white px-1.5 py-0.5 rounded-sm text-center">
             GIẢM {discount}%
           </span>
-        </div>
-      )}
+        )}
+        {isFeatured && (
+          <span className="bg-orange-500 text-white px-1.5 py-0.5 rounded-sm text-center">
+            HOT
+          </span>
+        )}
+      </div>
 
       {/* Product Image */}
       <div className="w-full h-44 mb-3 mt-4 overflow-hidden flex items-center justify-center relative">
