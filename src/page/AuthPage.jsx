@@ -631,6 +631,11 @@ export default function AuthPage() {
                       <p className="font-bold text-primary">{userProfile?.role}</p>
                     </div>
 
+                    <div className="space-y-1">
+                      <span className="text-xs text-gray-400 font-bold uppercase">Điểm tích lũy Quà Tặng VIP</span>
+                      <p className="font-bold text-yellow-600 text-lg">{(userProfile?.rewardPoints || 0).toLocaleString('vi-VN')} điểm</p>
+                    </div>
+
                     <div className="md:col-span-2 pt-4 border-t border-gray-200/50 flex justify-end">
                       <button
                         onClick={() => setIsEditingProfile(true)}

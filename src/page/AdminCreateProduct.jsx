@@ -46,9 +46,17 @@ export default function AdminCreateProduct({ onBack }) {
     fetchData();
   }, []);
 
-  // Handle auto slug
+  // Handle auto slug with Vietnamese diacritic removal
   const generateSlug = (text) => {
-    return text.toString().toLowerCase()
+    let str = text.toString().toLowerCase();
+    str = str.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
+    str = str.replace(/[èéẹẻẽêềếệểễ]/g, "e");
+    str = str.replace(/[ìíịỉĩ]/g, "i");
+    str = str.replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o");
+    str = str.replace(/[ùúụủũưừứựửữ]/g, "u");
+    str = str.replace(/[ỳýỵỷỹ]/g, "y");
+    str = str.replace(/đ/g, "d");
+    return str
       .replace(/\s+/g, '-')
       .replace(/[^\w\-]+/g, '')
       .replace(/\-\-+/g, '-')
@@ -164,7 +172,8 @@ export default function AdminCreateProduct({ onBack }) {
         name: formData.name,
         slug: formData.slug,
         description: formData.description,
-        basePrice: formData.basePrice,
+        basePrice: Number(formData.basePrice),
+        originalPrice: formData.originalPrice !== '' ? Number(formData.originalPrice) : null,
         totalStock: formData.variants.length > 0 ? formData.variants.reduce((acc, v) => acc + (Number(v.totalStock) || 0), 0) : 0,
         isActive: formData.isActive,
         isFeatured: formData.isFeatured,
@@ -515,21 +524,30 @@ export default function AdminCreateProduct({ onBack }) {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-[#E0E5F2] text-[10px] text-[#A3AED0] uppercase">
+                      <th className="pb-2">Hình ảnh</th>
                       <th className="pb-2">Preview</th>
-                      <th className="pb-2">Tên file / URL</th>
+                      <th className="pb-2 text-center w-24">Ảnh đại diện</th>
                       <th className="pb-2 text-center w-20">Thứ tự</th>
-                      <th className="pb-2 text-center w-20">Đại diện</th>
-                      <th className="pb-2"></th>
+                      <th className="pb-2 text-right">Tùy chọn xóa</th>
                     </tr>
                   </thead>
                   <tbody>
                     {formData.images.map((img, idx) => (
                       <tr key={idx} className="border-b border-[#E0E5F2] last:border-0">
+                        <td className="py-2 text-xs text-[#2B3674] max-w-[120px] truncate" title={img.url}>
+                          {img.url.split('/').pop()}
+                        </td>
                         <td className="py-2">
                           <img src={img.url} alt="preview" className="w-10 h-10 object-cover rounded bg-gray-100" />
                         </td>
-                        <td className="py-2 text-xs text-[#2B3674] max-w-[100px] truncate" title={img.url}>
-                          {img.url.split('/').pop()}
+                        <td className="py-2 text-center">
+                          <input 
+                            type="radio" 
+                            name="mainImage" 
+                            checked={img.isMain} 
+                            onChange={() => setMainImage(idx)}
+                            className="w-4 h-4 text-[#4318FF] cursor-pointer"
+                          />
                         </td>
                         <td className="py-2 text-center">
                           <input 
@@ -539,17 +557,8 @@ export default function AdminCreateProduct({ onBack }) {
                             className="w-12 px-1 py-1 text-center border border-[#E0E5F2] rounded outline-none focus:border-[#4318FF] text-xs"
                           />
                         </td>
-                        <td className="py-2 text-center">
-                          <input 
-                            type="radio" 
-                            name="mainImage" 
-                            checked={img.isMain} 
-                            onChange={() => setMainImage(idx)}
-                            className="w-4 h-4 text-[#4318FF]"
-                          />
-                        </td>
                         <td className="py-2 text-right">
-                          <button onClick={() => removeImage(idx)} className="text-[#A3AED0] hover:text-[#EE5D50]">
+                          <button onClick={() => removeImage(idx)} className="text-[#A3AED0] hover:text-[#EE5D50] p-1">
                             <Trash2 size={14} />
                           </button>
                         </td>

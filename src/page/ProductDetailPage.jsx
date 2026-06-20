@@ -379,6 +379,29 @@ export default function ProductDetailPage() {
     "Ưu đãi mua kèm Phụ kiện Apple giảm đến 30%"
   ];
 
+  // main image carousel navigation
+  const handleMainImagePrev = () => {
+    const currentIndex = galleryImages.indexOf(activeImage);
+    if (currentIndex === -1) return;
+    const prevIndex = currentIndex === 0 ? galleryImages.length - 1 : currentIndex - 1;
+    setIsFading(true);
+    setTimeout(() => {
+      setActiveImage(galleryImages[prevIndex]);
+      setIsFading(false);
+    }, 120);
+  };
+
+  const handleMainImageNext = () => {
+    const currentIndex = galleryImages.indexOf(activeImage);
+    if (currentIndex === -1) return;
+    const nextIndex = currentIndex === galleryImages.length - 1 ? 0 : currentIndex + 1;
+    setIsFading(true);
+    setTimeout(() => {
+      setActiveImage(galleryImages[nextIndex]);
+      setIsFading(false);
+    }, 120);
+  };
+
   return (
     <div className="flex flex-col w-full pb-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 w-full">
@@ -410,9 +433,29 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* CỘT TRÁI: THƯ VIỆN ẢNH ĐỘNG (Ảnh chính + Thumbnails + Lightbox) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white rounded-[3rem] border border-gray-100 p-8 shadow-sm flex flex-col items-center relative">
+            <div className="bg-white rounded-[3rem] border border-gray-100 p-8 shadow-sm flex flex-col items-center relative group">
               {/* Khung ảnh chính có hiệu ứng fade-in mượt mà */}
               <div className="relative w-full aspect-square max-w-[420px] mb-6 flex items-center justify-center overflow-hidden">
+                {/* Left/Right Carousel Control overlay */}
+                {galleryImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={handleMainImagePrev}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/80 hover:bg-white text-gray-800 rounded-full border border-gray-100 transition-all opacity-0 group-hover:opacity-100 shadow-md hover:scale-105 active:scale-95"
+                      title="Ảnh trước"
+                    >
+                      <ChevronLeft size={20} strokeWidth={2.5} />
+                    </button>
+                    <button
+                      onClick={handleMainImageNext}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/80 hover:bg-white text-gray-800 rounded-full border border-gray-100 transition-all opacity-0 group-hover:opacity-100 shadow-md hover:scale-105 active:scale-95"
+                      title="Ảnh tiếp theo"
+                    >
+                      <ChevronRight size={20} strokeWidth={2.5} />
+                    </button>
+                  </>
+                )}
+
                 <img
                   src={activeImage}
                   alt={product.name}

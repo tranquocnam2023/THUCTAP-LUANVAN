@@ -9,6 +9,8 @@ import { shippingInfoService } from '../services/shippingInfoService';
 import { orderService } from '../services/orderService';
 import api from '../services/api';
 import { authService } from '../services/authService';
+import { userService } from '../services/userService';
+
 
 import {
   User, Lock, MapPin, Check, Plus, Edit2, Trash2, ArrowLeft,
@@ -48,13 +50,23 @@ export default function CartPage() {
 
   // Load user profile on mount & when login state changes
   useEffect(() => {
-    const userJson = localStorage.getItem('user');
-    if (userJson && userJson !== 'undefined' && userJson !== 'null') {
-      try {
-        setCurrentUser(JSON.parse(userJson));
-      } catch (e) {
-        console.error("Lỗi đọc profile:", e);
-      }
+    if (isLoggedIn) {
+      userService.getProfile()
+        .then(res => {
+          if (res) {
+            setCurrentUser(res);
+            localStorage.setItem('user', JSON.stringify(res));
+          }
+        })
+        .catch(err => {
+          console.error("Lỗi lấy thông tin profile:", err);
+          const userJson = localStorage.getItem('user');
+          if (userJson && userJson !== 'undefined' && userJson !== 'null') {
+            try {
+              setCurrentUser(JSON.parse(userJson));
+            } catch (e) {}
+          }
+        });
     } else {
       setCurrentUser(null);
     }
@@ -506,6 +518,7 @@ export default function CartPage() {
         addressLine: deliveryMethod === 'ship' ? formData.streetAddress : 'Nhận tại Cửa hàng PhoneShop: 120 Đường 3/2, Quận 10, Thành phố Hồ Chí Minh',
         wardId: deliveryMethod === 'ship' ? formData.wardId : null,
         promotionCode: appliedPromo || '',
+        pointsToRedeem: usePoints ? pointsDiscount : 0,
         note: finalNote,
         paymentMethod: paymentMethod, // stripe/momo/transfer/cod (left as placeholder for backend API integration)
         items: cartItems.map(item => ({
@@ -548,6 +561,18 @@ export default function CartPage() {
       // 4. Place order
       const checkoutRes = await orderService.checkout(payload);
 
+      // Refresh points balance
+      if (isLoggedIn) {
+        userService.getProfile()
+          .then(res => {
+            if (res) {
+              setCurrentUser(res);
+              localStorage.setItem('user', JSON.stringify(res));
+            }
+          })
+          .catch(e => console.error("Lỗi lấy thông tin profile:", e));
+      }
+
       const newOrderId = checkoutRes?.orderId || checkoutRes?.OrderId || `PS${Math.floor(100000 + Math.random() * 900000)}`;
       setOrderCode(newOrderId);
       setIsFinished(true);
@@ -567,8 +592,10 @@ export default function CartPage() {
   };
 
   // Subtotal and final values
-  const pointsDiscount = usePoints ? Math.min(50000, cartTotal - discountAmount) : 0;
+  const userPoints = currentUser?.rewardPoints || 0;
+  const pointsDiscount = usePoints ? Math.min(userPoints, cartTotal - discountAmount) : 0;
   const finalTotalPay = Math.max(0, cartTotal - discountAmount - pointsDiscount);
+
 
   // Render Success Screen
   if (isFinished) {
@@ -1144,6 +1171,29 @@ export default function CartPage() {
 
             {/* Card 8: Total summary and checkout button */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 space-y-4">
+              {isLoggedIn && currentUser && (
+                <div className="flex items-center justify-between p-3.5 bg-yellow-50/50 border border-yellow-100/70 rounded-2xl">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center text-white select-none shrink-0 shadow-sm">
+                      <Gift size={15} className="fill-current" />
+                    </div>
+                    <div className="text-xs">
+                      <p className="font-extrabold text-gray-800">Dùng điểm Quà Tặng VIP</p>
+                      <p className="text-[10px] text-gray-400 font-bold">Điểm khả dụng: <span className="text-yellow-600 font-extrabold">{currentUser.rewardPoints?.toLocaleString('vi-VN')}</span></p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={usePoints}
+                      onChange={(e) => setUsePoints(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-gray-250 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
+                  </label>
+                </div>
+              )}
+
               <div className="space-y-2 text-xs font-semibold text-gray-500 uppercase tracking-tighter">
                 <div className="flex justify-between">
                   <span>Tạm tính ({cartItems.length} sản phẩm)</span>
@@ -1155,9 +1205,9 @@ export default function CartPage() {
                     <span>-{discountAmount.toLocaleString('vi-VN')}₫</span>
                   </div>
                 )}
-                {usePoints && (
+                {usePoints && pointsDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Điểm VIP tích lũy</span>
+                    <span>Quy đổi điểm VIP</span>
                     <span>-{pointsDiscount.toLocaleString('vi-VN')}₫</span>
                   </div>
                 )}
@@ -1167,8 +1217,12 @@ export default function CartPage() {
                 </div>
 
                 <div className="flex justify-between pt-3 border-t border-dashed border-gray-100 items-center">
-                  <span className="text-xs font-black text-gray-900">Tổng tiền thanh toán</span>
+                  <span className="text-xs font-black text-gray-900">Tổng tiền</span>
                   <span className="text-lg font-black text-red-600 tracking-tight">{finalTotalPay.toLocaleString('vi-VN')}₫</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-gray-500 pt-1">
+                  <span>Điểm tích lũy Quà Tặng VIP</span>
+                  <span className="font-bold text-gray-700">{(Math.floor(finalTotalPay * 0.002)).toLocaleString('vi-VN')} điểm</span>
                 </div>
               </div>
 

@@ -5,6 +5,7 @@ import AdminProductVariants from '../components/AdminProductVariants';
 import { categoryService } from '../services/categoryService';
 import { brandService } from '../services/brandService';
 import { productService } from '../services/productService';
+import { inventoryService } from '../services/inventoryService';
 import { usePagination } from '../hooks/usePagination';
 import { useFormat } from '../hooks/useFormat';
 import { cleanDescription } from '../utils/productHelper';
@@ -37,6 +38,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
   const [txQuantity, setTxQuantity] = useState(1);
   const [txPrice, setTxPrice] = useState('');
   const [txNote, setTxNote] = useState('');
+  const [txHistory, setTxHistory] = useState([]);
 
   // Khởi tạo các hook
   const filteredProducts = products.filter(p => {
@@ -122,8 +124,20 @@ export default function AdminProducts({ onCreate, onEdit }) {
     fetchVariants();
   }, [products]);
 
+  const fetchTxHistory = async () => {
+    try {
+      const res = await inventoryService.getAll();
+      if (Array.isArray(res)) {
+        setTxHistory(res);
+      }
+    } catch (err) {
+      console.log("Lỗi tải lịch sử giao dịch:", err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchTxHistory();
   }, []);
 
   const stats = [
@@ -165,35 +179,16 @@ export default function AdminProducts({ onCreate, onEdit }) {
       return;
     }
 
-    let newStock = product.totalStock ?? product.stock ?? product.stockQuantity ?? 0;
-    if (txConf.type === 'IN') {
-      newStock += quantity;
-    } else {
-      if (newStock < quantity) {
-        alert(`Số lượng xuất vượt quá tồn kho hiện tại (${newStock} sản phẩm)!`);
-        return;
-      }
-      newStock -= quantity;
-    }
-
     try {
-      const payload = {
-        name: product.name,
-        slug: product.slug || product.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
-        description: product.description || '',
-        basePrice: product.basePrice || product.price || 0,
-        totalStock: newStock,
-        isActive: product.isActive !== undefined ? product.isActive : true,
-        isFeatured: product.isFeatured || false,
-        shopId: product.shopId || 1,
-        categoryId: product.categoryId || 1,
-        thumbnailImage: product.thumbnailImage || "",
-        mainImage: product.mainImage || "",
-        images: product.images || ""
-      };
+      await inventoryService.create({
+        productId: product.id,
+        quantityChanged: quantity,
+        transactionType: activeTxTab,
+        price: parseFloat(txPrice) || 0,
+        note: txNote || ''
+      });
 
-      await productService.update(product.id, payload);
-      alert(`${txConf.name} thành công! Tồn kho mới: ${newStock}`);
+      alert(`${txConf.name} thành công!`);
       setActiveTxTab(null);
       // Reset form
       setTxProductId('');
@@ -201,9 +196,23 @@ export default function AdminProducts({ onCreate, onEdit }) {
       setTxPrice('');
       setTxNote('');
       fetchProducts();
+      fetchTxHistory();
     } catch (err) {
       console.error("Lỗi thực hiện giao dịch kho:", err);
-      alert('Giao dịch thất bại: ' + (err.message || JSON.stringify(err)));
+      alert('Giao dịch thất bại: ' + (err.response?.data || err.message || JSON.stringify(err)));
+    }
+  };
+
+  const handleRevertTransaction = async (id) => {
+    if (!window.confirm("Bạn có chắc chắn muốn hoàn tác/hủy giao dịch này không? Số lượng kho sẽ được điều chỉnh ngược lại.")) return;
+    try {
+      await inventoryService.revert(id);
+      alert("Hoàn tác giao dịch thành công!");
+      fetchProducts();
+      fetchTxHistory();
+    } catch (err) {
+      console.error("Lỗi hoàn tác giao dịch:", err);
+      alert("Lỗi hoàn tác: " + (err.response?.data?.message || err.response?.data || err.message));
     }
   };
 
@@ -232,7 +241,21 @@ export default function AdminProducts({ onCreate, onEdit }) {
             <label className="block text-sm font-bold text-[#2B3674] mb-2">Chọn sản phẩm</label>
             <select
               value={txProductId}
-              onChange={(e) => setTxProductId(e.target.value)}
+              onChange={(e) => {
+                const prodId = e.target.value;
+                setTxProductId(prodId);
+                const selectedProd = products.find(p => p.id === parseInt(prodId));
+                if (selectedProd) {
+                  setTxPrice((selectedProd.basePrice || selectedProd.price || 0).toString());
+                  setTxNote(activeTxTab === 'IMPORT_SUPPLIER' ? 'Nhập hàng từ nhà cung cấp' :
+                            activeTxTab === 'IMPORT_RETURN' ? 'Khách trả hàng' :
+                            activeTxTab === 'EXPORT_SELL' ? 'Xuất bán lẻ trực tiếp tại quầy' :
+                            activeTxTab === 'EXPORT_DEFECT' ? 'Trả hàng lỗi cho nhà cung cấp' : '');
+                } else {
+                  setTxPrice('');
+                  setTxNote('');
+                }
+              }}
               className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             >
               <option value="">-- Chọn sản phẩm {selectedBrand} --</option>
@@ -282,6 +305,86 @@ export default function AdminProducts({ onCreate, onEdit }) {
           >
             Xác nhận {txConf.type === 'IN' ? 'Nhập Kho' : 'Xuất Kho'}
           </button>
+        </div>
+
+        {/* Lịch sử giao dịch kho */}
+        <div className="mt-12 border-t border-[#E0E5F2] pt-8">
+          <h4 className="text-lg font-bold text-[#2B3674] mb-4">Lịch sử xuất/nhập kho</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[#E0E5F2] text-[#A3AED0] text-[11px] font-bold uppercase">
+                  <th className="pb-3 px-2">Mã Đơn hàng</th>
+                  <th className="pb-3 px-2">Thời gian</th>
+                  <th className="pb-3 px-2">Sản phẩm & Biến thể</th>
+                  <th className="pb-3 px-2">Loại GD</th>
+                  <th className="pb-3 px-2 text-right">Số lượng</th>
+                  <th className="pb-3 px-2 text-right">Giá trị</th>
+                  <th className="pb-3 px-2">Người thực hiện</th>
+                  <th className="pb-3 px-2">Ghi chú</th>
+                  <th className="pb-3 px-2 text-center">Hành động</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {txHistory.length > 0 ? (
+                  txHistory.map((t) => {
+                    const code = t.orderId ? `#PS${t.orderId}` : `#PS${t.id}`;
+                    const formattedDate = new Date(t.createdAt).toLocaleString('vi-VN');
+                    const qty = Math.abs(t.quantityChanged);
+                    const totalVal = t.price * qty;
+                    
+                    return (
+                      <tr key={t.id} className={`border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors ${t.isReverted ? 'opacity-50 line-through' : ''}`}>
+                        <td className="py-3 px-2 font-mono font-bold text-xs text-blue-600">{code}</td>
+                        <td className="py-3 px-2 text-xs text-[#A3AED0]">{formattedDate}</td>
+                        <td className="py-3 px-2 font-bold text-[#2B3674]">
+                          {t.productName} <span className="text-xs font-normal text-gray-500">({t.variantName})</span>
+                        </td>
+                        <td className="py-3 px-2">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            t.transactionType === 'IMPORT_SUPPLIER' ? 'bg-blue-50 text-blue-600' :
+                            t.transactionType === 'IMPORT_RETURN' ? 'bg-green-50 text-green-600' :
+                            t.transactionType === 'EXPORT_SELL' ? 'bg-purple-50 text-purple-600' :
+                            'bg-red-50 text-red-600'
+                          }`}>
+                            {t.transactionType === 'IMPORT_SUPPLIER' ? 'Nhập NCC' :
+                             t.transactionType === 'IMPORT_RETURN' ? 'Khách trả' :
+                             t.transactionType === 'EXPORT_SELL' ? 'Xuất bán lẻ' : 'Xuất lỗi'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-right font-bold text-[#2B3674]">
+                          {t.quantityChanged > 0 ? `+${qty}` : `-${qty}`}
+                        </td>
+                        <td className="py-3 px-2 text-right font-bold text-[#2B3674]">{formatCurrency(totalVal)}</td>
+                        <td className="py-3 px-2 text-xs text-[#2B3674]">{t.createdByUsername}</td>
+                        <td className="py-3 px-2 text-xs text-[#A3AED0]">{t.note}</td>
+                        <td className="py-3 px-2 text-center">
+                          {t.orderId ? (
+                            <span className="text-xs text-gray-400 italic">Theo đơn hàng</span>
+                          ) : !t.isReverted ? (
+                            <button
+                              onClick={() => handleRevertTransaction(t.id)}
+                              className="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold transition-all"
+                            >
+                              Hoàn tác
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">Đã hủy</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="p-8 text-center text-gray-400 bg-white italic">
+                      Chưa có lịch sử giao dịch kho nào.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     );

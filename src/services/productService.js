@@ -23,15 +23,6 @@ export const productService = {
         'Content-Type': 'multipart/form-data'
       }
     });
-  },
-
-  uploadCloudImage: (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return api.post('/Upload/cloud', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
   }
 };
+

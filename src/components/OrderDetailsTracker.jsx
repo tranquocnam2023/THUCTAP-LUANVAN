@@ -322,6 +322,18 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
                 <span className="font-black">{order.promotionCode}</span>
               </div>
             )}
+            {(order.pointsRedeemed || order.PointsRedeemed) > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Dùng điểm Quà Tặng VIP:</span>
+                <span className="font-black">-{order.pointsRedeemed || order.PointsRedeemed} điểm (-{(order.discountFromPoints || order.DiscountFromPoints || 0).toLocaleString('vi-VN')}₫)</span>
+              </div>
+            )}
+            {(order.pointsEarned || order.PointsEarned) > 0 && (
+              <div className="flex justify-between text-yellow-600">
+                <span>Điểm tích lũy nhận được:</span>
+                <span className="font-black">+{(order.pointsEarned || order.PointsEarned).toLocaleString('vi-VN')} điểm</span>
+              </div>
+            )}
             <div className="flex justify-between pt-2 border-t border-gray-200/50 text-sm font-black text-gray-900 normal-case tracking-normal">
               <span>Tổng cộng thanh toán:</span>
               <span className="text-red-600 font-black text-base">{order.totalPrice.toLocaleString('vi-VN')}₫</span>
