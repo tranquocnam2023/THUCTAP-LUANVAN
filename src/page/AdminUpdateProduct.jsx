@@ -5,6 +5,16 @@ import { brandService } from '../services/brandService';
 import { productService } from '../services/productService';
 import { variantService } from '../services/variantService';
 
+const parseRamRom = (value) => {
+  if (!value) return { ram: '', rom: '' };
+  const parts = value.split('-');
+  const ramPart = parts[0] || '';
+  const romPart = parts[1] || '';
+  const ram = ramPart.replace(/[^0-9]/g, '');
+  const rom = romPart.replace(/[^0-9]/g, '');
+  return { ram, rom };
+};
+
 export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -85,7 +95,8 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                   totalStock: v.totalStock,
                   isActive: v.isActive !== undefined ? v.isActive : true,
                   attr1Value: attr1Val,
-                  attr2Value: attr2Val
+                  attr2Value: attr2Val,
+                  imageId: v.imageId || ''
                 };
               });
 
@@ -230,7 +241,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
       ...formData,
       variants: [
         ...formData.variants,
-        { tempId: Date.now(), name: '', price: '', totalStock: 0, isActive: true, attr1Value: '', attr2Value: '' }
+        { tempId: Date.now(), name: '', price: '', totalStock: 0, isActive: true, attr1Value: '', attr2Value: '', imageId: '' }
       ]
     });
   };
@@ -256,6 +267,41 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
     const newVariants = [...formData.variants];
     newVariants[index][field] = value;
     setFormData({ ...formData, variants: newVariants });
+  };
+
+  const handleSaveVariant = async (index) => {
+    const v = formData.variants[index];
+    if (!v.name) return alert("Vui lòng nhập tên biến thể.");
+    
+    try {
+      const attrObj = {};
+      if (attr1Name.trim() && v.attr1Value) attrObj[attr1Name.trim()] = v.attr1Value;
+      if (hasAttr2 && attr2Name.trim() && v.attr2Value) attrObj[attr2Name.trim()] = v.attr2Value;
+
+      const vPayload = {
+        name: v.name,
+        price: v.price !== '' ? Number(v.price) : Number(formData.basePrice),
+        totalStock: Number(v.totalStock) || 0,
+        isActive: v.isActive,
+        productId: productId,
+        attributes: JSON.stringify(attrObj),
+        imageId: v.imageId || ''
+      };
+
+      if (v.id) {
+        await variantService.update(v.id, vPayload);
+        alert('Cập nhật biến thể thành công!');
+      } else {
+        const res = await variantService.create(vPayload);
+        // Cập nhật ID biến thể mới vào state để không bị tạo trùng
+        const newVariants = [...formData.variants];
+        newVariants[index].id = res?.id || v.id;
+        setFormData({ ...formData, variants: newVariants });
+        alert('Tạo biến thể mới thành công!');
+      }
+    } catch (e) {
+      alert("Lỗi lưu biến thể: " + e.message);
+    }
   };
 
   // Lưu
@@ -310,7 +356,8 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
               totalStock: Number(v.totalStock) || 0,
               isActive: v.isActive,
               productId: targetProductId,
-              attributes: JSON.stringify(attrObj)
+              attributes: JSON.stringify(attrObj),
+              imageId: v.imageId || ''
             });
           }
         }
@@ -332,7 +379,8 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
             totalStock: Number(v.totalStock) || 0,
             isActive: v.isActive,
             productId: productId,
-            attributes: JSON.stringify(attrObj)
+            attributes: JSON.stringify(attrObj),
+            imageId: v.imageId || ''
           };
 
           if (v.id) {
@@ -515,68 +563,195 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                 {formData.variants.map((variant, vIdx) => (
                   <div key={vIdx} className="p-4 border border-[#E0E5F2] rounded-xl bg-white relative hover:border-[#4318FF]/50 transition-colors">
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="lg:col-span-2">
-                          <label className="block text-xs font-bold text-[#2B3674] mb-1">Tên biến thể (SKU) *</label>
-                          <input
-                            type="text"
-                            value={variant.name}
-                            onChange={(e) => updateVariant(vIdx, 'name', e.target.value)}
-                            className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
-                            placeholder="VD: Đen - 256GB"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-[#2B3674] mb-1">{attr1Name || 'Thuộc tính 1'} *</label>
-                          <input
-                            type="text"
-                            value={variant.attr1Value}
-                            onChange={(e) => updateVariant(vIdx, 'attr1Value', e.target.value)}
-                            className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
-                            placeholder="VD: Đen"
-                          />
-                        </div>
-                        {hasAttr2 && (
-                          <div>
-                            <label className="block text-xs font-bold text-[#2B3674] mb-1">{attr2Name || 'Thuộc tính 2'} *</label>
+                      <div className="flex-1 flex flex-col gap-4">
+                        {/* Hàng 1 */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                          <div className="lg:col-span-2">
+                            <label className="block text-xs font-bold text-[#2B3674] mb-1">Tên biến thể (SKU) *</label>
                             <input
                               type="text"
-                              value={variant.attr2Value}
-                              onChange={(e) => updateVariant(vIdx, 'attr2Value', e.target.value)}
+                              value={variant.name}
+                              onChange={(e) => updateVariant(vIdx, 'name', e.target.value)}
                               className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
-                              placeholder="VD: 256GB"
+                              placeholder="VD: Đen - 256GB"
                             />
                           </div>
-                        )}
-                        <div>
-                          <label className="block text-xs font-bold text-[#2B3674] mb-1">Giá bán (VNĐ)</label>
-                          <input
-                            type="number"
-                            value={variant.price}
-                            onChange={(e) => updateVariant(vIdx, 'price', e.target.value)}
-                            className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
-                            placeholder="Để trống = Giá SP"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-[#2B3674] mb-1">Tồn kho</label>
-                          <input
-                            type="number"
-                            value={variant.totalStock}
-                            onChange={(e) => updateVariant(vIdx, 'totalStock', e.target.value)}
-                            className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
-                          />
-                        </div>
-                        <div className="flex items-center pt-6">
-                          <label className="flex items-center gap-2 cursor-pointer">
+                          <div>
+                            <label className="block text-xs font-bold text-[#2B3674] mb-1">{attr1Name || 'Thuộc tính 1'} *</label>
+                            {(attr1Name || '').trim().toLowerCase() === 'dung lượng ram - rom' ? (
+                              <div className="flex items-center gap-1 border border-[#E0E5F2] rounded-lg px-2 bg-white h-9 focus-within:border-[#4318FF] focus-within:ring-1 focus-within:ring-[#4318FF] w-fit">
+                                <input
+                                  type="number"
+                                  placeholder="RAM"
+                                  value={parseRamRom(variant.attr1Value).ram}
+                                  onChange={(e) => {
+                                    const { rom } = parseRamRom(variant.attr1Value);
+                                    updateVariant(vIdx, 'attr1Value', `${e.target.value || '0'}GB - ${rom || '0'}GB`);
+                                  }}
+                                  className="w-10 border-none outline-none text-sm text-center bg-transparent p-0"
+                                />
+                                <span className="text-[10px] text-gray-400 font-bold shrink-0">GB</span>
+                                <span className="text-gray-300 px-0.5 shrink-0">/</span>
+                                <input
+                                  type="number"
+                                  placeholder="ROM"
+                                  value={parseRamRom(variant.attr1Value).rom}
+                                  onChange={(e) => {
+                                    const { ram } = parseRamRom(variant.attr1Value);
+                                    updateVariant(vIdx, 'attr1Value', `${ram || '0'}GB - ${e.target.value || '0'}GB`);
+                                  }}
+                                  className="w-14 border-none outline-none text-sm text-center bg-transparent p-0"
+                                />
+                                <span className="text-[10px] text-gray-400 font-bold shrink-0">GB</span>
+                              </div>
+                            ) : (
+                              <input
+                                type="text"
+                                value={variant.attr1Value}
+                                onChange={(e) => updateVariant(vIdx, 'attr1Value', e.target.value)}
+                                className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
+                                placeholder="VD: Đen"
+                              />
+                            )}
+                          </div>
+                          {hasAttr2 && (
+                            <div>
+                              <label className="block text-xs font-bold text-[#2B3674] mb-1">{attr2Name || 'Thuộc tính 2'} *</label>
+                              {(attr2Name || '').trim().toLowerCase() === 'dung lượng ram - rom' ? (
+                                <div className="flex items-center gap-1 border border-[#E0E5F2] rounded-lg px-2 bg-white h-9 focus-within:border-[#4318FF] focus-within:ring-1 focus-within:ring-[#4318FF] w-fit">
+                                  <input
+                                    type="number"
+                                    placeholder="RAM"
+                                    value={parseRamRom(variant.attr2Value).ram}
+                                    onChange={(e) => {
+                                      const { rom } = parseRamRom(variant.attr2Value);
+                                      updateVariant(vIdx, 'attr2Value', `${e.target.value || '0'}GB - ${rom || '0'}GB`);
+                                    }}
+                                    className="w-10 border-none outline-none text-sm text-center bg-transparent p-0"
+                                  />
+                                  <span className="text-[10px] text-gray-400 font-bold shrink-0">GB</span>
+                                  <span className="text-gray-300 px-0.5 shrink-0">/</span>
+                                  <input
+                                    type="number"
+                                    placeholder="ROM"
+                                    value={parseRamRom(variant.attr2Value).rom}
+                                    onChange={(e) => {
+                                      const { ram } = parseRamRom(variant.attr2Value);
+                                      updateVariant(vIdx, 'attr2Value', `${ram || '0'}GB - ${e.target.value || '0'}GB`);
+                                    }}
+                                    className="w-14 border-none outline-none text-sm text-center bg-transparent p-0"
+                                  />
+                                  <span className="text-[10px] text-gray-400 font-bold shrink-0">GB</span>
+                                </div>
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={variant.attr2Value}
+                                  onChange={(e) => updateVariant(vIdx, 'attr2Value', e.target.value)}
+                                  className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
+                                  placeholder="VD: 256GB"
+                                />
+                              )}
+                            </div>
+                          )}
+                          <div>
+                            <label className="block text-xs font-bold text-[#2B3674] mb-1">Giá bán (VNĐ)</label>
                             <input
-                              type="checkbox"
-                              checked={variant.isActive}
-                              onChange={(e) => updateVariant(vIdx, 'isActive', e.target.checked)}
-                              className="w-4 h-4 text-[#4318FF] border-[#E0E5F2] rounded focus:ring-[#4318FF]"
+                              type="number"
+                              value={variant.price}
+                              onChange={(e) => updateVariant(vIdx, 'price', e.target.value)}
+                              className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
+                              placeholder="Để trống = Giá SP"
                             />
-                            <span className="text-xs font-bold text-[#2B3674]">Đang bán</span>
-                          </label>
+                          </div>
+                        </div>
+
+                        {/* Hàng 2 */}
+                        <div className="flex flex-wrap items-end gap-6 border-t border-gray-100 pt-3">
+                          <div>
+                            <label className="block text-xs font-bold text-[#2B3674] mb-1">Hình ảnh biến thể</label>
+                            <div className="flex items-center gap-2">
+                              <div className="w-10 h-10 rounded-lg border border-[#E0E5F2] flex items-center justify-center bg-gray-50 overflow-hidden shrink-0">
+                                {variant.imageId ? (
+                                  <img src={variant.imageId} alt="Variant" className="w-full h-full object-contain" />
+                                ) : (
+                                  <ImageIcon className="text-[#A3AED0]" size={16} />
+                                )}
+                              </div>
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  className="px-2.5 py-1.5 bg-[#F4F7FE] text-[#4318FF] hover:bg-[#E0E5F2] text-xs font-bold rounded-lg transition-colors whitespace-nowrap"
+                                >
+                                  Tải ảnh
+                                </button>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={async (e) => {
+                                    const file = e.target.files[0];
+                                    if (!file) return;
+                                    try {
+                                      const res = await productService.uploadLocalImage(file);
+                                      if (res && res.url) {
+                                        let finalUrl = res.url;
+                                        if (finalUrl.startsWith('/')) {
+                                          const apiBase = import.meta.env.VITE_API_URL || 'https://localhost:7279/api';
+                                          const hostBase = apiBase.replace('/api', '');
+                                          finalUrl = `${hostBase}${finalUrl}`;
+                                        }
+                                        updateVariant(vIdx, 'imageId', finalUrl);
+                                      }
+                                    } catch (err) {
+                                      alert("Lỗi tải ảnh: " + err.message);
+                                    }
+                                  }}
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                />
+                              </div>
+                              {variant.imageId && (
+                                <button
+                                  type="button"
+                                  onClick={() => updateVariant(vIdx, 'imageId', '')}
+                                  className="text-[#EE5D50] hover:text-red-700 text-xs font-bold"
+                                >
+                                  Xóa
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="w-32">
+                            <label className="block text-xs font-bold text-[#2B3674] mb-1">Tồn kho</label>
+                            <input
+                              type="number"
+                              value={variant.totalStock}
+                              onChange={(e) => updateVariant(vIdx, 'totalStock', e.target.value)}
+                              className="w-full px-3 py-2 border border-[#E0E5F2] rounded-lg text-sm outline-none focus:border-[#4318FF]"
+                            />
+                          </div>
+
+                          <div className="flex items-center pb-2.5">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={variant.isActive}
+                                onChange={(e) => updateVariant(vIdx, 'isActive', e.target.checked)}
+                                className="w-4 h-4 text-[#4318FF] border-[#E0E5F2] rounded focus:ring-[#4318FF]"
+                              />
+                              <span className="text-xs font-bold text-[#2B3674]">Đang bán</span>
+                            </label>
+                          </div>
+
+                          <div className="flex items-center pb-1">
+                            <button
+                              type="button"
+                              onClick={() => handleSaveVariant(vIdx)}
+                              className="px-4 py-2 bg-[#01B574] text-white hover:bg-[#00a065] text-xs font-bold rounded-lg transition-colors shadow-sm"
+                            >
+                              Lưu biến thể
+                            </button>
+                          </div>
                         </div>
                       </div>
                       <button 
