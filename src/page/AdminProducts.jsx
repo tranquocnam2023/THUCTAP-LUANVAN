@@ -307,84 +307,97 @@ export default function AdminProducts({ onCreate, onEdit }) {
           </button>
         </div>
 
-        {/* Lịch sử giao dịch kho */}
-        <div className="mt-12 border-t border-[#E0E5F2] pt-8">
-          <h4 className="text-lg font-bold text-[#2B3674] mb-4">Lịch sử xuất/nhập kho</h4>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#E0E5F2] text-[#A3AED0] text-[11px] font-bold uppercase">
-                  <th className="pb-3 px-2">Mã Đơn hàng</th>
-                  <th className="pb-3 px-2">Thời gian</th>
-                  <th className="pb-3 px-2">Sản phẩm & Biến thể</th>
-                  <th className="pb-3 px-2">Loại GD</th>
-                  <th className="pb-3 px-2 text-right">Số lượng</th>
-                  <th className="pb-3 px-2 text-right">Giá trị</th>
-                  <th className="pb-3 px-2">Người thực hiện</th>
-                  <th className="pb-3 px-2">Ghi chú</th>
-                  <th className="pb-3 px-2 text-center">Hành động</th>
+        {/* Render filtered transaction history below the form */}
+        {renderInventoryHistory(activeTxTab)}
+      </div>
+    );
+  };
+
+  const renderInventoryHistory = (filterType = null) => {
+    // Filter history based on filterType
+    const filteredHistory = filterType 
+      ? txHistory.filter(t => t.transactionType === filterType)
+      : txHistory;
+
+    return (
+      <div className="mt-12 border-t border-[#E0E5F2] pt-8">
+        <h4 className="text-lg font-bold text-[#2B3674] mb-4">
+          Lịch sử xuất/nhập kho {filterType ? `(${TRANSACTIONS.find(tx => tx.id === filterType)?.name})` : '(Tất cả)'}
+        </h4>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-[#E0E5F2] text-[#A3AED0] text-[11px] font-bold uppercase">
+                <th className="pb-3 px-2">Mã Đơn hàng</th>
+                <th className="pb-3 px-2">Thời gian</th>
+                <th className="pb-3 px-2">Sản phẩm & Biến thể</th>
+                <th className="pb-3 px-2">Loại GD</th>
+                <th className="pb-3 px-2 text-right">Số lượng</th>
+                <th className="pb-3 px-2 text-right">Giá trị</th>
+                <th className="pb-3 px-2">Người thực hiện</th>
+                <th className="pb-3 px-2">Ghi chú</th>
+                <th className="pb-3 px-2 text-center">Hành động</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm">
+              {filteredHistory.length > 0 ? (
+                filteredHistory.map((t) => {
+                  const code = t.orderId ? `#PS${t.orderId}` : `#PS${t.id}`;
+                  const formattedDate = new Date(t.createdAt).toLocaleString('vi-VN');
+                  const qty = Math.abs(t.quantityChanged);
+                  const totalVal = t.price * qty;
+                  
+                  return (
+                    <tr key={t.id} className={`border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors ${t.isReverted ? 'opacity-50 line-through' : ''}`}>
+                      <td className="py-3 px-2 font-mono font-bold text-xs text-blue-600">{code}</td>
+                      <td className="py-3 px-2 text-xs text-[#A3AED0]">{formattedDate}</td>
+                      <td className="py-3 px-2 font-bold text-[#2B3674]">
+                        {t.productName} <span className="text-xs font-normal text-gray-500">({t.variantName})</span>
+                      </td>
+                      <td className="py-3 px-2">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          t.transactionType === 'IMPORT_SUPPLIER' ? 'bg-blue-50 text-blue-600' :
+                          t.transactionType === 'IMPORT_RETURN' ? 'bg-green-50 text-green-600' :
+                          t.transactionType === 'EXPORT_SELL' ? 'bg-purple-50 text-purple-600' :
+                          'bg-red-50 text-red-600'
+                        }`}>
+                          {t.transactionType === 'IMPORT_SUPPLIER' ? 'Nhập NCC' :
+                           t.transactionType === 'IMPORT_RETURN' ? 'Khách trả' :
+                           t.transactionType === 'EXPORT_SELL' ? 'Xuất bán lẻ' : 'Xuất lỗi'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-right font-bold text-[#2B3674]">
+                        {t.quantityChanged > 0 ? `+${qty}` : `-${qty}`}
+                      </td>
+                      <td className="py-3 px-2 text-right font-bold text-[#2B3674]">{formatCurrency(totalVal)}</td>
+                      <td className="py-3 px-2 text-xs text-[#2B3674]">{t.createdByUsername}</td>
+                      <td className="py-3 px-2 text-xs text-[#A3AED0]">{t.note}</td>
+                      <td className="py-3 px-2 text-center">
+                        {t.orderId ? (
+                          <span className="text-xs text-gray-400 italic">Theo đơn hàng</span>
+                        ) : !t.isReverted ? (
+                          <button
+                            onClick={() => handleRevertTransaction(t.id)}
+                            className="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold transition-all"
+                          >
+                            Hoàn tác
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">Đã hủy</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="9" className="p-8 text-center text-gray-400 bg-white italic">
+                    Chưa có lịch sử giao dịch kho nào.
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="text-sm">
-                {txHistory.length > 0 ? (
-                  txHistory.map((t) => {
-                    const code = t.orderId ? `#PS${t.orderId}` : `#PS${t.id}`;
-                    const formattedDate = new Date(t.createdAt).toLocaleString('vi-VN');
-                    const qty = Math.abs(t.quantityChanged);
-                    const totalVal = t.price * qty;
-                    
-                    return (
-                      <tr key={t.id} className={`border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors ${t.isReverted ? 'opacity-50 line-through' : ''}`}>
-                        <td className="py-3 px-2 font-mono font-bold text-xs text-blue-600">{code}</td>
-                        <td className="py-3 px-2 text-xs text-[#A3AED0]">{formattedDate}</td>
-                        <td className="py-3 px-2 font-bold text-[#2B3674]">
-                          {t.productName} <span className="text-xs font-normal text-gray-500">({t.variantName})</span>
-                        </td>
-                        <td className="py-3 px-2">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            t.transactionType === 'IMPORT_SUPPLIER' ? 'bg-blue-50 text-blue-600' :
-                            t.transactionType === 'IMPORT_RETURN' ? 'bg-green-50 text-green-600' :
-                            t.transactionType === 'EXPORT_SELL' ? 'bg-purple-50 text-purple-600' :
-                            'bg-red-50 text-red-600'
-                          }`}>
-                            {t.transactionType === 'IMPORT_SUPPLIER' ? 'Nhập NCC' :
-                             t.transactionType === 'IMPORT_RETURN' ? 'Khách trả' :
-                             t.transactionType === 'EXPORT_SELL' ? 'Xuất bán lẻ' : 'Xuất lỗi'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2 text-right font-bold text-[#2B3674]">
-                          {t.quantityChanged > 0 ? `+${qty}` : `-${qty}`}
-                        </td>
-                        <td className="py-3 px-2 text-right font-bold text-[#2B3674]">{formatCurrency(totalVal)}</td>
-                        <td className="py-3 px-2 text-xs text-[#2B3674]">{t.createdByUsername}</td>
-                        <td className="py-3 px-2 text-xs text-[#A3AED0]">{t.note}</td>
-                        <td className="py-3 px-2 text-center">
-                          {t.orderId ? (
-                            <span className="text-xs text-gray-400 italic">Theo đơn hàng</span>
-                          ) : !t.isReverted ? (
-                            <button
-                              onClick={() => handleRevertTransaction(t.id)}
-                              className="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold transition-all"
-                            >
-                              Hoàn tác
-                            </button>
-                          ) : (
-                            <span className="text-xs text-gray-400 italic">Đã hủy</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan="9" className="p-8 text-center text-gray-400 bg-white italic">
-                      Chưa có lịch sử giao dịch kho nào.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     );
@@ -534,142 +547,149 @@ export default function AdminProducts({ onCreate, onEdit }) {
 
         {/* Hiển thị form tái sử dụng hoặc danh sách mặc định */}
         {activeTxTab ? renderReusableTransactionForm() : (
-          <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm p-6 flex-1 flex flex-col mb-8">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-[#2B3674]">Danh sách sản phẩm</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-[#E0E5F2] text-[#A3AED0] text-[12px] font-bold">
-                    <th className="pb-3 px-2">Tên sản phẩm({products.length}) </th>
-                    <th className="pb-3 px-2">Thương hiệu</th>
-                    <th className="pb-3 px-2">Danh mục</th>
-                    <th className="pb-3 px-2">Giá bán</th>
-                    <th className="pb-3 px-2 text-center">Tồn kho</th>
-                    <th className="pb-3 px-2 text-center">IsActive</th>
-                    <th className="pb-3 px-2 text-center">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  {paginatedProducts.length > 0 ? (
-                    paginatedProducts.map((product) => {
-                      const productVariants = variants.filter(v => v.productId === product.id);
-                      const isExpanded = expandedProducts[product.id];
-                      
-                      const brandName = categories.find(c => c.id === product.brandId)?.name || product.brandName || 'N/A';
-                      const categoryName = dbCategories.find(c => c.id === product.categoryId)?.name || 'N/A';
-
-                      return (
-                        <React.Fragment key={product.id}>
-                          <tr className="border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group cursor-pointer" onClick={() => setExpandedProducts(prev => ({ ...prev, [product.id]: !prev[product.id] }))}>
-                            <td className="py-4 px-2 font-bold text-[#2B3674]">
-                              <div className="flex items-center gap-2">
-                                {productVariants.length > 0 && (
-                                  <span className="text-[#A3AED0]">
-                                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                  </span>
-                                )}
-                                {product.name}
-                                {product.isFeatured && (
-                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFB547]/10 text-[#FFB547]">
-                                    Nổi bật
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="py-4 px-2 text-[#2B3674]">{brandName}</td>
-                            <td className="py-4 px-2 text-[#2B3674]">{categoryName}</td>
-                            <td className="py-4 px-2 font-bold text-[#2B3674]">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
-                            <td className="py-4 px-2 text-center font-bold text-[#2B3674]">{product.totalStock ?? product.stock ?? product.stockQuantity ?? 0}</td>
-                            <td className="py-4 px-2 text-center">
-                              <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${product.isActive ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
-                                {product.isActive ? 'Active' : 'Inactive'}
-                              </span>
-                            </td>
-                            <td className="py-4 px-2" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex items-center justify-center gap-2">
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
-                                  className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
-                                  title="Sửa"
-                                >
-                                  <Edit size={18} />
-                                </button>
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }}
-                                  className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
-                                  title="Xóa"
-                                >
-                                  <Trash2 size={18} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                          
-                          {/* Variant Rows (Chỉ hiển thị khi expanded) */}
-                          {isExpanded && productVariants.length > 0 && productVariants.map((v) => (
-                            <tr key={`v-${v.id}`} className="border-b border-[#E0E5F2]/60 hover:bg-[#F4F7FE]/40 transition-colors text-xs text-gray-600 bg-gray-50/50">
-                              <td className="py-3 px-6 font-medium text-gray-700 flex items-center gap-2">
-                                <span className="text-gray-400">↳</span>
-                                <span>{v.name}</span>
+          <>
+            <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm p-6 flex-1 flex flex-col mb-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-bold text-[#2B3674]">Danh sách sản phẩm</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#E0E5F2] text-[#A3AED0] text-[12px] font-bold">
+                      <th className="pb-3 px-2">Tên sản phẩm({products.length}) </th>
+                      <th className="pb-3 px-2">Thương hiệu</th>
+                      <th className="pb-3 px-2">Danh mục</th>
+                      <th className="pb-3 px-2">Giá bán</th>
+                      <th className="pb-3 px-2 text-center">Tồn kho</th>
+                      <th className="pb-3 px-2 text-center">IsActive</th>
+                      <th className="pb-3 px-2 text-center">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm">
+                    {paginatedProducts.length > 0 ? (
+                      paginatedProducts.map((product) => {
+                        const productVariants = variants.filter(v => v.productId === product.id);
+                        const isExpanded = expandedProducts[product.id];
+                        
+                        const brandName = categories.find(c => c.id === product.brandId)?.name || product.brandName || 'N/A';
+                        const categoryName = dbCategories.find(c => c.id === product.categoryId)?.name || 'N/A';
+  
+                        return (
+                          <React.Fragment key={product.id}>
+                            <tr className="border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group cursor-pointer" onClick={() => setExpandedProducts(prev => ({ ...prev, [product.id]: !prev[product.id] }))}>
+                              <td className="py-4 px-2 font-bold text-[#2B3674]">
+                                <div className="flex items-center gap-2">
+                                  {productVariants.length > 0 && (
+                                    <span className="text-[#A3AED0]">
+                                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                    </span>
+                                  )}
+                                  {product.name}
+                                  {product.isFeatured && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFB547]/10 text-[#FFB547]">
+                                      Nổi bật
+                                    </span>
+                                  )}
+                                </div>
                               </td>
-                              <td className="py-3 px-2 text-center text-gray-400">-</td>
-                              <td className="py-3 px-2 text-center text-gray-400">-</td>
-                              <td className="py-3 px-2 font-semibold text-gray-700">{formatCurrency(v.price)}</td>
-                              <td className="py-3 px-2 text-center font-semibold text-gray-700">{v.totalStock}</td>
-                              <td className="py-3 px-2 text-center">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${v.totalStock > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
-                                  {v.totalStock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                              <td className="py-4 px-2 text-[#2B3674]">{brandName}</td>
+                              <td className="py-4 px-2 text-[#2B3674]">{categoryName}</td>
+                              <td className="py-4 px-2 font-bold text-[#2B3674]">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
+                              <td className="py-4 px-2 text-center font-bold text-[#2B3674]">{product.totalStock ?? product.stock ?? product.stockQuantity ?? 0}</td>
+                              <td className="py-4 px-2 text-center">
+                                <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${product.isActive ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                                  {product.isActive ? 'Active' : 'Inactive'}
                                 </span>
                               </td>
-                              <td className="py-3 px-2 text-center text-gray-400">-</td>
+                              <td className="py-4 px-2" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
+                                    className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
+                                    title="Sửa"
+                                  >
+                                    <Edit size={18} />
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }}
+                                    className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
+                                    title="Xóa"
+                                  >
+                                    <Trash2 size={18} />
+                                  </button>
+                                </div>
+                              </td>
                             </tr>
-                          ))}
-                        </React.Fragment>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan="7" className="p-8 text-center text-gray-500 bg-white">
-                        Chưa có dữ liệu sản phẩm
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="text-sm font-bold text-[#A3AED0]">
-                Hiển thị {startIndex}-{endIndex} trên {totalItems} sản phẩm
+                            
+                            {/* Variant Rows (Chỉ hiển thị khi expanded) */}
+                            {isExpanded && productVariants.length > 0 && productVariants.map((v) => (
+                              <tr key={`v-${v.id}`} className="border-b border-[#E0E5F2]/60 hover:bg-[#F4F7FE]/40 transition-colors text-xs text-gray-600 bg-gray-50/50">
+                                <td className="py-3 px-6 font-medium text-gray-700 flex items-center gap-2">
+                                  <span className="text-gray-400">↳</span>
+                                  <span>{v.name}</span>
+                                </td>
+                                <td className="py-3 px-2 text-center text-gray-400">-</td>
+                                <td className="py-3 px-2 text-center text-gray-400">-</td>
+                                <td className="py-3 px-2 font-semibold text-gray-700">{formatCurrency(v.price)}</td>
+                                <td className="py-3 px-2 text-center font-semibold text-gray-700">{v.totalStock}</td>
+                                <td className="py-3 px-2 text-center">
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${v.totalStock > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                                    {v.totalStock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-2 text-center text-gray-400">-</td>
+                              </tr>
+                            ))}
+                          </React.Fragment>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="p-8 text-center text-gray-500 bg-white">
+                          Chưa có dữ liệu sản phẩm
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={prevPage}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  TRƯỚC
-                </button>
-                {[...Array(totalPages)].map((_, i) => (
+              <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="text-sm font-bold text-[#A3AED0]">
+                  Hiển thị {startIndex}-{endIndex} trên {totalItems} sản phẩm
+                </div>
+                <div className="flex gap-2">
                   <button
-                    key={i}
-                    onClick={() => goToPage(i + 1)}
-                    className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-[#4318FF] text-[#FFFFFF] shadow-md' : 'bg-transparent text-[#A3AED0] hover:bg-[#F4F7FE]'}`}
+                    onClick={prevPage}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {i + 1}
+                    TRƯỚC
                   </button>
-                ))}
-                <button
-                  onClick={nextPage}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  SAU
-                </button>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => goToPage(i + 1)}
+                      className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-[#4318FF] text-[#FFFFFF] shadow-md' : 'bg-transparent text-[#A3AED0] hover:bg-[#F4F7FE]'}`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={nextPage}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    SAU
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+            
+            {/* Lịch sử giao dịch kho chung */}
+            <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm p-6 mb-8">
+              {renderInventoryHistory(null)}
+            </div>
+          </>
         )}
       </div>
     </div>

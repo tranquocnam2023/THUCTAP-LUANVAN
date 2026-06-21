@@ -534,7 +534,9 @@ export default function AdminProductVariants() {
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Tồn kho ban đầu</label>
                   <input
                     type="number"
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                    min="0"
+                    step="1"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium bg-white"
                     value={variantStock}
                     onChange={(e) => setVariantStock(e.target.value)}
                     required
