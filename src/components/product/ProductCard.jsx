@@ -20,7 +20,7 @@ export default function ProductCard({
   return (
     <Link 
       to={`/product/${id}`}
-      className="group flex flex-col bg-white border rounded-lg p-3 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 relative cursor-pointer h-full overflow-hidden"
+      className="group flex flex-col bg-white border rounded-md p-3 transition-all duration-300 relative cursor-pointer h-full overflow-hidden"
       style={{ borderColor: THEME.border }}
       onMouseOver={(e) => { e.currentTarget.style.borderColor = THEME.primary; }}
       onMouseOut={(e) => { e.currentTarget.style.borderColor = THEME.border; }}

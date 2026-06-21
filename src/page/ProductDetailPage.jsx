@@ -433,7 +433,7 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* CỘT TRÁI: THƯ VIỆN ẢNH ĐỘNG (Ảnh chính + Thumbnails + Lightbox) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white rounded-[3rem] border border-gray-100 p-8 shadow-sm flex flex-col items-center relative group">
+            <div className="bg-white rounded-md border border-gray-100 p-8 flex flex-col items-center relative group">
               {/* Khung ảnh chính có hiệu ứng fade-in mượt mà */}
               <div className="relative w-full aspect-square max-w-[420px] mb-6 flex items-center justify-center overflow-hidden">
                 {/* Left/Right Carousel Control overlay */}
@@ -441,14 +441,14 @@ export default function ProductDetailPage() {
                   <>
                     <button
                       onClick={handleMainImagePrev}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/80 hover:bg-white text-gray-800 rounded-full border border-gray-100 transition-all opacity-0 group-hover:opacity-100 shadow-md hover:scale-105 active:scale-95"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/80 hover:bg-white text-gray-800 rounded-full border border-gray-100 transition-all opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95"
                       title="Ảnh trước"
                     >
                       <ChevronLeft size={20} strokeWidth={2.5} />
                     </button>
                     <button
                       onClick={handleMainImageNext}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/80 hover:bg-white text-gray-800 rounded-full border border-gray-100 transition-all opacity-0 group-hover:opacity-100 shadow-md hover:scale-105 active:scale-95"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/80 hover:bg-white text-gray-800 rounded-full border border-gray-100 transition-all opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95"
                       title="Ảnh tiếp theo"
                     >
                       <ChevronRight size={20} strokeWidth={2.5} />
@@ -464,7 +464,7 @@ export default function ProductDetailPage() {
                 />
 
                 {product.discount && (
-                  <div className="absolute top-0 right-0 bg-red-600 text-white font-black text-base px-3.5 py-1.5 rounded-2xl shadow-xl transform rotate-3 z-10">
+                  <div className="absolute top-0 right-0 bg-red-600 text-white font-black text-base px-3.5 py-1.5 rounded-md transform rotate-3 z-10">
                     -{product.discount}%
                   </div>
                 )}
@@ -477,7 +477,7 @@ export default function ProductDetailPage() {
                     <div
                       key={idx}
                       onClick={() => handleThumbnailClick(img)}
-                      className={`flex-shrink-0 w-16 h-16 rounded-2xl border-2 p-1.5 cursor-pointer bg-white transition-all hover:scale-105 active:scale-95 ${activeImage === img
+                      className={`flex-shrink-0 w-16 h-16 rounded-md border-2 p-1.5 cursor-pointer bg-white transition-all hover:scale-105 active:scale-95 ${activeImage === img
                         ? 'border-blue-500 ring-2 ring-blue-50'
                         : 'border-gray-100 hover:border-blue-200'
                         }`}
@@ -504,7 +504,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Content Tabs (Specs / Info) */}
-            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+            <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
               <div className="flex border-b border-gray-100 bg-gray-50/50">
                 <button
                   onClick={() => setActiveTab('specs')}
@@ -532,11 +532,11 @@ export default function ProductDetailPage() {
                       Thiết kế titan siêu bền và nhẹ tạo nên vẻ ngoài sang trọng bậc nhất.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
-                      <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                      <div className="bg-gray-50 p-5 rounded-md border border-gray-100">
                         <h4 className="font-bold text-blue-700 mb-2 text-sm">Màn hình sống động</h4>
                         <p className="text-xs text-gray-600">Công nghệ LTPO giúp tiết kiệm pin tối đa trong khi vẫn đảm bảo tần số quét 120Hz mượt mà.</p>
                       </div>
-                      <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                      <div className="bg-gray-50 p-5 rounded-md border border-gray-100">
                         <h4 className="font-bold text-blue-700 mb-2 text-sm">Pin ấn tượng</h4>
                         <p className="text-xs text-gray-600">Thời lượng sử dụng lên đến 30 giờ phát video liên tục, hỗ trợ sạc siêu nhanh.</p>
                       </div>
@@ -572,7 +572,7 @@ export default function ProductDetailPage() {
           {/* CỘT PHẢI: KHU VỰC CHỌN BIẾN THỂ & ĐẶT MUA */}
           <div className="lg:col-span-5 space-y-8">
             <div className="sticky top-10 space-y-6">
-              <div className="bg-white rounded-[3rem] border border-gray-100 p-8 shadow-xl shadow-gray-100 space-y-8">
+              <div className="bg-white rounded-md border border-gray-100 p-8 space-y-8">
                 {/* 1. Chọn Dung lượng */}
                 <div>
                   <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Dung lượng:</h4>
@@ -584,7 +584,7 @@ export default function ProductDetailPage() {
                           key={storage}
                           type="button"
                           onClick={() => handleStorageClick(storage)}
-                          className={`py-3 rounded-2xl border-2 font-black transition-all ${isSelected
+                          className={`py-3 rounded-md border-2 font-black transition-all ${isSelected
                             ? 'border-blue-500 text-blue-600 bg-blue-50 shadow-md transform scale-[1.02]'
                             : 'border-gray-100 text-gray-500 hover:border-blue-200'
                             }`}
@@ -629,7 +629,7 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Hiển thị Giá và Tồn kho động */}
-                <div className="bg-gray-50 rounded-3xl p-6 space-y-2 border border-gray-100">
+                <div className="bg-gray-50 rounded-md p-6 space-y-2 border border-gray-100">
                   <div className="flex items-baseline flex-wrap gap-3">
                     <span className="text-3xl font-black text-red-600">
                       {displayDetails.price.toLocaleString('vi-VN')}₫
@@ -642,7 +642,7 @@ export default function ProductDetailPage() {
                   </div>
                   <div className="flex items-center flex-wrap gap-2">
                     {displayDetails.originalPrice > displayDetails.price && (
-                      <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-lg uppercase whitespace-nowrap">
+                      <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase whitespace-nowrap">
                         TIẾT KIỆM {((displayDetails.originalPrice - displayDetails.price) || 0).toLocaleString('vi-VN')}₫
                       </span>
                     )}
@@ -677,7 +677,7 @@ export default function ProductDetailPage() {
                   <button
                     onClick={handleBuyNow}
                     disabled={displayDetails.stock === 0}
-                    className={`w-full bg-gradient-to-r ${displayDetails.stock > 0 ? 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800' : 'from-gray-400 to-gray-500 cursor-not-allowed'} text-white font-black py-4.5 rounded-[2rem] text-xl uppercase shadow-2xl transition-all transform active:scale-95 flex flex-col items-center`}
+                    className={`w-full bg-gradient-to-r ${displayDetails.stock > 0 ? 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800' : 'from-gray-400 to-gray-500 cursor-not-allowed'} text-white font-black py-4.5 rounded-md text-xl uppercase shadow-2xl transition-all transform active:scale-95 flex flex-col items-center`}
                   >
                     {displayDetails.stock > 0 ? 'MUA NGAY' : 'HẾT HÀNG'}
                     <span className="text-[10px] font-bold opacity-80 normal-case mt-0.5">
@@ -687,7 +687,7 @@ export default function ProductDetailPage() {
                   <button
                     onClick={handleAddToCart}
                     disabled={displayDetails.stock === 0}
-                    className={`w-full border-2 ${displayDetails.stock > 0 ? 'border-blue-600 text-blue-600 hover:bg-blue-50' : 'border-gray-300 text-gray-400 cursor-not-allowed'} font-black py-3.5 rounded-[2rem] text-md uppercase transition-all flex items-center justify-center gap-2`}
+                    className={`w-full border-2 ${displayDetails.stock > 0 ? 'border-blue-600 text-blue-600 hover:bg-blue-50' : 'border-gray-300 text-gray-400 cursor-not-allowed'} font-black py-3.5 rounded-md text-md uppercase transition-all flex items-center justify-center gap-2`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
@@ -698,9 +698,9 @@ export default function ProductDetailPage() {
               </div>
 
               {/* cửa hàng gần bạn */}
-              <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100">
+              <div className="bg-gray-50 rounded-md p-6 border border-gray-100">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-600">
+                  <div className="w-12 h-12 rounded-md bg-white flex items-center justify-center text-blue-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
@@ -754,7 +754,7 @@ export default function ProductDetailPage() {
               <img
                 src={galleryImages[lightboxActiveIndex]}
                 alt=""
-                className="max-w-full max-h-full object-contain rounded-lg drop-shadow-2xl animate-in zoom-in-95 duration-200"
+                className="max-w-full max-h-full object-contain rounded-md drop-shadow-2xl animate-in zoom-in-95 duration-200"
               />
             </div>
 
@@ -776,7 +776,7 @@ export default function ProductDetailPage() {
               <div
                 key={idx}
                 onClick={() => setLightboxActiveIndex(idx)}
-                className={`w-14 h-14 rounded-xl p-1 bg-white cursor-pointer transition-all ${lightboxActiveIndex === idx
+                className={`w-14 h-14 rounded-md p-1 bg-white cursor-pointer transition-all ${lightboxActiveIndex === idx
                   ? 'ring-4 ring-blue-500 opacity-100 scale-105'
                   : 'opacity-50 hover:opacity-80'
                   }`}

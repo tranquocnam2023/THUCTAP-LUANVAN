@@ -307,7 +307,7 @@ export default function AdminProductVariants() {
             <input
               type="text"
               placeholder="Tìm theo sản phẩm, biến thể, SKU..."
-              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] shadow-sm font-medium text-[#2B3674] placeholder-[#A3AED0]"
+              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -317,7 +317,7 @@ export default function AdminProductVariants() {
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
           >
             <Plus size={18} />
             <span>Thêm biến thể</span>
@@ -326,7 +326,7 @@ export default function AdminProductVariants() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8 p-6 flex flex-col">
+      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8 p-6 flex flex-col">
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -356,7 +356,7 @@ export default function AdminProductVariants() {
                         <span className="text-[#A3AED0] font-bold">#{v.id}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="w-14 h-14 rounded-xl bg-[#F4F7FE] flex items-center justify-center overflow-hidden border border-[#E0E5F2] p-1">
+                        <div className="w-14 h-14 rounded-md bg-[#F4F7FE] flex items-center justify-center overflow-hidden border border-[#E0E5F2] p-1">
                           {v.imageId ? (
                             <img src={v.imageId} alt="Variant" className="w-full h-full object-contain" />
                           ) : (
@@ -404,14 +404,14 @@ export default function AdminProductVariants() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleOpenModal(v)}
-                            className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
+                            className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-md transition-all"
                             title="Chỉnh sửa"
                           >
                             <Edit2 size={16} />
                           </button>
                           <button
                             onClick={() => handleDelete(v.id)}
-                            className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
+                            className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-md transition-all"
                             title="Xóa"
                           >
                             <Trash2 size={16} />
@@ -445,7 +445,7 @@ export default function AdminProductVariants() {
               <button
                 onClick={prevPage}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 <ChevronLeft size={16} /> TRƯỚC
               </button>
@@ -461,7 +461,7 @@ export default function AdminProductVariants() {
               <button
                 onClick={nextPage}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 SAU <ChevronRight size={16} />
               </button>
@@ -473,7 +473,7 @@ export default function AdminProductVariants() {
       {/* CRUD Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#FFFFFF] rounded-[20px] w-full max-w-2xl shadow-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
+          <div className="bg-[#FFFFFF] rounded-md w-full max-w-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F4F7FE]">
               <h3 className="text-xl font-bold text-[#2B3674]">{editingVariant ? 'Cập nhật Biến thể' : 'Thêm Biến thể mới'}</h3>
               <button onClick={() => setShowModal(false)} className="text-[#A3AED0] hover:text-[#EE5D50] transition-colors">
@@ -487,7 +487,7 @@ export default function AdminProductVariants() {
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Sản phẩm gốc *</label>
                   <select
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-[#FFFFFF] font-medium"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-[#FFFFFF] font-medium"
                     value={selectedProductId}
                     onChange={(e) => setSelectedProductId(e.target.value)}
                     required
@@ -502,7 +502,7 @@ export default function AdminProductVariants() {
                   <input
                     type="text"
                     readOnly
-                    className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-xl outline-none text-[#2B3674] font-medium select-all"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-md outline-none text-[#2B3674] font-medium select-all"
                     value={generatedVariantName}
                   />
                 </div>
@@ -512,7 +512,7 @@ export default function AdminProductVariants() {
                   <input
                     type="text"
                     readOnly
-                    className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-xl outline-none text-red-600 font-mono font-bold select-all"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-md outline-none text-red-600 font-mono font-bold select-all"
                     value={generatedSku}
                   />
                 </div>
@@ -523,7 +523,7 @@ export default function AdminProductVariants() {
                   <input
                     type="number"
                     placeholder={selectedProduct ? `Giá gốc: ${selectedProduct.basePrice?.toLocaleString('vi-VN')} ₫` : 'Giá bán'}
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
                     value={variantPrice}
                     onChange={(e) => setVariantPrice(e.target.value)}
                   />
@@ -536,7 +536,7 @@ export default function AdminProductVariants() {
                     type="number"
                     min="0"
                     step="1"
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium bg-white"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium bg-white"
                     value={variantStock}
                     onChange={(e) => setVariantStock(e.target.value)}
                     required
@@ -568,14 +568,14 @@ export default function AdminProductVariants() {
                     </button>
                   </div>
 
-                  <div className="space-y-3 max-h-60 overflow-y-auto pr-1 border border-[#E0E5F2] rounded-xl p-3 bg-gray-50">
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-1 border border-[#E0E5F2] rounded-md p-3 bg-gray-50">
                     {attributes.map((attr, index) => (
-                      <div key={index} className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-[#E0E5F2]">
+                      <div key={index} className="flex items-center gap-3 bg-white p-2.5 rounded-md border border-[#E0E5F2]">
                         <div className="flex-1">
                           <input
                             type="text"
                             placeholder="Tên thuộc tính (VD: Màu sắc)"
-                            className="w-full px-3 py-1.5 border border-[#E0E5F2] rounded-lg text-xs font-semibold outline-none focus:border-[#4318FF]"
+                            className="w-full px-3 py-1.5 border border-[#E0E5F2] rounded-md text-xs font-semibold outline-none focus:border-[#4318FF]"
                             value={attr.key}
                             onChange={(e) => handleAttributeChange(index, 'key', e.target.value)}
                             required
@@ -585,7 +585,7 @@ export default function AdminProductVariants() {
                           <input
                             type="text"
                             placeholder="Giá trị (VD: Đen)"
-                            className="w-full px-3 py-1.5 border border-[#E0E5F2] rounded-lg text-xs outline-none focus:border-[#4318FF]"
+                            className="w-full px-3 py-1.5 border border-[#E0E5F2] rounded-md text-xs outline-none focus:border-[#4318FF]"
                             value={attr.value}
                             onChange={(e) => handleAttributeChange(index, 'value', e.target.value)}
                             required
@@ -625,7 +625,7 @@ export default function AdminProductVariants() {
                   </div>
 
                   {imageInputMethod === 'upload' ? (
-                    <div className="relative border-2 border-dashed border-[#E0E5F2] rounded-xl p-6 flex flex-col items-center justify-center bg-[#F4F7FE]/10 h-28 cursor-pointer hover:border-[#4318FF] transition-colors">
+                    <div className="relative border-2 border-dashed border-[#E0E5F2] rounded-md p-6 flex flex-col items-center justify-center bg-[#F4F7FE]/10 h-28 cursor-pointer hover:border-[#4318FF] transition-colors">
                       <input
                         type="file"
                         accept="image/*"
@@ -642,14 +642,14 @@ export default function AdminProductVariants() {
                   ) : (
                     <input
                       type="text"
-                      className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
+                      className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
                       placeholder="Dán link ảnh biến thể (https://...)"
                       value={variantImage}
                       onChange={(e) => setVariantImage(e.target.value)}
                     />
                   )}
                   {variantImage && (
-                    <div className="flex items-center gap-3 mt-3 p-2 border border-[#E0E5F2] rounded-xl w-fit bg-gray-50">
+                    <div className="flex items-center gap-3 mt-3 p-2 border border-[#E0E5F2] rounded-md w-fit bg-gray-50">
                       <img src={variantImage} alt="Preview" className="w-12 h-12 object-contain rounded" />
                       <span className="text-xs text-[#A3AED0] font-bold">Hình ảnh xem trước</span>
                     </div>
@@ -658,7 +658,7 @@ export default function AdminProductVariants() {
               </div>
 
               {/* Inventory history (Mocked table as requested by UI design) */}
-              <div className="border border-[#E0E5F2] rounded-xl overflow-hidden mt-6">
+              <div className="border border-[#E0E5F2] rounded-md overflow-hidden mt-6">
                 <div className="bg-gray-50 px-4 py-2 border-b border-[#E0E5F2] text-[10px] font-black text-gray-500 uppercase tracking-widest">
                   Lịch sử tồn kho
                 </div>
@@ -692,13 +692,13 @@ export default function AdminProductVariants() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-xl font-bold hover:bg-[#E0E5F2] transition-colors"
+                  className="px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-md font-bold hover:bg-[#E0E5F2] transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95"
+                  className="px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95"
                 >
                   Lưu Lại
                 </button>

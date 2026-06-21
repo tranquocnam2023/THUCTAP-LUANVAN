@@ -6,7 +6,7 @@ const POLICY_DATA = {
     title: 'TRUNG TÂM HỖ TRỢ TRA CỨU THÔNG TIN, CHÍNH SÁCH BẢO HÀNH SẢN PHẨM CHÍNH HÃNG',
     content: (
       <div className="space-y-6">
-        <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 text-sm text-gray-700 leading-relaxed">
+        <div className="bg-gray-50 p-6 rounded-md border border-gray-200 text-sm text-gray-700 leading-relaxed">
           <p>Thegioididong.com xin lỗi vì sự cố khiến điện thoại của quý khách bị hỏng và phải đi bảo hành. Thế Giới Di Động có 2 hỗ trợ dành riêng cho khách hàng mua điện thoại tại TGDĐ trong thời gian đi bảo hành như sau:</p>
           <ul className="list-disc pl-5 mt-3 space-y-2">
             <li>Thế Giới Di Động cung cấp cho khách hàng một điện thoại đã qua sử dụng để khách hàng sử dụng tạm thời trong thời gian bảo hành. Chi tiết máy cung cấp quý khách có thể hỏi nhân viên siêu thị hoặc xem trên giấy tiếp nhận bảo hành/sửa chữa dịch vụ.</li>
@@ -28,7 +28,7 @@ const POLICY_DATA = {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
              {['OPPO', 'SAMSUNG', 'REALME', 'GIGABYTE', 'MICROLAB', 'CHUWI', 'LIFETRONS', 'ASIA MŨ BẢO HIỂM', 'VIVO', 'ARCA', 'FUROVER', '365 SELECTION'].map(brand => (
-               <div key={brand} className="border border-gray-100 rounded-lg p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow bg-white cursor-pointer group">
+               <div key={brand} className="border border-gray-100 rounded-md p-4 flex flex-col items-center justify-center transition-shadow bg-white cursor-pointer group">
                   <div className="text-xs font-black text-gray-400 group-hover:text-blue-600 transition-colors">{brand}</div>
                   <div className="text-[10px] text-gray-400 mt-1 uppercase">{brand}</div>
                </div>
@@ -41,7 +41,7 @@ const POLICY_DATA = {
   'doi-tra': {
     title: 'CHÍNH SÁCH ĐỔI TRẢ SẢN PHẨM TẠI THẾ GIỚI DI ĐỘNG',
     content: (
-      <div className="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
+      <div className="bg-white p-8 rounded-md border border-gray-100">
         <h3 className="text-xl font-bold text-blue-700 mb-4">1. Lỗi kỹ thuật từ nhà sản xuất</h3>
         <p className="text-gray-600 mb-6">Áp dụng đổi mới sản phẩm tương đương hoặc hoàn tiền nếu sản phẩm gặp lỗi phần cứng do nhà sản xuất trong vòng 30 ngày đầu sử dụng.</p>
         <h3 className="text-xl font-bold text-blue-700 mb-4">2. Đổi trả theo nhu cầu</h3>
@@ -53,11 +53,11 @@ const POLICY_DATA = {
     title: 'HƯỚNG DẪN MUA TRẢ GÓP 0% LÃI SUẤT',
     content: (
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+        <div className="bg-blue-50 p-6 rounded-md border border-blue-100">
           <h3 className="text-lg font-bold text-blue-800 mb-4">Trả góp qua thẻ tín dụng</h3>
           <p className="text-sm text-blue-700">Hỗ trợ hơn 20 ngân hàng lớn tại Việt Nam. Thủ tục nhanh gọn, không cần chứng minh thu nhập.</p>
         </div>
-        <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100">
+        <div className="bg-orange-50 p-6 rounded-md border border-orange-100">
           <h3 className="text-lg font-bold text-orange-800 mb-4">Trả góp qua công ty tài chính</h3>
           <p className="text-sm text-orange-700">Dành cho khách hàng chưa có thẻ tín dụng. Chỉ cần CCCD, duyệt hồ sơ trong 15-30 phút.</p>
         </div>

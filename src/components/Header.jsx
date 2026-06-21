@@ -123,7 +123,7 @@ export default function Header() {
             {isLoggedIn && userRole === 'Admin' && (
               <Link 
                 to="/admin" 
-                className="flex items-center px-3 py-2 rounded border font-black transition text-center shadow-lg animate-pulse hover:animate-none"
+                className="flex items-center px-3 py-2 rounded border font-black transition text-center animate-pulse hover:animate-none"
                 style={{ backgroundColor: THEME.accent, color: '#000', borderColor: THEME.accent }}
               >
                 Trang<br/>Quản trị

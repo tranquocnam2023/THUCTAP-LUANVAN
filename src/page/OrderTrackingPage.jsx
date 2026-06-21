@@ -80,9 +80,9 @@ export default function OrderTrackingPage() {
         </div>
       ) : (
         // Chưa tra cứu: Hiển thị Form nhập liệu tra cứu
-        <div className="bg-white border border-bordercustom p-8 rounded-lg shadow-sm w-full max-w-md mx-auto space-y-4 animate-in zoom-in duration-300">
+        <div className="bg-white border border-bordercustom p-8 rounded-md w-full max-w-md mx-auto space-y-4 animate-in zoom-in duration-300">
           <div className="text-center space-y-3">
-            <div className="w-16 h-16 bg-primary/10 text-primary rounded-lg flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 bg-primary/10 text-primary rounded-md flex items-center justify-center mx-auto">
               <FileSearch size={32} />
             </div>
             <h2 className="text-2xl font-bold text-primary mb-2 text-center">Tra cứu trạng thái đơn hàng</h2>

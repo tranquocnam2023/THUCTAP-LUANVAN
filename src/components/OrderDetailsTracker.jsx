@@ -145,7 +145,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
   };
 
   return (
-    <div className="w-full bg-white rounded-[2.5rem] p-6 md:p-8 border border-gray-100 shadow-sm space-y-8 animate-in fade-in duration-300">
+    <div className="w-full bg-white rounded-md p-6 md:p-8 border border-gray-100 space-y-8 animate-in fade-in duration-300">
       {/* Header đơn hàng */}
       <div className="flex flex-wrap items-center justify-between border-b border-gray-50 pb-6 gap-4">
         <div>
@@ -230,7 +230,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
 
                     {/* Bài toán Đơn vị vận chuyển thứ 3: GHN tracking code */}
                     {step.hasTracking && isCompleted && (
-                      <div className="mt-3 bg-gray-50 p-4 rounded-2xl border border-gray-100 flex flex-wrap items-center justify-between gap-4 animate-in zoom-in-95">
+                      <div className="mt-3 bg-gray-50 p-4 rounded-md border border-gray-100 flex flex-wrap items-center justify-between gap-4 animate-in zoom-in-95">
                         <div className="space-y-1">
                           <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Đối tác giao nhận</span>
                           <div className="flex items-center gap-2">
@@ -244,7 +244,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
                           href="https://giaohangnhanh.vn" 
                           target="_blank" 
                           rel="noreferrer"
-                          className="px-4 py-2 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-[11px] font-black text-gray-700 flex items-center gap-1 shadow-sm transition-all"
+                          className="px-4 py-2 bg-white hover:bg-gray-100 border border-gray-200 rounded-md text-[11px] font-black text-gray-700 flex items-center gap-1 transition-all"
                         >
                           Tra cứu trang GHN
                           <ExternalLink size={12} />
@@ -258,7 +258,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
           </div>
         </div>
       ) : (
-        <div className="bg-red-50 border border-red-100 text-red-700 p-4 rounded-2xl flex items-center gap-3 animate-in zoom-in-95">
+        <div className="bg-red-50 border border-red-100 text-red-700 p-4 rounded-md flex items-center gap-3 animate-in zoom-in-95">
           <AlertTriangle className="stroke-[2.5]" />
           <div>
             <h4 className="text-sm font-black">Đơn hàng này đã bị hủy</h4>
@@ -273,7 +273,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
         <div className="space-y-4">
           {order.items && order.items.map((item, idx) => (
             <div key={idx} className="flex gap-4 items-center">
-              <div className="w-14 h-14 bg-gray-50 rounded-xl p-1.5 border border-gray-100 shrink-0 shadow-inner flex items-center justify-center">
+              <div className="w-14 h-14 bg-gray-50 rounded-md p-1.5 border border-gray-100 shrink-0 flex items-center justify-center">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gray-400" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
               </div>
               <div className="flex-1 min-w-0">
@@ -294,7 +294,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
 
       {/* THÔNG TIN NGƯỜI NHẬN & PHƯƠNG THỨC */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-50 pt-6">
-        <div className="space-y-3 bg-gray-50/50 p-5 rounded-[2rem] border border-gray-100">
+        <div className="space-y-3 bg-gray-50/50 p-5 rounded-md border border-gray-100">
           <h4 className="text-xs font-black text-gray-800 uppercase tracking-widest flex items-center gap-1.5">
             <MapPin size={14} className="text-blue-500" />
             Thông tin nhận hàng
@@ -306,7 +306,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
           </div>
         </div>
 
-        <div className="space-y-3 bg-gray-50/50 p-5 rounded-[2rem] border border-gray-100">
+        <div className="space-y-3 bg-gray-50/50 p-5 rounded-md border border-gray-100">
           <h4 className="text-xs font-black text-gray-800 uppercase tracking-widest flex items-center gap-1.5">
             <CreditCard size={14} className="text-blue-500" />
             Thanh toán chi tiết
@@ -345,7 +345,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
       {/* TGDĐ-STYLE CANCEL REASON MODAL */}
       {isCancelModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[2rem] border border-gray-100 shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-md border border-gray-100 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-gray-50 p-6 bg-gray-50/50">
               <div>
@@ -370,7 +370,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
               <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">Vui lòng chọn lý do hủy đơn:</p>
               
               {cancelError && (
-                <div className="p-3.5 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in shake">
+                <div className="p-3.5 bg-red-50 border border-red-100 text-red-600 rounded-md text-xs font-bold flex items-center gap-2 animate-in shake">
                   <AlertTriangle size={14} className="shrink-0" />
                   <span>{cancelError}</span>
                 </div>
@@ -380,7 +380,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
                 {cancelReasons.map((reason, idx) => (
                   <label 
                     key={idx} 
-                    className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                    className={`flex items-center gap-3 p-3.5 rounded-md border transition-all cursor-pointer ${
                       cancelReason === reason 
                         ? 'border-red-500 bg-red-50/30' 
                         : 'border-gray-100 hover:border-gray-200 bg-white'
@@ -412,7 +412,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
                       setCancelError('');
                     }}
                     rows={3}
-                    className="w-full border border-gray-200 p-3 rounded-2xl text-xs font-semibold focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    className="w-full border border-gray-200 p-3 rounded-md text-xs font-semibold focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
                   ></textarea>
                 </div>
               )}
@@ -428,14 +428,14 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
                   setCancelError('');
                 }}
                 disabled={cancelling}
-                className="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-black text-gray-700 hover:bg-gray-50 transition active:scale-95 disabled:opacity-50"
+                className="flex-1 py-3 border border-gray-200 rounded-md text-xs font-black text-gray-700 hover:bg-gray-50 transition active:scale-95 disabled:opacity-50"
               >
                 ĐÓNG
               </button>
               <button
                 onClick={handleCancelOrder}
                 disabled={cancelling}
-                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-2xl text-xs font-black transition active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs font-black transition active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {cancelling ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN HỦY ĐƠN'}
               </button>

@@ -114,7 +114,7 @@ export default function FilterModal({ onClose, onApply }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-hidden">
-      <div className="bg-white w-full max-w-3xl h-[85vh] rounded-lg shadow-xl flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white w-full max-w-3xl h-[85vh] rounded-md flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
           <h2 className="text-lg font-bold text-gray-800 flex-1 text-center">Tất cả bộ lọc</h2>
@@ -138,7 +138,7 @@ export default function FilterModal({ onClose, onApply }) {
             </div>
 
             <div className="flex items-center gap-4">
-              <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5  w-[120px] text-center text-sm  outline-none" />
+              <input type="text" value={formatPrice(priceRange[0])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[120px] text-center text-sm outline-none" />
               <div className="flex-1 px-2">
                 <Slider
                   range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
@@ -150,7 +150,7 @@ export default function FilterModal({ onClose, onApply }) {
                   railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
                 />
               </div>
-              <input type="text" value={formatPrice(priceRange[1])} readOnly className="border border-gray-300  rounded px-3 py-1.5  w-[120px] text-center text-sm outline-none" />
+              <input type="text" value={formatPrice(priceRange[1])} readOnly className="border border-gray-300 rounded px-3 py-1.5 w-[120px] text-center text-sm outline-none" />
             </div>
             {/* ========================================================
                 CẤU TRÚC 2: Thanh kéo nằm TRÊN hai mức giá              
@@ -204,11 +204,11 @@ export default function FilterModal({ onClose, onApply }) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 px-6 py-4 shrink-0 flex items-center justify-center gap-4 bg-white/90 backdrop-blur-sm rounded-b-lg shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="border-t border-gray-200 px-6 py-4 shrink-0 flex items-center justify-center gap-4 bg-white/90 backdrop-blur-sm rounded-b-md">
           <button onClick={clearAll} className="px-10 py-2.5 border border-red-500 text-red-500 rounded font-medium hover:bg-red-50 transition-colors">
             Bỏ chọn
           </button>
-          <button onClick={handleApply} className="px-10 py-2.5 bg-primary text-white rounded font-medium hover:bg-secondary transition-colors shadow-sm uppercase">
+          <button onClick={handleApply} className="px-10 py-2.5 bg-primary text-white rounded font-medium hover:bg-secondary transition-colors uppercase">
             Xem kết quả
           </button>
         </div>

@@ -128,7 +128,7 @@ export default function HomePage() {
 
       {/* SECTION SẢN PHẨM NỔI BẬT (Điện Máy Xanh Style) */}
       {!selectedBrand && !advancedFilters && featuredProducts.length > 0 && (
-        <div className="w-full bg-gradient-to-r from-[#006ca2] via-[#0085bd] to-[#009ad3] rounded-3xl p-6 mb-8 border border-[#009ad3]/40 shadow-[0_4px_20px_rgba(0,108,162,0.25)] animate-in fade-in zoom-in-95 duration-500">
+        <div className="w-full bg-gradient-to-r from-[#006ca2] via-[#0085bd] to-[#009ad3] rounded-md p-6 mb-8 border border-[#009ad3]/40 animate-in fade-in zoom-in-95 duration-500">
           <div className="flex items-center justify-between mb-5 border-b border-white/20 pb-3">
             <h3 className="text-lg font-black text-white flex items-center gap-2 drop-shadow-md">
               <span className="animate-bounce">🌟</span>

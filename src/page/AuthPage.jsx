@@ -531,7 +531,7 @@ export default function AuthPage() {
 
         <div className="flex flex-col md:flex-row gap-6 mt-6">
           {/* Sidebar */}
-          <aside className="w-full md:w-64 shrink-0 bg-white rounded-xl border border-gray-200 shadow-sm p-4 h-fit">
+          <aside className="w-full md:w-64 shrink-0 bg-white rounded-md border border-gray-200 p-4 h-fit">
             <div className="flex items-center space-x-3 pb-4 mb-4 border-b border-gray-100">
               <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center font-bold text-white text-lg">
                 {(userProfile?.username || 'U')[0].toUpperCase()}
@@ -546,7 +546,7 @@ export default function AuthPage() {
             <nav className="flex flex-col space-y-1">
               <button
                 onClick={() => setProfileTab('info')}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold transition-all text-left ${profileTab === 'info'
+                className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-bold transition-all text-left ${profileTab === 'info'
                     ? 'bg-primary/10 text-primary'
                     : 'text-gray-600 hover:bg-gray-50'
                   }`}
@@ -557,7 +557,7 @@ export default function AuthPage() {
 
               <button
                 onClick={() => setProfileTab('addresses')}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold transition-all text-left ${profileTab === 'addresses'
+                className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-bold transition-all text-left ${profileTab === 'addresses'
                     ? 'bg-primary/10 text-primary'
                     : 'text-gray-600 hover:bg-gray-50'
                   }`}
@@ -568,7 +568,7 @@ export default function AuthPage() {
 
               <button
                 onClick={() => { setProfileTab('history'); setSelectedOrder(null); }}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold transition-all text-left ${profileTab === 'history'
+                className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-bold transition-all text-left ${profileTab === 'history'
                     ? 'bg-primary/10 text-primary'
                     : 'text-gray-600 hover:bg-gray-50'
                   }`}
@@ -579,7 +579,7 @@ export default function AuthPage() {
 
               <button
                 onClick={() => setProfileTab('password')}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold transition-all text-left ${profileTab === 'password'
+                className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-bold transition-all text-left ${profileTab === 'password'
                     ? 'bg-primary/10 text-primary'
                     : 'text-gray-600 hover:bg-gray-50'
                   }`}
@@ -590,7 +590,7 @@ export default function AuthPage() {
 
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-bold text-red-600 hover:bg-red-50 transition-all text-left mt-4 border-t border-gray-100 pt-4"
+                className="flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-bold text-red-600 hover:bg-red-50 transition-all text-left mt-4 border-t border-gray-100 pt-4"
               >
                 <LogOut size={18} />
                 <span>Đăng xuất</span>
@@ -599,7 +599,7 @@ export default function AuthPage() {
           </aside>
 
           {/* Main Panel Content */}
-          <main className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <main className="flex-1 bg-white rounded-md border border-gray-200 p-6">
 
             {/* 1. Account Info Tab */}
             {profileTab === 'info' && (
@@ -610,7 +610,7 @@ export default function AuthPage() {
                 </div>
 
                 {!isEditingProfile ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-xl border border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-md border border-gray-100">
                     <div className="space-y-1">
                       <span className="text-xs text-gray-400 font-bold uppercase">Họ và tên</span>
                       <p className="font-bold text-gray-800 text-lg">{userProfile?.username}</p>
@@ -639,7 +639,7 @@ export default function AuthPage() {
                     <div className="md:col-span-2 pt-4 border-t border-gray-200/50 flex justify-end">
                       <button
                         onClick={() => setIsEditingProfile(true)}
-                        className="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                        className="px-6 py-2.5 bg-primary text-white font-bold rounded-md hover:bg-secondary transition active:scale-95 text-sm"
                       >
                         Chỉnh sửa thông tin
                       </button>
@@ -652,7 +652,7 @@ export default function AuthPage() {
                       <input
                         type="text"
                         required
-                        className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                        className="w-full border border-gray-300 p-2.5 rounded-md focus:outline-none focus:border-primary text-sm font-semibold"
                         value={editProfileData.username}
                         onChange={(e) => setEditProfileData({ ...editProfileData, username: e.target.value })}
                       />
@@ -663,7 +663,7 @@ export default function AuthPage() {
                       <input
                         type="email"
                         required
-                        className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                        className="w-full border border-gray-300 p-2.5 rounded-md focus:outline-none focus:border-primary text-sm font-semibold"
                         value={editProfileData.email}
                         onChange={(e) => setEditProfileData({ ...editProfileData, email: e.target.value })}
                       />
@@ -673,14 +673,14 @@ export default function AuthPage() {
                       <button
                         type="button"
                         onClick={() => setIsEditingProfile(false)}
-                        className="px-5 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition text-sm"
+                        className="px-5 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-md hover:bg-gray-200 transition text-sm"
                       >
                         Hủy
                       </button>
                       <button
                         type="submit"
                         disabled={loading}
-                        className="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                        className="px-6 py-2.5 bg-primary text-white font-bold rounded-md hover:bg-secondary transition active:scale-95 text-sm"
                       >
                         {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
                       </button>
@@ -701,7 +701,7 @@ export default function AuthPage() {
                   {!isAddressFormOpen && (
                     <button
                       onClick={() => handleOpenAddressForm()}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white font-bold rounded-md hover:bg-secondary transition active:scale-95 text-sm"
                     >
                       <Plus size={16} />
                       <span>Thêm địa chỉ</span>
@@ -710,7 +710,7 @@ export default function AuthPage() {
                 </div>
 
                 {isAddressFormOpen ? (
-                  <form onSubmit={handleSaveAddress} className="space-y-4 max-w-lg bg-gray-50 p-6 rounded-xl border border-gray-200">
+                  <form onSubmit={handleSaveAddress} className="space-y-4 max-w-lg bg-gray-50 p-6 rounded-md border border-gray-200">
                     <h4 className="font-bold text-gray-800 border-b border-gray-200 pb-2">
                       {editingAddressId ? 'Cập nhật địa chỉ nhận hàng' : 'Thêm địa chỉ nhận hàng mới'}
                     </h4>
@@ -722,7 +722,7 @@ export default function AuthPage() {
                           type="text"
                           required
                           placeholder="Họ và tên..."
-                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          className="w-full border border-gray-300 p-2.5 rounded-md text-sm font-semibold focus:outline-none focus:border-primary"
                           value={addressForm.recipientName}
                           onChange={(e) => setAddressForm({ ...addressForm, recipientName: e.target.value })}
                         />
@@ -733,7 +733,7 @@ export default function AuthPage() {
                           type="text"
                           required
                           placeholder="SĐT liên hệ..."
-                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          className="w-full border border-gray-300 p-2.5 rounded-md text-sm font-semibold focus:outline-none focus:border-primary"
                           value={addressForm.phoneNumber}
                           onChange={(e) => setAddressForm({ ...addressForm, phoneNumber: e.target.value })}
                         />
@@ -744,7 +744,7 @@ export default function AuthPage() {
                           type="text"
                           required
                           placeholder="Ví dụ: 120/5 Nguyễn Văn Cừ..."
-                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          className="w-full border border-gray-300 p-2.5 rounded-md text-sm font-semibold focus:outline-none focus:border-primary"
                           value={addressForm.addressLine}
                           onChange={(e) => setAddressForm({ ...addressForm, addressLine: e.target.value })}
                         />
@@ -755,7 +755,7 @@ export default function AuthPage() {
                           required
                           value={selectedProvinceId}
                           onChange={handleProvinceChange}
-                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          className="w-full border border-gray-300 p-2.5 rounded-md text-sm font-semibold focus:outline-none focus:border-primary"
                         >
                           <option value="">Chọn Tỉnh/Thành phố</option>
                           {provinces.map(p => (
@@ -768,7 +768,7 @@ export default function AuthPage() {
                         <input
                           type="text"
                           placeholder="Quận/Huyện..."
-                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary"
+                          className="w-full border border-gray-300 p-2.5 rounded-md text-sm font-semibold focus:outline-none focus:border-primary"
                           value={addressForm.district}
                           onChange={(e) => setAddressForm({ ...addressForm, district: e.target.value })}
                         />
@@ -780,7 +780,7 @@ export default function AuthPage() {
                           value={addressForm.wardId}
                           onChange={handleWardChange}
                           disabled={!selectedProvinceId}
-                          className="w-full border border-gray-300 p-2.5 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary disabled:opacity-50"
+                          className="w-full border border-gray-300 p-2.5 rounded-md text-sm font-semibold focus:outline-none focus:border-primary disabled:opacity-50"
                         >
                           <option value="">Chọn Phường/Xã</option>
                           {wards.map(w => (
@@ -806,14 +806,14 @@ export default function AuthPage() {
                       <button
                         type="button"
                         onClick={() => setIsAddressFormOpen(false)}
-                        className="px-5 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-100 transition text-sm"
+                        className="px-5 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded-md hover:bg-gray-100 transition text-sm"
                       >
                         Hủy
                       </button>
                       <button
                         type="submit"
                         disabled={loading}
-                        className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                        className="px-6 py-2 bg-primary text-white font-bold rounded-md hover:bg-secondary transition active:scale-95 text-sm"
                       >
                         {loading ? 'Đang lưu...' : 'Lưu địa chỉ'}
                       </button>
@@ -830,7 +830,7 @@ export default function AuthPage() {
                       shippingInfos.map((item) => (
                         <div
                           key={item.id}
-                          className={`p-5 rounded-xl border flex justify-between items-start transition-all ${item.isDefault
+                          className={`p-5 rounded-md border flex justify-between items-start transition-all ${item.isDefault
                               ? 'border-primary bg-primary/5 shadow-sm'
                               : 'border-gray-200 hover:border-gray-300'
                             }`}
@@ -851,7 +851,7 @@ export default function AuthPage() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleOpenAddressForm(item)}
-                              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
                               title="Sửa địa chỉ"
                             >
                               <Edit2 size={16} />
@@ -859,7 +859,7 @@ export default function AuthPage() {
                             <button
                               onClick={() => handleDeleteAddress(item.id)}
                               disabled={item.isDefault && shippingInfos.length > 1} // Can't delete default unless it's the last one
-                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30"
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-30"
                               title="Xóa địa chỉ"
                             >
                               <Trash2 size={16} />
@@ -868,7 +868,7 @@ export default function AuthPage() {
                         </div>
                       ))
                     ) : (
-                      <div className="text-center py-10 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
+                      <div className="text-center py-10 bg-gray-50 rounded-md border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
                         <MapPin size={48} className="mb-2 opacity-50 text-gray-300" />
                         <p className="font-bold text-gray-600">Bạn chưa có địa chỉ nhận hàng nào</p>
                         <p className="text-xs mt-0.5">Vui lòng bấm nút "Thêm địa chỉ" để nhận hàng khi đặt sản phẩm</p>
@@ -893,7 +893,7 @@ export default function AuthPage() {
                     <input
                       type="password"
                       required
-                      className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                      className="w-full border border-gray-300 p-2.5 rounded-md focus:outline-none focus:border-primary text-sm font-semibold"
                       value={passwordData.oldPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
                     />
@@ -905,7 +905,7 @@ export default function AuthPage() {
                       type="password"
                       required
                       minLength={6}
-                      className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                      className="w-full border border-gray-300 p-2.5 rounded-md focus:outline-none focus:border-primary text-sm font-semibold"
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                     />
@@ -917,7 +917,7 @@ export default function AuthPage() {
                       type="password"
                       required
                       minLength={6}
-                      className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:border-primary text-sm font-semibold"
+                      className="w-full border border-gray-300 p-2.5 rounded-md focus:outline-none focus:border-primary text-sm font-semibold"
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                     />
@@ -927,7 +927,7 @@ export default function AuthPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-secondary transition active:scale-95 text-sm"
+                      className="px-6 py-2.5 bg-primary text-white font-bold rounded-md hover:bg-secondary transition active:scale-95 text-sm"
                     >
                       {loading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
                     </button>
@@ -947,7 +947,7 @@ export default function AuthPage() {
                   {selectedOrder && (
                     <button
                       onClick={() => setSelectedOrder(null)}
-                      className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-600 transition-all flex items-center gap-1"
+                      className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md text-xs font-bold text-gray-600 transition-all flex items-center gap-1"
                     >
                       <ArrowLeft size={14} /> Quay lại danh sách
                     </button>
@@ -966,7 +966,7 @@ export default function AuthPage() {
                     {orders.map((item) => (
                       <div
                         key={item.id}
-                        className="p-5 rounded-2xl border border-gray-200 hover:border-gray-300 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white hover:shadow-sm"
+                        className="p-5 rounded-md border border-gray-200 hover:border-gray-300 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white"
                       >
                         <div className="space-y-1.5 text-xs text-gray-500 font-bold">
                           <p className="text-sm font-black text-gray-800">Mã đơn hàng: #PS{item.id}</p>
@@ -990,7 +990,7 @@ export default function AuthPage() {
                           </span>
                           <button
                             onClick={() => setSelectedOrder(item)}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow-sm transition-all"
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-md transition-all"
                           >
                             Theo dõi đơn
                           </button>
@@ -999,7 +999,7 @@ export default function AuthPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-10 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
+                  <div className="text-center py-10 bg-gray-50 rounded-md border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
                     <ClipboardList size={48} className="mb-2 opacity-50 text-gray-300" />
                     <p className="font-bold text-gray-600">Bạn chưa mua đơn hàng nào</p>
                     <p className="text-xs mt-0.5">Các đơn hàng bạn mua sẽ xuất hiện tại đây để theo dõi hành trình giao nhận</p>
@@ -1020,7 +1020,7 @@ export default function AuthPage() {
       <div className="flex flex-col h-full w-full">
         <Breadcrumb items={[{ label: 'Quên mật khẩu' }]} />
         <div className="flex justify-center items-start pt-6 w-full px-4">
-          <div className="bg-white border border-bordercustom p-8 rounded-lg shadow-sm w-full max-w-md space-y-4">
+          <div className="bg-white border border-bordercustom p-8 rounded-md w-full max-w-md space-y-4">
             
             {/* Step Indicators */}
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
@@ -1177,7 +1177,7 @@ export default function AuthPage() {
     <div className="flex flex-col h-full w-full">
       <Breadcrumb items={[{ label: isLogin ? 'Đăng nhập' : 'Đăng ký' }]} />
       <div className="flex justify-center items-start pt-6 w-full">
-        <div className="bg-white border border-bordercustom p-8 rounded-lg shadow-sm w-full max-w-md">
+        <div className="bg-white border border-bordercustom p-8 rounded-md w-full max-w-md">
           <h2 className="text-2xl font-bold text-primary mb-6 text-center">
             {isLogin ? 'Đăng Nhập' : 'Đăng Ký Tài Khoản'}
           </h2>

@@ -25,7 +25,7 @@ export default function FilterBar({ selectedBrand, onSelectBrand, onApplyFilter,
   return (
     <>
       <div 
-        className="flex flex-wrap items-center gap-2 mb-4 p-2 rounded-lg shadow-sm border"
+        className="flex flex-wrap items-center gap-2 mb-4 p-2 rounded-md border"
         style={{ backgroundColor: '#ffffff', borderColor: THEME.border }}
       >
         <button 
@@ -43,7 +43,7 @@ export default function FilterBar({ selectedBrand, onSelectBrand, onApplyFilter,
           <button 
             key={brand} 
             onClick={() => onSelectBrand(selectedBrand === brand ? null : brand)}
-            className={`px-3 py-1.5 border rounded-[4px] text-[13px] transition-all duration-200 ${
+            className={`px-3 py-1.5 border rounded-md text-[13px] transition-all duration-200 ${
               selectedBrand === brand 
               ? 'font-bold shadow-inner' 
               : 'hover:bg-gray-50'

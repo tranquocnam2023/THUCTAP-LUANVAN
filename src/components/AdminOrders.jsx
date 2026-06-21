@@ -262,7 +262,7 @@ export default function AdminOrders() {
   return (
     <div className="animate-in fade-in duration-500 space-y-6">
       {error && (
-        <div className="p-5 bg-[#EE5D50]/10 border border-[#EE5D50]/20 text-[#EE5D50] rounded-[20px] font-bold text-sm">
+        <div className="p-5 bg-[#EE5D50]/10 border border-[#EE5D50]/20 text-[#EE5D50] rounded-md font-bold text-sm">
           ⚠️ Có lỗi xảy ra khi tải dữ liệu đơn hàng: {error}
         </div>
       )}
@@ -278,7 +278,7 @@ export default function AdminOrders() {
           <input
             type="text"
             placeholder="Mã đơn, tên khách hàng..."
-            className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] shadow-sm font-medium text-[#2B3674] placeholder-[#A3AED0]"
+            className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -293,7 +293,7 @@ export default function AdminOrders() {
           return (
             <div
               key={i}
-              className="p-5 rounded-[20px] shadow-sm transition-all hover:shadow-md flex items-center justify-between h-28 bg-[#FFFFFF]"
+              className="p-5 rounded-md transition-all flex items-center justify-between h-28 bg-[#FFFFFF]"
             >
               <div className="flex flex-col">
                 <p className="text-[12px] font-bold text-[#A3AED0] mb-1">
@@ -320,14 +320,14 @@ export default function AdminOrders() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center px-6 py-3 rounded-[20px] text-sm font-bold transition-all whitespace-nowrap border ${isActive
+              className={`flex items-center px-6 py-3 rounded-md text-sm font-bold transition-all whitespace-nowrap border ${isActive
                   ? 'bg-[#4318FF] text-[#FFFFFF] border-[#4318FF] shadow-md scale-[1.02]'
                   : 'bg-[#FFFFFF] text-[#A3AED0] border-[#E0E5F2] hover:border-[#4318FF] hover:text-[#4318FF]'
                 }`}
             >
               {Icon && <Icon className={`w-4 h-4 mr-3 ${isActive ? 'text-[#FFFFFF]' : tab.color}`} />}
               {tab.name}
-              <span className={`ml-3 px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
+              <span className={`ml-3 px-2 py-0.5 rounded-md text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
                 {counts[tab.id]}
               </span>
             </button>
@@ -336,7 +336,7 @@ export default function AdminOrders() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8">
+      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -377,7 +377,7 @@ export default function AdminOrders() {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <select
-                          className="text-xs font-bold bg-[#F4F7FE] text-[#2B3674] rounded-xl px-3 py-2 border-none focus:outline-none focus:ring-1 focus:ring-[#4318FF] cursor-pointer hover:bg-[#E0E5F2] transition-all disabled:opacity-75 disabled:cursor-not-allowed"
+                          className="text-xs font-bold bg-[#F4F7FE] text-[#2B3674] rounded-md px-3 py-2 border-none focus:outline-none focus:ring-1 focus:ring-[#4318FF] cursor-pointer hover:bg-[#E0E5F2] transition-all disabled:opacity-75 disabled:cursor-not-allowed"
                           value={getOrderStatus(order.status)}
                           disabled={order.status === 'shipping' || order.status === 'shipping_failed' || order.status === 'delivered' || order.status === 'cancelled'}
                           onChange={(e) => handleStatusChange(order.id, e.target.value)}
@@ -402,7 +402,7 @@ export default function AdminOrders() {
                         {(order.status === 'confirmed' || order.status === 'preparing') && (
                           <button
                             onClick={() => handleStatusChange(order.id, 'shipping')}
-                            className="text-[10px] font-extrabold text-[#4318FF] hover:underline px-2 py-1 bg-[#4318FF]/5 rounded-lg border border-[#4318FF]/10 transition-all hover:bg-[#4318FF]/10 active:scale-95 whitespace-nowrap"
+                            className="text-[10px] font-extrabold text-[#4318FF] hover:underline px-2 py-1 bg-[#4318FF]/5 rounded-md border border-[#4318FF]/10 transition-all hover:bg-[#4318FF]/10 active:scale-95 whitespace-nowrap"
                             title="Mô phỏng: Bên vận chuyển đến lấy hàng và bắt đầu giao"
                           >
                             Giao hàng
@@ -412,14 +412,14 @@ export default function AdminOrders() {
                           <>
                             <button
                               onClick={() => handleStatusChange(order.id, 'delivered')}
-                              className="text-[10px] font-extrabold text-[#01B574] hover:underline px-2 py-1 bg-[#01B574]/5 rounded-lg border border-[#01B574]/10 transition-all hover:bg-[#01B574]/10 active:scale-95 whitespace-nowrap"
+                              className="text-[10px] font-extrabold text-[#01B574] hover:underline px-2 py-1 bg-[#01B574]/5 rounded-md border border-[#01B574]/10 transition-all hover:bg-[#01B574]/10 active:scale-95 whitespace-nowrap"
                               title="Mô phỏng: Bên vận chuyển cập nhật giao hàng thành công"
                             >
                               Xác nhận đã giao
                             </button>
                             <button
                               onClick={() => handleStatusChange(order.id, 'shipping_failed')}
-                              className="text-[10px] font-extrabold text-[#EE5D50] hover:underline px-2 py-1 bg-[#EE5D50]/5 rounded-lg border border-[#EE5D50]/10 transition-all hover:bg-[#EE5D50]/10 active:scale-95 whitespace-nowrap ml-1"
+                              className="text-[10px] font-extrabold text-[#EE5D50] hover:underline px-2 py-1 bg-[#EE5D50]/5 rounded-md border border-[#EE5D50]/10 transition-all hover:bg-[#EE5D50]/10 active:scale-95 whitespace-nowrap ml-1"
                               title="Mô phỏng: Giao hàng thất bại"
                             >
                               Giao thất bại
@@ -431,14 +431,14 @@ export default function AdminOrders() {
                           <div className="flex gap-1.5 items-center">
                             <button
                               onClick={() => handleStatusChange(order.id, 'shipping')}
-                              className="text-[10px] font-extrabold text-[#39B8FF] hover:underline px-2 py-1 bg-[#39B8FF]/5 rounded-lg border border-[#39B8FF]/10 transition-all hover:bg-[#39B8FF]/10 active:scale-95 whitespace-nowrap"
+                              className="text-[10px] font-extrabold text-[#39B8FF] hover:underline px-2 py-1 bg-[#39B8FF]/5 rounded-md border border-[#39B8FF]/10 transition-all hover:bg-[#39B8FF]/10 active:scale-95 whitespace-nowrap"
                               title="Mô phỏng: Giao hàng lại lần tiếp theo"
                             >
                               Giao lại
                             </button>
                             <button
                               onClick={() => handleStatusChange(order.id, 'cancelled')}
-                              className="text-[10px] font-extrabold px-2 py-1 rounded-lg border transition-all whitespace-nowrap text-[#EE5D50] hover:underline bg-[#EE5D50]/5 border-[#EE5D50]/10 hover:bg-[#EE5D50]/10 active:scale-95"
+                              className="text-[10px] font-extrabold px-2 py-1 rounded-md border transition-all whitespace-nowrap text-[#EE5D50] hover:underline bg-[#EE5D50]/5 border-[#EE5D50]/10 hover:bg-[#EE5D50]/10 active:scale-95"
                               title="Hủy đơn hàng"
                             >
                               Hủy đơn
@@ -472,7 +472,7 @@ export default function AdminOrders() {
             <button
               onClick={prevPage}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
             >
               TRƯỚC
             </button>
@@ -488,7 +488,7 @@ export default function AdminOrders() {
             <button
               onClick={nextPage}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
             >
               SAU
             </button>
@@ -499,7 +499,7 @@ export default function AdminOrders() {
       {/* Custom Confirm Cancel Modal */}
       {cancelModal.isOpen && (
         <div className="fixed inset-0 bg-[#2B3674]/40 backdrop-blur-sm flex items-center justify-center z-[9999] animate-in fade-in duration-200">
-          <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-2xl border border-[#E0E5F2] w-full max-w-sm mx-4 transform transition-all scale-100 animate-in zoom-in-95 duration-200">
+          <div className="bg-[#FFFFFF] p-6 rounded-md border border-[#E0E5F2] w-full max-w-sm mx-4 transform transition-all scale-100 animate-in zoom-in-95 duration-200">
             <h3 className="text-lg font-bold text-[#2B3674] mb-2 flex items-center gap-2">
               ⚠️ Xác nhận hủy đơn hàng
             </h3>
@@ -509,13 +509,13 @@ export default function AdminOrders() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setCancelModal({ isOpen: false, orderId: null, newStatus: null })}
-                className="px-5 py-2.5 bg-[#F4F7FE] text-[#A3AED0] font-bold rounded-xl text-xs hover:bg-[#E0E5F2] transition-colors"
+                className="px-5 py-2.5 bg-[#F4F7FE] text-[#A3AED0] font-bold rounded-md text-xs hover:bg-[#E0E5F2] transition-colors"
               >
                 Hủy bỏ
               </button>
               <button
                 onClick={confirmCancelOrder}
-                className="px-5 py-2.5 bg-[#EE5D50] text-[#FFFFFF] font-bold rounded-xl text-xs hover:bg-[#EE5D50]/90 transition-colors shadow-lg shadow-[#EE5D50]/20"
+                className="px-5 py-2.5 bg-[#EE5D50] text-[#FFFFFF] font-bold rounded-md text-xs hover:bg-[#EE5D50]/90 transition-colors"
               >
                 Đồng ý hủy
               </button>

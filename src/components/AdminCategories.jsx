@@ -75,14 +75,14 @@ export default function AdminCategories() {
             <input
               type="text"
               placeholder="Tìm tên danh mục..."
-              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] shadow-sm font-medium text-[#2B3674] placeholder-[#A3AED0]"
+              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
           >
             <Plus size={18} />
             <span>Thêm danh mục</span>
@@ -91,7 +91,7 @@ export default function AdminCategories() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8">
+      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -122,7 +122,7 @@ export default function AdminCategories() {
                           <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => handleToggleProducts(cat.id)}
-                              className="p-2 text-[#A3AED0] hover:text-[#4318FF] hover:bg-[#F4F7FE] rounded-lg transition-all"
+                              className="p-2 text-[#A3AED0] hover:text-[#4318FF] hover:bg-[#F4F7FE] rounded-md transition-all"
                               title={expandedCategories[cat.id] ? 'Thu gọn' : 'Xem thương hiệu'}
                             >
                               {expandedCategories[cat.id] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -141,8 +141,8 @@ export default function AdminCategories() {
                                     (p.brandId === brand.id || p.BrandId === brand.id)
                                   ).length;
                                   return (
-                                    <div key={brand.id} className="bg-[#FFFFFF] p-4 rounded-[20px] shadow-sm flex items-center gap-4 border border-[#E0E5F2] hover:shadow-md transition-all group/item">
-                                      <div className="w-16 h-16 rounded-[15px] bg-[#F4F7FE] p-2 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    <div key={brand.id} className="bg-[#FFFFFF] p-4 rounded-md flex items-center gap-4 border border-[#E0E5F2] transition-all group/item">
+                                      <div className="w-16 h-16 rounded-md bg-[#F4F7FE] p-2 flex items-center justify-center overflow-hidden flex-shrink-0">
                                         {brand.iconUrl || brand.logo || brand.image ? (
                                           <img src={brand.iconUrl || brand.logo || brand.image} alt={brand.name} className="w-full h-full object-contain group-hover/item:scale-105 transition-transform" />
                                         ) : (
@@ -159,7 +159,7 @@ export default function AdminCategories() {
                                   );
                                 })
                               ) : (
-                                <div className="col-span-full py-8 flex flex-col items-center justify-center text-[#A3AED0] bg-[#FFFFFF] rounded-[20px] border-2 border-dashed border-[#E0E5F2]">
+                                <div className="col-span-full py-8 flex flex-col items-center justify-center text-[#A3AED0] bg-[#FFFFFF] rounded-md border-2 border-dashed border-[#E0E5F2]">
                                   <FolderOpen size={32} strokeWidth={1.5} className="mb-2 opacity-50" />
                                   <p className="text-sm font-bold">Danh mục này chưa có thương hiệu nào</p>
                                 </div>
@@ -188,9 +188,9 @@ export default function AdminCategories() {
         <div className="px-6 py-4 border-t border-[#E0E5F2] flex items-center justify-between text-sm font-bold text-[#A3AED0]">
           <span>Tổng cộng: {filteredCategories.length} danh mục</span>
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>TRƯỚC</button>
-            <button className="px-4 py-2 bg-[#4318FF] text-[#FFFFFF] rounded-xl shadow-md">1</button>
-            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>SAU</button>
+            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>TRƯỚC</button>
+            <button className="px-4 py-2 bg-[#4318FF] text-[#FFFFFF] rounded-md">1</button>
+            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>SAU</button>
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@ export default function AdminCategories() {
       {/* Create Category Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#FFFFFF] rounded-[20px] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-[#FFFFFF] rounded-md w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F4F7FE]">
               <h3 className="text-xl font-bold text-[#2B3674]">Thêm Danh Mục Mới</h3>
               <button
@@ -246,7 +246,7 @@ export default function AdminCategories() {
                   type="text"
                   required
                   placeholder="VD: Điện thoại, Laptop..."
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
                 />
@@ -257,7 +257,7 @@ export default function AdminCategories() {
                 <textarea
                   rows="3"
                   placeholder="Mô tả tóm tắt danh mục này..."
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium resize-none"
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium resize-none"
                   value={newCatDesc}
                   onChange={(e) => setNewCatDesc(e.target.value)}
                 />
@@ -271,14 +271,14 @@ export default function AdminCategories() {
                     setNewCatName('');
                     setNewCatDesc('');
                   }}
-                  className="px-5 py-2.5 bg-[#F4F7FE] text-[#2B3674] rounded-xl font-bold hover:bg-[#E0E5F2] transition-colors"
+                  className="px-5 py-2.5 bg-[#F4F7FE] text-[#2B3674] rounded-md font-bold hover:bg-[#E0E5F2] transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="px-5 py-2.5 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 disabled:bg-blue-400"
+                  className="px-5 py-2.5 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 disabled:bg-blue-400"
                 >
                   {creating ? "Đang tạo..." : "Tạo mới"}
                 </button>

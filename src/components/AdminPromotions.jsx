@@ -152,14 +152,14 @@ export default function AdminPromotions() {
             <input
               type="text"
               placeholder="Tìm mã giảm giá..."
-              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] shadow-sm font-medium text-[#2B3674] placeholder-[#A3AED0]"
+              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
           >
             <Plus size={18} />
             <span>Thêm mã mới</span>
@@ -168,7 +168,7 @@ export default function AdminPromotions() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8">
+      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -192,7 +192,7 @@ export default function AdminPromotions() {
                       <td className="px-6 py-4 text-[#A3AED0] font-bold">#{promo.id}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-[#4318FF]/5 text-[#4318FF] flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-md bg-[#4318FF]/5 text-[#4318FF] flex items-center justify-center">
                             <Ticket size={16} />
                           </div>
                           <span className="font-extrabold text-[#2B3674] tracking-wider text-base">{promo.code}</span>
@@ -226,14 +226,14 @@ export default function AdminPromotions() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleOpenModal(promo)}
-                            className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
+                            className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-md transition-all"
                             title="Chỉnh sửa"
                           >
                             <Edit size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(promo.id)}
-                            className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
+                            className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-md transition-all"
                             title="Xóa"
                           >
                             <Trash2 size={18} />
@@ -265,7 +265,7 @@ export default function AdminPromotions() {
       {/* Modal CRUD */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-[#FFFFFF] rounded-[20px] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-[#FFFFFF] rounded-md w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F4F7FE]">
               <h3 className="text-xl font-bold text-[#2B3674]">
                 {editingPromotion ? 'Cập nhật mã khuyến mãi' : 'Thêm mã khuyến mãi mới'}
@@ -283,7 +283,7 @@ export default function AdminPromotions() {
                     type="text"
                     required
                     maxLength={30}
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-bold uppercase tracking-wider text-[#2B3674]"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-bold uppercase tracking-wider text-[#2B3674]"
                     placeholder="VD: KHUYENMAI20, SUMMER50..."
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
@@ -293,7 +293,7 @@ export default function AdminPromotions() {
                 <div>
                   <label className="block text-sm font-bold text-[#2B3674] mb-2">Loại giảm giá *</label>
                   <select
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-semibold text-[#2B3674]"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-semibold text-[#2B3674]"
                     value={formData.discountType}
                     onChange={(e) => setFormData({ ...formData, discountType: e.target.value, discountValue: e.target.value === 'PERCENTAGE' ? Math.min(100, formData.discountValue) : formData.discountValue })}
                   >
@@ -309,7 +309,7 @@ export default function AdminPromotions() {
                     required
                     min={1}
                     max={formData.discountType === 'PERCENTAGE' ? 100 : 99999999}
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-bold text-[#2B3674]"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-bold text-[#2B3674]"
                     placeholder={formData.discountType === 'PERCENTAGE' ? "Nhập % (1-100)" : "Nhập số tiền giảm"}
                     value={formData.discountValue}
                     onChange={(e) => setFormData({ ...formData, discountValue: Number(e.target.value) })}
@@ -321,7 +321,7 @@ export default function AdminPromotions() {
                   <input
                     type="datetime-local"
                     required
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-semibold text-[#2B3674]"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-semibold text-[#2B3674]"
                     value={formData.startDate}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                   />
@@ -332,7 +332,7 @@ export default function AdminPromotions() {
                   <input
                     type="datetime-local"
                     required
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-semibold text-[#2B3674]"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-semibold text-[#2B3674]"
                     value={formData.endDate}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                   />
@@ -343,7 +343,7 @@ export default function AdminPromotions() {
                   <input
                     type="number"
                     min={0}
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-bold text-[#2B3674]"
+                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-bold text-[#2B3674]"
                     placeholder="VD: 50, 100..."
                     value={formData.usageLimit}
                     onChange={(e) => setFormData({ ...formData, usageLimit: Number(e.target.value) })}
@@ -367,14 +367,14 @@ export default function AdminPromotions() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-xl font-bold hover:bg-[#E0E5F2] transition-colors"
+                  className="flex-1 px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-md font-bold hover:bg-[#E0E5F2] transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 disabled:opacity-50"
+                  className="flex-1 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 disabled:opacity-50"
                 >
                   {loading ? 'Đang xử lý...' : (editingPromotion ? 'Cập nhật' : 'Thêm mới')}
                 </button>

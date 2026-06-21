@@ -87,11 +87,11 @@ export default function OtpVerification({
   };
 
   return (
-    <div className="flex flex-col w-full max-w-md mx-auto bg-white/80 backdrop-blur-xl border border-gray-100 rounded-[2.5rem] p-8 shadow-2xl animate-fade-in">
+    <div className="flex flex-col w-full max-w-md mx-auto bg-white/80 backdrop-blur-xl border border-gray-100 rounded-md p-8 animate-fade-in">
       
       {/* Dev helper to display mock OTP */}
       {mockOtp && (
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 text-amber-800 text-xs font-bold animate-pulse shadow-sm">
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md flex items-start gap-3 text-amber-800 text-xs font-bold animate-pulse">
           <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={16} />
           <div>
             <p className="uppercase tracking-wider">Trình giả lập Email (Demo):</p>
@@ -99,7 +99,7 @@ export default function OtpVerification({
               Hệ thống đã gửi mã xác thực tới <span className="text-blue-600 font-extrabold">{email}</span>.
             </p>
             <p className="mt-1 text-sm">
-              Mã OTP của bạn là: <span className="text-amber-600 bg-amber-100 px-2.5 py-0.5 rounded-lg text-base font-black tracking-widest">{mockOtp}</span>
+              Mã OTP của bạn là: <span className="text-amber-600 bg-amber-100 px-2.5 py-0.5 rounded-md text-base font-black tracking-widest">{mockOtp}</span>
             </p>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function OtpVerification({
 
       {/* Header Info */}
       <div className="text-center space-y-3 mb-8">
-        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
           <ShieldCheck size={32} strokeWidth={2.5} />
         </div>
         <h3 className="text-2xl font-black text-gray-900 tracking-tight">{title}</h3>
@@ -127,14 +127,14 @@ export default function OtpVerification({
               value={value}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-12 h-14 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-center text-xl font-extrabold text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all shadow-sm"
+              className="w-12 h-14 bg-gray-50/50 border-2 border-gray-100 rounded-md text-center text-xl font-extrabold text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all"
               disabled={isSubmitting}
             />
           ))}
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-2xl text-xs font-bold border border-red-100 flex items-center gap-2 animate-shake">
+          <div className="bg-red-50 text-red-600 p-3 rounded-md text-xs font-bold border border-red-100 flex items-center gap-2 animate-shake">
             <AlertCircle size={14} className="shrink-0" />
             <span>{error}</span>
           </div>
@@ -144,7 +144,7 @@ export default function OtpVerification({
         <button
           type="submit"
           disabled={isSubmitting || otpValues.join('').length < 6}
-          className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-black transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>

@@ -222,7 +222,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
     const txConf = TRANSACTIONS.find(t => t.id === activeTxTab);
 
     return (
-      <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm animate-fade-in mb-8">
+      <div className="bg-[#FFFFFF] p-6 rounded-md animate-fade-in mb-8">
         <div className="flex justify-between items-center mb-6 border-b border-[#E0E5F2] pb-4">
           <h3 className="text-xl font-bold text-[#2B3674] flex items-center">
             <span className="inline-block w-3 h-3 rounded-full mr-3" style={{ backgroundColor: txConf.bgColor === '#FFFFFF' ? '#A3AED0' : txConf.bgColor }}></span>
@@ -230,7 +230,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
           </h3>
           <button
             onClick={() => setActiveTxTab(null)}
-            className="text-sm font-bold px-4 py-2 rounded-xl transition-colors hover:bg-[#F4F7FE] text-[#A3AED0] hover:text-[#2B3674]"
+            className="text-sm font-bold px-4 py-2 rounded-md transition-colors hover:bg-[#F4F7FE] text-[#A3AED0] hover:text-[#2B3674]"
           >
             Đóng
           </button>
@@ -256,7 +256,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
                   setTxNote('');
                 }
               }}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             >
               <option value="">-- Chọn sản phẩm {selectedBrand} --</option>
               {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -269,7 +269,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
               min="1"
               value={txQuantity}
               onChange={(e) => setTxQuantity(e.target.value)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             />
           </div>
 
@@ -282,7 +282,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
               placeholder="VD: 25.000.000"
               value={txPrice}
               onChange={(e) => setTxPrice(e.target.value)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             />
           </div>
 
@@ -293,7 +293,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
               placeholder="Lý do, mã phiếu..."
               value={txNote}
               onChange={(e) => setTxNote(e.target.value)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             />
           </div>
         </div>
@@ -301,7 +301,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
         <div className="mt-8 flex justify-end">
           <button
             onClick={handleExecuteTransaction}
-            className="px-6 py-3 rounded-xl font-bold transition-all hover:opacity-90 shadow-sm bg-[#4318FF] text-[#FFFFFF]"
+            className="px-6 py-3 rounded-md font-bold transition-all hover:opacity-90 bg-[#4318FF] text-[#FFFFFF]"
           >
             Xác nhận {txConf.type === 'IN' ? 'Nhập Kho' : 'Xuất Kho'}
           </button>
@@ -378,7 +378,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
                         ) : !t.isReverted ? (
                           <button
                             onClick={() => handleRevertTransaction(t.id)}
-                            className="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold transition-all"
+                            className="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-md font-bold transition-all"
                           >
                             Hoàn tác
                           </button>
@@ -408,7 +408,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
   return (
     <div className="flex flex-col md:flex-row min-h-full gap-6">
       {/* Sidebar Bộ lọc */}
-      <div className="w-full md:w-64 flex-shrink-0 bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden h-fit md:h-auto">
+      <div className="w-full md:w-64 flex-shrink-0 bg-[#FFFFFF] rounded-md overflow-hidden h-fit md:h-auto">
         <div className="px-6 py-5 border-b border-[#E0E5F2] font-bold text-[#2B3674] flex items-center text-lg">
           <Settings2 className="w-5 h-5 mr-3 text-[#4318FF]" />
           Bộ lọc sản phẩm
@@ -421,7 +421,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
             <select
               value={selectedBrand}
               onChange={(e) => { setSelectedBrand(e.target.value); goToPage(1); }}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-2 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-2 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             >
               <option value="ALL">Tất cả thương hiệu</option>
               {categories.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -434,7 +434,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
             <select
               value={selectedCategory}
               onChange={(e) => { setSelectedCategory(e.target.value); goToPage(1); }}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-2 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-2 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             >
               <option value="ALL">Tất cả danh mục</option>
               {dbCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -447,7 +447,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
             <select
               value={isActiveFilter}
               onChange={(e) => { setIsActiveFilter(e.target.value); goToPage(1); }}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-2 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-2 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             >
               <option value="ALL">Tất cả trạng thái</option>
               <option value="TRUE">Đang bán (Active)</option>
@@ -461,7 +461,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
             <select
               value={isFeaturedFilter}
               onChange={(e) => { setIsFeaturedFilter(e.target.value); goToPage(1); }}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-xl px-4 py-2 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-2 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             >
               <option value="ALL">Tất cả</option>
               <option value="TRUE">Có</option>
@@ -489,12 +489,12 @@ export default function AdminProducts({ onCreate, onEdit }) {
                 placeholder="Tìm sản phẩm theo tên..."
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); goToPage(1); }}
-                className="w-full pl-11 pr-4 py-2.5 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] shadow-sm font-semibold text-[#2B3674] placeholder-[#A3AED0] text-sm"
+                className="w-full pl-11 pr-4 py-2.5 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-semibold text-[#2B3674] placeholder-[#A3AED0] text-sm"
               />
             </div>
             <button
               onClick={onCreate}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 text-sm whitespace-nowrap"
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 text-sm whitespace-nowrap"
             >
               <Plus size={18} />
               <span>Thêm sản phẩm</span>
@@ -508,7 +508,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
             return (
               <div
                 key={i}
-                className="p-5 rounded-[20px] shadow-sm transition-all hover:shadow-md flex items-center justify-between h-28 bg-[#FFFFFF]"
+                className="p-5 rounded-md transition-all flex items-center justify-between h-28 bg-[#FFFFFF]"
               >
                 <div className="flex flex-col">
                   <p className="text-[12px] font-bold text-[#A3AED0] mb-1">
@@ -535,7 +535,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
             <button
               key={tx.id}
               onClick={() => setActiveTxTab(tx.id)}
-              className={`p-4 rounded-[20px] font-bold text-sm transition-all transform hover:-translate-y-1 ${activeTxTab === tx.id ? 'ring-2 ring-offset-2 ring-[#4318FF] shadow-md' : 'shadow-sm border border-[#E0E5F2]'}`}
+              className={`p-4 rounded-md font-bold text-sm transition-all transform hover:-translate-y-1 ${activeTxTab === tx.id ? 'ring-2 ring-offset-2 ring-[#4318FF] shadow-md' : 'shadow-sm border border-[#E0E5F2]'}`}
               style={{ backgroundColor: tx.bgColor, color: tx.textColor }}
             >
               <div className="flex flex-col items-center justify-center w-full h-full text-center">
@@ -548,7 +548,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
         {/* Hiển thị form tái sử dụng hoặc danh sách mặc định */}
         {activeTxTab ? renderReusableTransactionForm() : (
           <>
-            <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm p-6 flex-1 flex flex-col mb-8">
+            <div className="bg-[#FFFFFF] rounded-md p-6 flex-1 flex flex-col mb-8">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-[#2B3674]">Danh sách sản phẩm</h3>
               </div>
@@ -605,14 +605,14 @@ export default function AdminProducts({ onCreate, onEdit }) {
                                 <div className="flex items-center justify-center gap-2">
                                   <button
                                     onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
-                                    className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
+                                    className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-md transition-all"
                                     title="Sửa"
                                   >
                                     <Edit size={18} />
                                   </button>
                                   <button
                                     onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }}
-                                    className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
+                                    className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-md transition-all"
                                     title="Xóa"
                                   >
                                     <Trash2 size={18} />
@@ -661,7 +661,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
                   <button
                     onClick={prevPage}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     TRƯỚC
                   </button>
@@ -677,7 +677,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
                   <button
                     onClick={nextPage}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     SAU
                   </button>
@@ -686,7 +686,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
             </div>
             
             {/* Lịch sử giao dịch kho chung */}
-            <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm p-6 mb-8">
+            <div className="bg-[#FFFFFF] rounded-md p-6 mb-8">
               {renderInventoryHistory(null)}
             </div>
           </>

@@ -19,7 +19,7 @@ export default function Sidebar() {
 
   return (
     <aside 
-      className="w-64 flex-shrink-0 bg-white rounded-xl border border-gray-200/80 shadow-sm p-1.5 space-y-1 h-fit"
+      className="w-64 flex-shrink-0 bg-white rounded-md border border-gray-200/80 p-1.5 space-y-1 h-fit"
     >
       <nav className="flex flex-col">
         {categories.map((cat, idx) => {
@@ -30,7 +30,7 @@ export default function Sidebar() {
             <Link
               key={idx}
               to={path}
-              className={`group flex items-center justify-between px-4 py-3.5 rounded-lg transition-all duration-200 font-semibold text-sm ${
+              className={`group flex items-center justify-between px-4 py-3.5 rounded-md transition-all duration-200 font-semibold text-sm ${
                 isActive 
                   ? 'bg-[rgba(40,138,214,0.08)] text-[#288ad6]' 
                   : 'text-gray-700 hover:bg-[rgba(40,138,214,0.05)] hover:text-[#288ad6]'

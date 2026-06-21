@@ -148,14 +148,14 @@ export default function AdminCustomers() {
             <input
               type="text"
               placeholder="Tìm username, email, mã người dùng..."
-              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] shadow-sm font-medium text-[#2B3674] placeholder-[#A3AED0]"
+              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button 
             onClick={handleOpenModal}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
           >
             <UserPlus size={18} />
             <span>Thêm tài khoản</span>
@@ -171,7 +171,7 @@ export default function AdminCustomers() {
           return (
             <div 
               key={i} 
-              className="p-5 rounded-[20px] shadow-sm transition-all hover:shadow-md flex items-center justify-between h-28 bg-[#FFFFFF] border border-[#E0E5F2]"
+              className="p-5 rounded-md transition-all flex items-center justify-between h-28 bg-[#FFFFFF] border border-[#E0E5F2]"
             >
               <div className="flex flex-col">
                 <p className="text-[12px] font-bold text-[#A3AED0] mb-1">
@@ -199,7 +199,7 @@ export default function AdminCustomers() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center px-6 py-3 rounded-[20px] text-sm font-bold transition-all whitespace-nowrap border ${
+              className={`flex items-center px-6 py-3 rounded-md text-sm font-bold transition-all whitespace-nowrap border ${
                 isActive 
                 ? 'bg-[#4318FF] text-[#FFFFFF] border-[#4318FF] shadow-md scale-[1.02]' 
                 : 'bg-[#FFFFFF] text-[#A3AED0] border-[#E0E5F2] hover:border-[#4318FF] hover:text-[#4318FF]'
@@ -207,7 +207,7 @@ export default function AdminCustomers() {
             >
               {Icon && <Icon className={`w-4 h-4 mr-3 ${isActive ? 'text-[#FFFFFF]' : tab.color}`} />}
               {tab.name}
-              <span className={`ml-3 px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
+              <span className={`ml-3 px-2 py-0.5 rounded-md text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
                 {count}
               </span>
             </button>
@@ -216,7 +216,7 @@ export default function AdminCustomers() {
       </div>
 
       {/* Table */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8 border border-[#E0E5F2]">
+      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8 border border-[#E0E5F2]">
         <div className="overflow-x-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 text-[#4318FF] gap-3">
@@ -276,7 +276,7 @@ export default function AdminCustomers() {
                           <div className="flex items-center justify-center gap-2">
                             <button 
                               onClick={() => handleToggleStatus(customer.id, customer.username, customer.isActive)}
-                              className={`p-2 rounded-lg transition-all ${
+                              className={`p-2 rounded-md transition-all ${
                                 customer.isActive 
                                 ? 'text-[#EE5D50] hover:bg-[#FFF5F5]' 
                                 : 'text-[#01B574] hover:bg-[#E8F8F2]'
@@ -316,7 +316,7 @@ export default function AdminCustomers() {
               <button 
                 onClick={prevPage}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
               >
                 TRƯỚC
               </button>
@@ -332,7 +332,7 @@ export default function AdminCustomers() {
               <button 
                 onClick={nextPage}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
               >
                 SAU
               </button>
@@ -344,7 +344,7 @@ export default function AdminCustomers() {
       {/* Add User Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-[#FFFFFF] rounded-[20px] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-[#FFFFFF] rounded-md w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F4F7FE]">
               <h3 className="text-xl font-bold text-[#2B3674] flex items-center gap-2">
                 <UserPlus size={22} className="text-[#4318FF]" />
@@ -361,7 +361,7 @@ export default function AdminCustomers() {
                 <input 
                   type="text" 
                   required
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
                   placeholder="Nhập tên tài khoản..."
                   value={formData.username}
                   onChange={(e) => setFormData({...formData, username: e.target.value})}
@@ -373,7 +373,7 @@ export default function AdminCustomers() {
                 <input 
                   type="email" 
                   required
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
                   placeholder="example@gmail.com..."
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -386,14 +386,14 @@ export default function AdminCustomers() {
                   type="password" 
                   required
                   minLength={6}
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
                   placeholder="Tối thiểu 6 ký tự..."
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
               </div>
 
-              <div className="bg-[#FFF8ED] p-4 rounded-xl border border-[#FFB547]/20 flex items-start gap-3 text-xs text-[#FFB547] font-medium">
+              <div className="bg-[#FFF8ED] p-4 rounded-md border border-[#FFB547]/20 flex items-start gap-3 text-xs text-[#FFB547] font-medium">
                 <ShieldAlert size={20} className="shrink-0" />
                 <p>Tài khoản được đăng ký tại đây mặc định sẽ có vai trò là <strong>Khách hàng (User)</strong> và được kích hoạt hoạt động ngay.</p>
               </div>
@@ -402,14 +402,14 @@ export default function AdminCustomers() {
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-xl font-bold hover:bg-[#E0E5F2] transition-colors"
+                  className="px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-md font-bold hover:bg-[#E0E5F2] transition-colors"
                 >
                   Hủy
                 </button>
                 <button 
                   type="submit"
                   disabled={modalLoading}
-                  className="px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 disabled:opacity-50"
+                  className="px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 disabled:opacity-50"
                 >
                   {modalLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
                 </button>

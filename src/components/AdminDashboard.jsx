@@ -93,18 +93,18 @@ export default function AdminDashboard() {
   }, []);
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      <div className="flex items-center justify-between bg-[#FFFFFF] p-5 rounded-[20px] shadow-sm">
+      <div className="flex items-center justify-between bg-[#FFFFFF] p-5 rounded-md">
         <h2 className="text-xl font-bold text-[#2B3674]">Thống kê cửa hàng</h2>
-        <span className="text-xs font-bold text-[#A3AED0] uppercase tracking-widest bg-[#F4F7FE] px-3 py-1.5 rounded-lg">Cập nhật: Vừa xong</span>
+        <span className="text-xs font-bold text-[#A3AED0] uppercase tracking-widest bg-[#F4F7FE] px-3 py-1.5 rounded-md">Cập nhật: Vừa xong</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* 1. BIỂU ĐỒ DOANH THU */}
-        <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
+        <div className="bg-[#FFFFFF] p-6 rounded-md h-[400px] flex flex-col transition-all">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
-              <div className="p-2 bg-[#F4F7FE] rounded-lg">
+              <div className="p-2 bg-[#F4F7FE] rounded-md">
                 <TrendingUp size={20} className="text-[#4318FF]" />
               </div>
               Doanh thu (7 ngày & Tháng)
@@ -130,10 +130,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* 2. HIỆU SUẤT THEO THƯƠNG HIỆU (TỒN & BÁN) */}
-        <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
+        <div className="bg-[#FFFFFF] p-6 rounded-md h-[400px] flex flex-col transition-all">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
-              <div className="p-2 bg-[#F4F7FE] rounded-lg">
+              <div className="p-2 bg-[#F4F7FE] rounded-md">
                 <Package size={20} className="text-[#FFB547]" />
               </div>
               Tồn kho & Bán ra theo Hiệu
@@ -177,10 +177,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* 3. ĐƠN HÀNG GẦN ĐÂY */}
-        <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
+        <div className="bg-[#FFFFFF] p-6 rounded-md h-[400px] flex flex-col transition-all">
            <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
-              <div className="p-2 bg-[#F4F7FE] rounded-lg">
+              <div className="p-2 bg-[#F4F7FE] rounded-md">
                 <ShoppingCart size={20} className="text-[#39B8FF]" />
               </div>
               Đơn hàng mới nhận
@@ -223,10 +223,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* 4. THỐNG KÊ THEO TỪNG MẶT HÀNG */}
-        <div className="bg-[#FFFFFF] p-6 rounded-[20px] shadow-sm h-[400px] flex flex-col transition-all">
+        <div className="bg-[#FFFFFF] p-6 rounded-md h-[400px] flex flex-col transition-all">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-[#2B3674] flex items-center gap-2">
-              <div className="p-2 bg-[#F4F7FE] rounded-lg">
+              <div className="p-2 bg-[#F4F7FE] rounded-md">
                 <ShoppingBag size={20} className="text-[#4318FF]" />
               </div>
               Thống kê theo từng mặt hàng
@@ -241,12 +241,12 @@ export default function AdminDashboard() {
                 const percentage = Math.round((item.quantity / maxQty) * 100);
 
                 return (
-                  <div key={idx} className="p-3 rounded-xl border border-[#E0E5F2] hover:border-[#E0E5F2] hover:bg-[#F4F7FE]/40 transition-all flex flex-col gap-2">
+                  <div key={idx} className="p-3 rounded-md border border-[#E0E5F2] hover:border-[#E0E5F2] hover:bg-[#F4F7FE]/40 transition-all flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0">
                         {/* Color Picker Dot representing the item */}
                         <div 
-                          className="w-3.5 h-3.5 rounded-full flex-shrink-0 shadow-sm transition-transform hover:scale-125 cursor-pointer" 
+                          className="w-3.5 h-3.5 rounded-full flex-shrink-0 transition-transform hover:scale-125 cursor-pointer" 
                           style={{ backgroundColor: itemColor }}
                           title={`Mã màu: ${itemColor}`}
                         />

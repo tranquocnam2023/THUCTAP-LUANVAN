@@ -153,14 +153,14 @@ export default function AdminBrands() {
             <input
               type="text"
               placeholder="Tìm tên thương hiệu..."
-              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] shadow-sm font-medium text-[#2B3674] placeholder-[#A3AED0]"
+              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
           >
             <Plus size={18} />
             <span>Thêm thương hiệu</span>
@@ -169,7 +169,7 @@ export default function AdminBrands() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8">
+      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -194,21 +194,21 @@ export default function AdminBrands() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleToggleProducts(brand)}
-                            className="p-2 text-[#A3AED0] hover:text-[#4318FF] hover:bg-[#F4F7FE] rounded-lg transition-all"
+                            className="p-2 text-[#A3AED0] hover:text-[#4318FF] hover:bg-[#F4F7FE] rounded-md transition-all"
                             title={expandedBrands[brand.id] ? 'Thu gọn' : 'Xem sản phẩm'}
                           >
                             {expandedBrands[brand.id] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                           </button>
                           <button
                             onClick={() => handleOpenModal(brand)}
-                            className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-lg transition-all"
+                            className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-md transition-all"
                             title="Chỉnh sửa"
                           >
                             <Edit size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(brand.id)}
-                            className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
+                            className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-md transition-all"
                             title="Xóa"
                           >
                             <Trash2 size={18} />
@@ -228,8 +228,8 @@ export default function AdminBrands() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                               {brandProducts[brand.id] && brandProducts[brand.id].length > 0 ? (
                                 brandProducts[brand.id].map((prod) => (
-                                  <div key={prod.id} className="bg-[#FFFFFF] p-4 rounded-[20px] shadow-sm flex gap-4 hover:shadow-md transition-all group/item border border-[#E0E5F2]">
-                                    <div className="w-16 h-16 rounded-[15px] bg-[#F4F7FE] p-2 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                  <div key={prod.id} className="bg-[#FFFFFF] p-4 rounded-md flex gap-4 transition-all group/item border border-[#E0E5F2]">
+                                    <div className="w-16 h-16 rounded-md bg-[#F4F7FE] p-2 flex items-center justify-center overflow-hidden flex-shrink-0">
                                       {prod.thumbnailImage ? (
                                         <img src={prod.thumbnailImage} alt={prod.name} className="w-full h-full object-contain group-hover/item:scale-105 transition-transform" />
                                       ) : (
@@ -250,7 +250,7 @@ export default function AdminBrands() {
                                   </div>
                                 ))
                               ) : (
-                                <div className="col-span-full py-8 flex flex-col items-center justify-center text-[#A3AED0] bg-[#FFFFFF] rounded-[20px] border-2 border-dashed border-[#E0E5F2]">
+                                <div className="col-span-full py-8 flex flex-col items-center justify-center text-[#A3AED0] bg-[#FFFFFF] rounded-md border-2 border-dashed border-[#E0E5F2]">
                                   <FolderOpen size={32} strokeWidth={1.5} className="mb-2 opacity-50" />
                                   <p className="text-sm font-bold">Thương hiệu này chưa có sản phẩm nào</p>
                                 </div>
@@ -279,9 +279,9 @@ export default function AdminBrands() {
         <div className="px-6 py-4 border-t border-[#E0E5F2] flex items-center justify-between text-sm font-bold text-[#A3AED0]">
           <span>Tổng cộng: {filteredBrands.length} thương hiệu</span>
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>TRƯỚC</button>
-            <button className="px-4 py-2 bg-[#4318FF] text-[#FFFFFF] rounded-xl shadow-md">1</button>
-            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>SAU</button>
+            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>TRƯỚC</button>
+            <button className="px-4 py-2 bg-[#4318FF] text-[#FFFFFF] rounded-md">1</button>
+            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>SAU</button>
           </div>
         </div>
       </div>
@@ -289,7 +289,7 @@ export default function AdminBrands() {
       {/* Modal CRUD */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-[#FFFFFF] rounded-[20px] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-[#FFFFFF] rounded-md w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F4F7FE]">
               <h3 className="text-xl font-bold text-[#2B3674]">{editingBrand ? 'Cập nhật thương hiệu' : 'Thêm thương hiệu mới'}</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-[#A3AED0] hover:text-[#4318FF] transition-colors">
@@ -302,7 +302,7 @@ export default function AdminBrands() {
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-medium text-[#2B3674]"
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-medium text-[#2B3674]"
                   placeholder="VD: iPhone, Samsung..."
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -313,13 +313,13 @@ export default function AdminBrands() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-xl font-bold hover:bg-[#E0E5F2] transition-colors"
+                  className="flex-1 px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-md font-bold hover:bg-[#E0E5F2] transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95"
+                  className="flex-1 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95"
                 >
                   {editingBrand ? 'Cập nhật' : 'Thêm mới'}
                 </button>

@@ -130,7 +130,7 @@ export default function PromotionSelector({ subTotal, onApplyPromotion }) {
   const publicCoupons = isLoggedIn && coupons.length > 0 ? coupons.slice(1) : coupons;
 
   return (
-    <div className="w-full bg-white border border-gray-100 rounded-[2.5rem] p-6 shadow-sm space-y-4">
+    <div className="w-full bg-white border border-gray-100 rounded-md p-6 space-y-4">
       {/* Accordion Dòng liên kết chữ mờ mượt mà kiểu TGDĐ */}
       <div className="flex items-center justify-between">
         <button
@@ -154,7 +154,7 @@ export default function PromotionSelector({ subTotal, onApplyPromotion }) {
                 value={promoInput}
                 onChange={handleInputChange}
                 placeholder="Nhập mã giảm giá..."
-                className={`w-full bg-gray-50 border-2 rounded-2xl pl-5 pr-10 py-3 focus:outline-none focus:ring-4 transition-all font-bold text-sm text-gray-800 placeholder:text-gray-400 ${
+                className={`w-full bg-gray-50 border-2 rounded-md pl-5 pr-10 py-3 focus:outline-none focus:ring-4 transition-all font-bold text-sm text-gray-800 placeholder:text-gray-400 ${
                   validationError
                     ? 'border-red-500 focus:ring-red-500/10'
                     : successMessage
@@ -178,7 +178,7 @@ export default function PromotionSelector({ subTotal, onApplyPromotion }) {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="px-5 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 font-black rounded-2xl text-xs transition-colors border border-blue-100 shrink-0"
+              className="px-5 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 font-black rounded-md text-xs transition-colors border border-blue-100 shrink-0"
             >
               Chọn mã
             </button>
@@ -204,7 +204,7 @@ export default function PromotionSelector({ subTotal, onApplyPromotion }) {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div 
-            className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col relative max-h-[80vh] overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100"
+            className="bg-white w-full max-w-md rounded-md flex flex-col relative max-h-[80vh] overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Modal */}
@@ -309,7 +309,7 @@ function VoucherCard({ coupon, isUsed, onApply, isVIP }) {
 
   return (
     <div 
-      className={`relative flex items-stretch bg-white border rounded-3xl overflow-hidden shadow-sm transition-all duration-200 ${
+      className={`relative flex items-stretch bg-white border rounded-md overflow-hidden shadow-sm transition-all duration-200 ${
         isUsed 
           ? 'opacity-60 cursor-not-allowed select-none bg-gray-100/50 border-gray-100' 
           : isVIP 
@@ -338,7 +338,7 @@ function VoucherCard({ coupon, isUsed, onApply, isVIP }) {
       <div className="flex-1 p-4 flex flex-col justify-between space-y-2.5">
         <div>
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <span className={`font-black text-xs px-2.5 py-0.5 rounded-lg border ${
+            <span className={`font-black text-xs px-2.5 py-0.5 rounded-md border ${
               isUsed 
                 ? 'bg-gray-100 text-gray-500 border-gray-200' 
                 : isVIP
@@ -362,7 +362,7 @@ function VoucherCard({ coupon, isUsed, onApply, isVIP }) {
             <button
               type="button"
               onClick={() => onApply(coupon)}
-              className={`px-4 py-1.5 text-white text-[11px] font-black rounded-xl transition-all shadow-md ${
+              className={`px-4 py-1.5 text-white text-[11px] font-black rounded-md transition-all shadow-md ${
                 isVIP 
                   ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-amber-100'
                   : 'bg-blue-600 hover:bg-blue-700 shadow-blue-100'

@@ -52,7 +52,7 @@ export default function AdminReviews() {
       </div>
 
       {/* Filter Section */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm border border-[#E0E5F2] p-6 space-y-6">
+      <div className="bg-[#FFFFFF] rounded-md border border-[#E0E5F2] p-6 space-y-6">
         <div className="flex flex-wrap items-end gap-6">
           <div className="flex-1 min-w-[300px] space-y-2">
             <label className="text-[12px] font-bold text-[#2B3674] ml-1">Lọc theo mã đánh giá / user / email / nội dung...</label>
@@ -63,7 +63,7 @@ export default function AdminReviews() {
               <input
                 type="text"
                 placeholder="Nhập thông tin cần tìm..."
-                className="w-full pl-11 pr-4 py-3 bg-[#FFFFFF] border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-medium text-[#2B3674] placeholder-[#A3AED0]"
+                className="w-full pl-11 pr-4 py-3 bg-[#FFFFFF] border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all font-medium text-[#2B3674] placeholder-[#A3AED0]"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -74,7 +74,7 @@ export default function AdminReviews() {
             <label className="text-[12px] font-bold text-[#2B3674] ml-1">Ngày bắt đầu</label>
             <input
               type="date"
-              className="px-4 py-3 bg-[#FFFFFF] border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all text-sm font-bold text-[#2B3674]"
+              className="px-4 py-3 bg-[#FFFFFF] border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all text-sm font-bold text-[#2B3674]"
             />
           </div>
 
@@ -82,22 +82,22 @@ export default function AdminReviews() {
             <label className="text-[12px] font-bold text-[#2B3674] ml-1">Ngày kết thúc</label>
             <input
               type="date"
-              className="px-4 py-3 bg-[#FFFFFF] border border-[#E0E5F2] rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all text-sm font-bold text-[#2B3674]"
+              className="px-4 py-3 bg-[#FFFFFF] border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all text-sm font-bold text-[#2B3674]"
             />
           </div>
 
-          <button className="px-6 py-3 bg-[#EE5D50]/10 text-[#EE5D50] rounded-xl font-bold text-sm hover:bg-[#EE5D50]/20 transition-all active:scale-95">
+          <button className="px-6 py-3 bg-[#EE5D50]/10 text-[#EE5D50] rounded-md font-bold text-sm hover:bg-[#EE5D50]/20 transition-all active:scale-95">
             Xóa lọc
           </button>
 
-          <button className="px-6 py-3 bg-[#F4F7FE] text-[#4318FF] rounded-xl font-bold text-sm hover:bg-[#E0E5F2] transition-all active:scale-95">
+          <button className="px-6 py-3 bg-[#F4F7FE] text-[#4318FF] rounded-md font-bold text-sm hover:bg-[#E0E5F2] transition-all active:scale-95">
             Làm mới
           </button>
         </div>
       </div>
 
       {/* Table Section */}
-      <div className="bg-[#FFFFFF] rounded-[20px] shadow-sm overflow-hidden mb-8">
+      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8">
         <div className="px-6 py-4 border-b border-[#E0E5F2]">
           <h3 className="text-sm font-bold text-[#2B3674] flex items-center gap-2">
             <MessageSquare size={18} className="text-[#4318FF]" />
@@ -147,7 +147,7 @@ export default function AdminReviews() {
                       <div className="flex items-center justify-center">
                         <button
                           onClick={() => handleDelete(rev.id)}
-                          className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-lg transition-all"
+                          className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-md transition-all"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -171,9 +171,9 @@ export default function AdminReviews() {
 
         <div className="px-6 py-4 border-t border-[#E0E5F2] flex items-center justify-between text-[12px] font-bold text-[#A3AED0]">
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>Trang trước</button>
+            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>Trang trước</button>
             <span className="flex items-center px-4">Trang 1 / 1</span>
-            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-xl hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>Trang sau</button>
+            <button className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md hover:bg-[#E0E5F2] transition-colors disabled:opacity-50" disabled>Trang sau</button>
           </div>
         </div>
       </div>

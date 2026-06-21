@@ -579,8 +579,8 @@ export default function CartPage() {
   // Render Success Screen
   if (isFinished) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center max-w-[600px] mx-auto bg-white rounded-3xl shadow-md border border-gray-100 p-8 my-8">
-        <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-inner animate-bounce">
+      <div className="flex flex-col items-center justify-center py-16 text-center max-w-[600px] mx-auto bg-white rounded-md border border-gray-100 p-8 my-8">
+        <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
           <ShieldCheck size={40} strokeWidth={2.5} />
         </div>
         <h2 className="text-2xl font-black text-gray-900 mb-2">Đặt hàng thành công!</h2>
@@ -590,7 +590,7 @@ export default function CartPage() {
         </p>
 
         {paymentMethod === 'transfer' && (
-          <div className="w-full bg-gray-50 rounded-2xl p-5 border border-gray-150 mb-8 text-left space-y-3">
+          <div className="w-full bg-gray-50 rounded-md p-5 border border-gray-150 mb-8 text-left space-y-3">
             <p className="text-xs font-bold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
               <CreditCard size={14} />
               Thông tin thanh toán ngân hàng
@@ -606,7 +606,7 @@ export default function CartPage() {
         )}
 
         {paymentMethod === 'stripe' && (
-          <div className="w-full bg-gray-50 rounded-2xl p-5 border border-gray-150 mb-8 text-left space-y-3">
+          <div className="w-full bg-gray-50 rounded-md p-5 border border-gray-150 mb-8 text-left space-y-3">
             <p className="text-xs font-bold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
               <CreditCard size={14} />
               Thanh toán trực tuyến qua Stripe
@@ -620,7 +620,7 @@ export default function CartPage() {
         )}
 
         {paymentMethod === 'momo' && (
-          <div className="w-full bg-gray-50 rounded-2xl p-5 border border-gray-150 mb-8 text-left space-y-3">
+          <div className="w-full bg-gray-50 rounded-md p-5 border border-gray-150 mb-8 text-left space-y-3">
             <p className="text-xs font-bold text-[#A50064] uppercase tracking-widest flex items-center gap-1.5">
               <span className="w-4 h-4 bg-[#A50064] text-white text-[7px] font-black rounded flex items-center justify-center">M</span>
               Thanh toán qua ví điện tử MoMo
@@ -632,8 +632,8 @@ export default function CartPage() {
                 <p>Số tiền: <strong className="text-red-600 font-extrabold text-sm">{finalTotalPay.toLocaleString('vi-VN')}₫</strong></p>
                 <p className="text-[10px] text-gray-400 italic font-medium pt-1">Vui lòng quét mã QR bên cạnh để hoàn tất thanh toán.</p>
               </div>
-              <div className="flex flex-col items-center justify-center p-2 bg-white border border-gray-250 rounded-xl shrink-0">
-                <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center text-gray-300">
+              <div className="flex flex-col items-center justify-center p-2 bg-white border border-gray-250 rounded-md shrink-0">
+                <div className="w-16 h-16 bg-gray-50 rounded-md flex items-center justify-center text-gray-300">
                   <svg className="w-10 h-10 text-[#A50064]" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm1 1v4h4V4H4zm1 1h2v2H5V5zM3 15h6v6H3v-6zm1 1v4h4v-4H4zm1 1h2v2H5v-2zM15 3h6v6h-6V3zm1 1v4h4V4h-4zm1 1h2v2h-2V5zM15 15h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm-2 2v2h-2v-2zm2 0h2v2h-2v-2zM10 3h4v2h-4V3zm0 4h4v2h-4V7zm0 8h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2z" /></svg>
                 </div>
                 <span className="text-[8px] text-[#A50064] font-bold uppercase tracking-wider mt-1">QR MOMO</span>
@@ -644,7 +644,7 @@ export default function CartPage() {
 
         <button
           onClick={() => navigate('/')}
-          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black shadow-lg shadow-orange-100 transition active:scale-95 uppercase tracking-wider text-sm"
+          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-md font-black transition active:scale-95 uppercase tracking-wider text-sm"
         >
           Tiếp tục mua sắm
         </button>
@@ -667,8 +667,8 @@ export default function CartPage() {
 
         {cartItems.length === 0 ? (
           // Empty Cart View
-          <div className="bg-white border border-bordercustom p-8 rounded-lg shadow-sm w-full max-w-md mx-auto text-center flex flex-col items-center justify-center space-y-4">
-            <div className="w-16 h-16 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
+          <div className="bg-white border border-bordercustom p-8 rounded-md w-full max-w-md mx-auto text-center flex flex-col items-center justify-center space-y-4">
+            <div className="w-16 h-16 bg-primary/10 text-primary rounded-md flex items-center justify-center">
               <ShoppingBag size={32} />
             </div>
             <h2 className="text-2xl font-bold text-primary text-center">Giỏ hàng đang trống</h2>
@@ -687,7 +687,7 @@ export default function CartPage() {
           <div className="space-y-4">
 
             {/* Card 1: Selected Products */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
+            <div className="bg-white rounded-md border border-gray-100 p-4 space-y-4">
               <div className="flex items-center gap-2 border-b border-gray-50 pb-3">
                 <ShoppingBag className="text-blue-600 shrink-0" size={18} />
                 <h2 className="text-sm font-black text-gray-900">
@@ -699,7 +699,7 @@ export default function CartPage() {
                 {cartItems.map((item) => (
                   <div key={item.cartId} className="flex gap-4 py-4 first:pt-0 last:pb-0">
                     {/* Image */}
-                    <div className="w-16 h-16 bg-white p-1 border border-gray-100 rounded-xl shrink-0 flex justify-center items-center">
+                    <div className="w-16 h-16 bg-white p-1 border border-gray-100 rounded-md shrink-0 flex justify-center items-center">
                       <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain" />
                     </div>
 
@@ -762,7 +762,7 @@ export default function CartPage() {
 
             {/* Card 2: Inline Registration / Login for Guest */}
             {!isLoggedIn ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-4 space-y-3">
+              <div className="bg-white rounded-md border border-blue-100 p-4 space-y-3">
                 <div className="flex items-start gap-2">
                   <Sparkles className="text-blue-500 shrink-0 mt-0.5" size={16} />
                   <div>
@@ -780,7 +780,7 @@ export default function CartPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">Họ tên & SĐT</label>
-                        <div className="text-[11px] font-bold text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 flex justify-between items-center">
+                        <div className="text-[11px] font-bold text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-3 py-2 flex justify-between items-center">
                           <span>
                             {formData.fullName && formData.phone
                               ? `${formData.fullName} - ${formData.phone}`
@@ -802,7 +802,7 @@ export default function CartPage() {
                           placeholder="nhapemail@gmail.com..."
                           value={inlineEmail}
                           onChange={(e) => setInlineEmail(e.target.value)}
-                          className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800"
+                          className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800"
                         />
                       </div>
                     </div>
@@ -814,7 +814,7 @@ export default function CartPage() {
                         placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)..."
                         value={inlinePassword}
                         onChange={(e) => setInlinePassword(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800"
                       />
                     </div>
 
@@ -830,7 +830,7 @@ export default function CartPage() {
                         type="button"
                         onClick={handleInlineRegister}
                         disabled={inlineAuthLoading}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-bold rounded-xl transition shadow-sm"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-bold rounded-md transition"
                       >
                         {inlineAuthLoading ? 'Đang xử lý...' : 'Đăng ký & Đăng nhập'}
                       </button>
@@ -856,7 +856,7 @@ export default function CartPage() {
                           placeholder="Nhập username hoặc email..."
                           value={inlineUsername}
                           onChange={(e) => setInlineUsername(e.target.value)}
-                          className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800"
+                          className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800"
                         />
                       </div>
                       <div>
@@ -866,7 +866,7 @@ export default function CartPage() {
                           placeholder="Nhập mật khẩu..."
                           value={inlinePassword}
                           onChange={(e) => setInlinePassword(e.target.value)}
-                          className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800"
+                          className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800"
                         />
                       </div>
                     </div>
@@ -883,7 +883,7 @@ export default function CartPage() {
                         type="button"
                         onClick={handleInlineLogin}
                         disabled={inlineAuthLoading}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-bold rounded-xl transition shadow-sm"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-bold rounded-md transition"
                       >
                         {inlineAuthLoading ? 'Đang xử lý...' : 'Đăng nhập'}
                       </button>
@@ -902,7 +902,7 @@ export default function CartPage() {
                 )}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-green-100 p-4 flex items-center justify-between">
+              <div className="bg-white rounded-md border border-green-100 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="text-green-500 shrink-0" size={18} />
                   <span className="text-xs font-extrabold text-gray-700">
@@ -913,14 +913,14 @@ export default function CartPage() {
             )}
 
             {/* Card 3: Delivery Options & Address Preview */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
+            <div className="bg-white rounded-md border border-gray-100 p-4 space-y-4">
 
               {/* Delivery Tabs */}
-              <div className="flex bg-gray-50 rounded-xl p-1 border border-gray-100">
+              <div className="flex bg-gray-50 rounded-md p-1 border border-gray-100">
                 <button
                   type="button"
                   onClick={() => setDeliveryMethod('ship')}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${deliveryMethod === 'ship'
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 ${deliveryMethod === 'ship'
                     ? 'bg-white text-blue-600 shadow-sm border border-gray-200/50'
                     : 'text-gray-500 hover:text-gray-800'
                     }`}
@@ -931,7 +931,7 @@ export default function CartPage() {
                 <button
                   type="button"
                   onClick={() => setDeliveryMethod('store')}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${deliveryMethod === 'store'
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 ${deliveryMethod === 'store'
                     ? 'bg-white text-blue-600 shadow-sm border border-gray-200/50'
                     : 'text-gray-500 hover:text-gray-800'
                     }`}
@@ -944,7 +944,7 @@ export default function CartPage() {
               {/* Address Preview Box */}
               <div
                 onClick={openAddressModal}
-                className="border border-orange-200 bg-orange-50/50 hover:bg-orange-50 rounded-xl p-3.5 cursor-pointer transition flex items-start justify-between gap-3"
+                className="border border-orange-200 bg-orange-50/50 hover:bg-orange-50 rounded-md p-3.5 cursor-pointer transition flex items-start justify-between gap-3"
               >
                 <div className="space-y-1">
                   <p className="text-[10px] font-black text-orange-600 uppercase tracking-wider flex items-center gap-1">
@@ -984,7 +984,7 @@ export default function CartPage() {
             </div>
 
             {/* Card 4: Support Request Checklist */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+            <div className="bg-white rounded-md border border-gray-100 p-4 space-y-3">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Yêu cầu hỗ trợ đặc biệt</h3>
               <div className="flex flex-col gap-2.5">
                 <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer hover:text-gray-900 select-none">
@@ -1014,7 +1014,7 @@ export default function CartPage() {
                       value={otherRequestText}
                       onChange={(e) => setOtherRequestText(e.target.value)}
                       rows="2"
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 resize-none text-gray-800"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-md p-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 resize-none text-gray-800"
                     ></textarea>
                   </div>
                 )}
@@ -1022,7 +1022,7 @@ export default function CartPage() {
             </div>
 
             {/* Card 5: Voucher discount selector */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+            <div className="bg-white rounded-md border border-gray-100 p-4">
               <PromotionSelector
                 subTotal={cartTotal}
                 onApplyPromotion={(code, discount) => {
@@ -1035,12 +1035,12 @@ export default function CartPage() {
 
 
             {/* Card 7: Payment Methods */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+            <div className="bg-white rounded-md border border-gray-100 p-4 space-y-3">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Hình thức thanh toán</h3>
               <div className="space-y-2">
 
                 {/* Stripe */}
-                <label className={`flex items-center gap-3 p-3 border rounded-xl transition cursor-pointer select-none ${paymentMethod === 'stripe' ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'
+                <label className={`flex items-center gap-3 p-3 border rounded-md transition cursor-pointer select-none ${paymentMethod === 'stripe' ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'
                   }`}>
                   <input
                     type="radio"
@@ -1058,7 +1058,7 @@ export default function CartPage() {
                 </label>
 
                 {/* MoMo */}
-                <label className={`flex items-center gap-3 p-3 border rounded-xl transition cursor-pointer select-none ${paymentMethod === 'momo' ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'
+                <label className={`flex items-center gap-3 p-3 border rounded-md transition cursor-pointer select-none ${paymentMethod === 'momo' ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'
                   }`}>
                   <input
                     type="radio"
@@ -1072,11 +1072,11 @@ export default function CartPage() {
                     <p className="font-bold text-gray-800">Thanh toán qua ví điện tử MoMo</p>
                     <p className="text-[10px] text-gray-400">Quét mã QR thanh toán nhanh chóng bằng ví MoMo</p>
                   </div>
-                  <span className="w-6 h-6 bg-[#A50064] text-white text-[8px] font-black rounded flex items-center justify-center select-none shadow-sm shrink-0">MoMo</span>
+                  <span className="w-6 h-6 bg-[#A50064] text-white text-[8px] font-black rounded flex items-center justify-center select-none shrink-0">MoMo</span>
                 </label>
 
                 {/* Bank transfer */}
-                <label className={`flex items-center gap-3 p-3 border rounded-xl transition cursor-pointer select-none ${paymentMethod === 'transfer' ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'
+                <label className={`flex items-center gap-3 p-3 border rounded-md transition cursor-pointer select-none ${paymentMethod === 'transfer' ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'
                   }`}>
                   <input
                     type="radio"
@@ -1094,7 +1094,7 @@ export default function CartPage() {
                 </label>
 
                 {/* COD (requires login) */}
-                <label className={`flex items-center gap-3 p-3 border rounded-xl transition select-none ${!isLoggedIn
+                <label className={`flex items-center gap-3 p-3 border rounded-md transition select-none ${!isLoggedIn
                   ? 'opacity-50 bg-gray-50 border-gray-100 cursor-not-allowed'
                   : paymentMethod === 'cod'
                     ? 'border-blue-500 bg-blue-50/20 cursor-pointer'
@@ -1117,7 +1117,7 @@ export default function CartPage() {
                 </label>
 
                 {!isLoggedIn && (
-                  <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl flex gap-2 text-amber-800 text-[10px] font-medium leading-relaxed">
+                  <div className="p-3 bg-amber-50 border border-amber-100 rounded-md flex gap-2 text-amber-800 text-[10px] font-medium leading-relaxed">
                     <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
                     <p>
                       Hình thức <strong>Thanh toán tiền mặt (COD)</strong> bị khóa vì quý khách đang đặt dưới dạng khách vãng lai. Vui lòng đăng ký/đăng nhập VIP để kích hoạt.
@@ -1128,7 +1128,7 @@ export default function CartPage() {
 
               {/* Bank Transfer QR details */}
               {paymentMethod === 'transfer' && (
-                <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-xs space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-md text-xs space-y-3 animate-in slide-in-from-top-2 duration-200">
                   <p className="font-black text-blue-600 uppercase tracking-widest text-[9px]">Thông tin chuyển khoản nhanh</p>
                   <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                     <div className="flex-1 w-full space-y-1.5 font-semibold text-gray-700">
@@ -1137,8 +1137,8 @@ export default function CartPage() {
                       <p className="flex justify-between border-b border-gray-200 pb-1">Số tài khoản: <span className="font-bold text-blue-600 tracking-wider">098 7654 3210</span></p>
                       <p className="flex justify-between pt-1">Số tiền chuyển: <span className="font-black text-red-600 text-sm">{(finalTotalPay).toLocaleString('vi-VN')}₫</span></p>
                     </div>
-                    <div className="flex flex-col items-center justify-center p-2.5 bg-white border border-gray-200 rounded-xl shrink-0">
-                      <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center text-gray-300">
+                    <div className="flex flex-col items-center justify-center p-2.5 bg-white border border-gray-200 rounded-md shrink-0">
+                      <div className="w-16 h-16 bg-gray-50 rounded-md flex items-center justify-center text-gray-300">
                         <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm1 1v4h4V4H4zm1 1h2v2H5V5zM3 15h6v6H3v-6zm1 1v4h4v-4H4zm1 1h2v2H5v-2zM15 3h6v6h-6V3zm1 1v4h4V4h-4zm1 1h2v2h-2V5zM15 15h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm-2 2v2h-2v-2zm2 0h2v2h-2v-2zM10 3h4v2h-4V3zm0 4h4v2h-4V7zm0 8h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2z" /></svg>
                       </div>
                       <span className="text-[8px] text-gray-400 font-bold uppercase tracking-wider mt-1">Mã QR</span>
@@ -1149,11 +1149,11 @@ export default function CartPage() {
             </div>
 
             {/* Card 8: Total summary and checkout button */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 space-y-4">
+            <div className="bg-white rounded-md border border-gray-100 p-4 md:p-6 space-y-4">
               {isLoggedIn && currentUser && (
-                <div className="flex items-center justify-between p-3.5 bg-yellow-50/50 border border-yellow-100/70 rounded-2xl">
+                <div className="flex items-center justify-between p-3.5 bg-yellow-50/50 border border-yellow-100/70 rounded-md">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center text-white select-none shrink-0 shadow-sm">
+                    <div className="w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center text-white select-none shrink-0">
                       <Gift size={15} className="fill-current" />
                     </div>
                     <div className="text-xs">
@@ -1210,7 +1210,7 @@ export default function CartPage() {
                 type="button"
                 onClick={handleCheckoutSubmit}
                 disabled={isSubmitting}
-                className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 text-white rounded-xl font-black shadow-md transition active:scale-95 uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 group cursor-pointer"
+                className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 text-white rounded-md font-black transition active:scale-95 uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 group cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
@@ -1238,7 +1238,7 @@ export default function CartPage() {
       {/* Address Information Modal */}
       {showAddressModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col relative max-h-[90vh] border border-gray-150 animate-in zoom-in-95 duration-200">
+          <div className="bg-white w-full max-w-md rounded-md flex flex-col relative max-h-[90vh] border border-gray-150 animate-in zoom-in-95 duration-200">
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 shrink-0">
@@ -1293,7 +1293,7 @@ export default function CartPage() {
                     placeholder="VD: Nguyễn Văn A..."
                     value={modalFullName}
                     onChange={(e) => setModalFullName(e.target.value)}
-                    className={`w-full bg-gray-50 border ${validationErrors.fullName ? 'border-red-500' : 'border-gray-200'} rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-blue-500`}
+                    className={`w-full bg-gray-50 border ${validationErrors.fullName ? 'border-red-500' : 'border-gray-200'} rounded-md px-3 py-2 font-bold focus:outline-none focus:border-blue-500`}
                   />
                   {validationErrors.fullName && <p className="text-red-500 text-[9px] font-medium">{validationErrors.fullName}</p>}
                 </div>
@@ -1304,7 +1304,7 @@ export default function CartPage() {
                     placeholder="VD: 0987654321..."
                     value={modalPhone}
                     onChange={(e) => setModalPhone(e.target.value)}
-                    className={`w-full bg-gray-50 border ${validationErrors.phone ? 'border-red-500' : 'border-gray-200'} rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-blue-500`}
+                    className={`w-full bg-gray-50 border ${validationErrors.phone ? 'border-red-500' : 'border-gray-200'} rounded-md px-3 py-2 font-bold focus:outline-none focus:border-blue-500`}
                   />
                   {validationErrors.phone && <p className="text-red-500 text-[9px] font-medium">{validationErrors.phone}</p>}
                 </div>
@@ -1318,7 +1318,7 @@ export default function CartPage() {
                   placeholder="nhapemail@gmail.com..."
                   value={modalEmail}
                   onChange={(e) => setModalEmail(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-blue-500 text-gray-800"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 font-bold focus:outline-none focus:border-blue-500 text-gray-800"
                 />
               </div>
 
@@ -1334,7 +1334,7 @@ export default function CartPage() {
                       <select
                         value={selectedProvinceId}
                         onChange={handleProvinceChange}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-2 py-2 focus:outline-none focus:border-blue-500 font-bold text-gray-850"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-md px-2 py-2 focus:outline-none focus:border-blue-500 font-bold text-gray-850"
                       >
                         <option value="">Chọn Tỉnh/Thành phố</option>
                         {provinces.map(p => (
@@ -1350,7 +1350,7 @@ export default function CartPage() {
                         placeholder="Nhập Quận/Huyện..."
                         value={modalDistrict}
                         onChange={(e) => setModalDistrict(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-blue-500"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 font-bold focus:outline-none focus:border-blue-500"
                       />
                     </div>
                   </div>
@@ -1363,7 +1363,7 @@ export default function CartPage() {
                         value={modalWardId}
                         onChange={handleWardChange}
                         disabled={!selectedProvinceId}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-2 py-2 focus:outline-none focus:border-blue-500 font-bold disabled:opacity-50"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-md px-2 py-2 focus:outline-none focus:border-blue-500 font-bold disabled:opacity-50"
                       >
                         <option value="">Chọn Phường/Xã</option>
                         {wards.map(w => (
@@ -1379,7 +1379,7 @@ export default function CartPage() {
                         placeholder="Số nhà, tên đường..."
                         value={modalStreetAddress}
                         onChange={(e) => setModalStreetAddress(e.target.value)}
-                        className={`w-full bg-gray-50 border ${validationErrors.streetAddress ? 'border-red-500' : 'border-gray-200'} rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-blue-500`}
+                        className={`w-full bg-gray-50 border ${validationErrors.streetAddress ? 'border-red-500' : 'border-gray-200'} rounded-md px-3 py-2 font-bold focus:outline-none focus:border-blue-500`}
                       />
                       {validationErrors.streetAddress && <p className="text-red-500 text-[9px] font-medium">{validationErrors.streetAddress}</p>}
                     </div>
@@ -1400,7 +1400,7 @@ export default function CartPage() {
                 </label>
 
                 {modalSomeoneElse && (
-                  <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 border border-gray-150 rounded-xl animate-in slide-in-from-top-2 duration-150">
+                  <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 border border-gray-150 rounded-md animate-in slide-in-from-top-2 duration-150">
                     <div className="space-y-1">
                       <label className="block text-[8px] font-bold text-gray-400 uppercase">Họ tên người nhận hộ *</label>
                       <input
@@ -1408,7 +1408,7 @@ export default function CartPage() {
                         placeholder="Nguyễn Văn B..."
                         value={modalSomeoneElseName}
                         onChange={(e) => setModalSomeoneElseName(e.target.value)}
-                        className={`w-full bg-white border ${validationErrors.someoneElseName ? 'border-red-500' : 'border-gray-200'} rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-500`}
+                        className={`w-full bg-white border ${validationErrors.someoneElseName ? 'border-red-500' : 'border-gray-200'} rounded-md px-2 py-1.5 focus:outline-none focus:border-blue-500`}
                       />
                       {validationErrors.someoneElseName && <p className="text-red-500 text-[8px] font-medium">{validationErrors.someoneElseName}</p>}
                     </div>
@@ -1419,7 +1419,7 @@ export default function CartPage() {
                         placeholder="Số điện thoại..."
                         value={modalSomeoneElsePhone}
                         onChange={(e) => setModalSomeoneElsePhone(e.target.value)}
-                        className={`w-full bg-white border ${validationErrors.someoneElsePhone ? 'border-red-500' : 'border-gray-200'} rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-500`}
+                        className={`w-full bg-white border ${validationErrors.someoneElsePhone ? 'border-red-500' : 'border-gray-200'} rounded-md px-2 py-1.5 focus:outline-none focus:border-blue-500`}
                       />
                       {validationErrors.someoneElsePhone && <p className="text-red-500 text-[8px] font-medium">{validationErrors.someoneElsePhone}</p>}
                     </div>
@@ -1430,18 +1430,18 @@ export default function CartPage() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-100 px-5 py-3.5 bg-gray-50 flex gap-3 rounded-b-2xl">
+            <div className="border-t border-gray-100 px-5 py-3.5 bg-gray-50 flex gap-3 rounded-b-md">
               <button
                 type="button"
                 onClick={() => setShowAddressModal(false)}
-                className="flex-1 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 font-black rounded-xl text-xs transition active:scale-95 uppercase tracking-wider"
+                className="flex-1 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 font-black rounded-md text-xs transition active:scale-95 uppercase tracking-wider"
               >
                 Hủy bỏ
               </button>
               <button
                 type="button"
                 onClick={confirmAddress}
-                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl text-xs transition active:scale-95 shadow-md shadow-blue-100 uppercase tracking-wider"
+                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-md text-xs transition active:scale-95 uppercase tracking-wider"
               >
                 Xác nhận
               </button>

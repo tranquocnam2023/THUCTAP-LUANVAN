@@ -78,7 +78,7 @@ function App() {
             </div>
 
             {/* Nội dung chính linh hoạt theo Route */}
-            <main className="flex-1 bg-white p-6 rounded shadow-sm border border-bordercustom min-h-[50vh]">
+            <main className="flex-1 bg-white p-6 rounded border border-bordercustom min-h-[50vh]">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/auth" element={<AuthPage />} />
