@@ -128,15 +128,11 @@ export default function HomePage() {
 
       {/* SECTION SẢN PHẨM NỔI BẬT (Điện Máy Xanh Style) */}
       {!selectedBrand && !advancedFilters && featuredProducts.length > 0 && (
-        <div className="w-full bg-gradient-to-r from-[#006ca2] via-[#0085bd] to-[#009ad3] rounded-md p-6 mb-8 border border-[#009ad3]/40 animate-in fade-in zoom-in-95 duration-500">
-          <div className="flex items-center justify-between mb-5 border-b border-white/20 pb-3">
-            <h3 className="text-lg font-black text-white flex items-center gap-2 drop-shadow-md">
-              <span className="animate-bounce">🌟</span>
+        <div className="w-full bg-white rounded-md p-6 mb-8 border border-gray-200 animate-in fade-in zoom-in-95 duration-500">
+          <div className="flex items-center justify-between mb-5 border-b border-gray-100 pb-3">
+            <h3 className="text-lg font-black flex items-center gap-2" style={{ color: THEME.secondary }}>
               <span>SẢN PHẨM NỔI BẬT NHẤT</span>
             </h3>
-            <span className="text-[10px] bg-white/20 text-white font-black px-3 py-1 rounded-full border border-white/10 uppercase tracking-widest animate-pulse">
-              HOT SALE
-            </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {featuredProducts.map((product) => (

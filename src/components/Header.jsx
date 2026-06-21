@@ -99,26 +99,6 @@ export default function Header() {
               Tra cứu<br/>đơn hàng
             </Link>
 
-            {isLoggedIn ? (
-              <div className="flex items-center px-3 py-1 rounded bg-white/10 gap-3">
-                 <div className="flex flex-col items-end">
-                    <span className="font-bold opacity-80">Chào {user.username || user.name || 'User'}</span>
-                    <button onClick={handleLogout} className="text-[10px] hover:underline text-yellow-300 font-bold uppercase">Đăng xuất</button>
-                 </div>
-                 <Link to="/profile" className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm hover:bg-white/30 cursor-pointer transition-colors" title="Quản lý thông tin tài khoản">
-                    {(user.username || 'U')[0].toUpperCase()}
-                 </Link>
-              </div>
-            ) : (
-              <Link 
-                to="/auth" 
-                className="flex items-center px-3 py-2 rounded transition text-center hover:bg-white/20"
-                style={{ color: THEME.textLight }}
-              >
-                Đăng nhập<br/>Tài khoản
-              </Link>
-            )}
-
             {/* KIỂM TRA QUYỀN: Phải ĐĂNG NHẬP và là ADMIN mới thấy Thẻ Quản Trị */}
             {isLoggedIn && userRole === 'Admin' && (
               <Link 
@@ -129,7 +109,7 @@ export default function Header() {
                 Trang<br/>Quản trị
               </Link>
             )}
- 
+
             <Link 
               to="/cart" 
               className="flex items-center px-3 py-2 border rounded transition space-x-2 relative group"
@@ -149,6 +129,26 @@ export default function Header() {
               </div>
               <span className="font-semibold text-sm">Giỏ hàng</span>
             </Link>
+
+            {isLoggedIn ? (
+              <div className="flex items-center px-3 py-1 rounded bg-white/10 gap-3">
+                 <div className="flex flex-col items-end">
+                    <span className="font-bold opacity-80">Chào {user.username || user.name || 'User'}</span>
+                    <button onClick={handleLogout} className="text-[10px] hover:underline text-yellow-300 font-bold uppercase">Đăng xuất</button>
+                 </div>
+                 <Link to="/profile" className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm hover:bg-white/30 cursor-pointer transition-colors" title="Quản lý thông tin tài khoản">
+                    {(user.username || 'U')[0].toUpperCase()}
+                  </Link>
+              </div>
+            ) : (
+              <Link 
+                to="/auth" 
+                className="flex items-center px-3 py-2 rounded transition text-center hover:bg-white/20"
+                style={{ color: THEME.textLight }}
+              >
+                Đăng nhập<br/>Tài khoản
+              </Link>
+            )}
         </div>
       </div>
     </header>
