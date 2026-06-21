@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, FolderOpen, Image as ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, FolderOpen, Image as ImageIcon, ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
 export default function AdminCategories() {
@@ -8,6 +8,12 @@ export default function AdminCategories() {
   const [brands, setBrands] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // States for creating a category
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatDesc, setNewCatDesc] = useState('');
+  const [creating, setCreating] = useState(false);
 
   // States for expanding categories
   const [expandedCategories, setExpandedCategories] = useState({}); // { [id]: boolean }
@@ -74,6 +80,13 @@ export default function AdminCategories() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+          >
+            <Plus size={18} />
+            <span>Thêm danh mục</span>
+          </button>
         </div>
       </div>
 
@@ -123,8 +136,8 @@ export default function AdminCategories() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                               {catBrands.length > 0 ? (
                                 catBrands.map((brand) => {
-                                  const productCount = products.filter(p => 
-                                    (p.categoryId === cat.id || p.CategoryId === cat.id) && 
+                                  const productCount = products.filter(p =>
+                                    (p.categoryId === cat.id || p.CategoryId === cat.id) &&
                                     (p.brandId === brand.id || p.BrandId === brand.id)
                                   ).length;
                                   return (
@@ -181,6 +194,99 @@ export default function AdminCategories() {
           </div>
         </div>
       </div>
+
+      {/* Create Category Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#FFFFFF] rounded-[20px] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F4F7FE]">
+              <h3 className="text-xl font-bold text-[#2B3674]">Thêm Danh Mục Mới</h3>
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewCatName('');
+                  setNewCatDesc('');
+                }}
+                className="text-[#A3AED0] hover:text-[#EE5D50] transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!newCatName.trim()) return alert("Vui lòng nhập tên danh mục.");
+                //không nhập trùng
+                if (categories.some(cat => cat.name.trim().toLowerCase() === newCatName.trim().toLowerCase())) return alert("Danh mục đã tồn tại!");
+
+                setCreating(true);
+                try {
+                  await categoryService.create({
+                    name: newCatName.trim(),
+                    description: newCatDesc.trim()
+                  });
+                  alert("Tạo danh mục mới thành công!");
+                  setShowCreateModal(false);
+                  setNewCatName('');
+                  setNewCatDesc('');
+                  loadData();
+                } catch (err) {
+                  console.error(err);
+                  alert("Lỗi tạo danh mục: " + (err.message || "Lỗi không xác định"));
+                } finally {
+                  setCreating(false);
+                }
+              }}
+              className="p-6 space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-bold text-[#2B3674] mb-2">Tên danh mục *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="VD: Điện thoại, Laptop..."
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-[#2B3674] mb-2">Mô tả danh mục</label>
+                <textarea
+                  rows="3"
+                  placeholder="Mô tả tóm tắt danh mục này..."
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium resize-none"
+                  value={newCatDesc}
+                  onChange={(e) => setNewCatDesc(e.target.value)}
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4 border-t border-[#E0E5F2]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setNewCatName('');
+                    setNewCatDesc('');
+                  }}
+                  className="px-5 py-2.5 bg-[#F4F7FE] text-[#2B3674] rounded-xl font-bold hover:bg-[#E0E5F2] transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="px-5 py-2.5 bg-[#4318FF] text-[#FFFFFF] rounded-xl font-bold shadow-md hover:bg-[#3911D1] transition-all active:scale-95 disabled:bg-blue-400"
+                >
+                  {creating ? "Đang tạo..." : "Tạo mới"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

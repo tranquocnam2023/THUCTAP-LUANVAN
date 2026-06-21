@@ -51,7 +51,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
           categoryService.getAll(),
           productService.getById(productId)
         ]);
-        
+
         if (brandsData) setBrands(brandsData);
         if (catsData) setCategories(catsData);
 
@@ -85,7 +85,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                       attr1Val = parsed[a1Name] || parsed[keys[0]] || '';
                       if (hA2) attr2Val = parsed[a2Name] || (keys.length > 1 ? parsed[keys[1]] : '') || '';
                     }
-                  } catch(e) {}
+                  } catch (e) { }
                 }
                 return {
                   id: v.id,
@@ -106,7 +106,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                 setHasAttr2(hA2);
               }
             }
-          } catch(e) {}
+          } catch (e) { }
 
           // Parse images
           let loadedImages = [];
@@ -123,7 +123,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                   }
                 });
               }
-            } catch(e) {}
+            } catch (e) { }
           }
 
           setFormData({
@@ -181,7 +181,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-    
+
     setUploading(true);
     try {
       const newImages = [...formData.images];
@@ -272,7 +272,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
   const handleSaveVariant = async (index) => {
     const v = formData.variants[index];
     if (!v.name) return alert("Vui lòng nhập tên biến thể.");
-    
+
     try {
       const attrObj = {};
       if (attr1Name.trim() && v.attr1Value) attrObj[attr1Name.trim()] = v.attr1Value;
@@ -310,14 +310,16 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
     if (hasAttr2 && attr1Name.trim().toLowerCase() === attr2Name.trim().toLowerCase()) {
       return alert("Trùng lặp thuộc tính! Vui lòng đặt tên hai thuộc tính khác nhau.");
     }
-
+    // ràng buộc thuộc tính màu sắc và dung lượng ram rom
+    //const checkInvalid = (v) => (attr1Name.includes('RAM') && v.attr1Value !== '12GB - 256GB') || (hasAttr2 && attr2Name.includes('RAM') && v.attr2Value !== '12GB - 256GB');
+    //if (formData.variants.some(checkInvalid)) return alert("Ràng buộc màu sắc và dung lượng RAM không được vi phạm!");
     setSaving(true);
     try {
       // Sort images by order before saving
       const sortedImages = [...formData.images].sort((a, b) => a.order - b.order);
       const mainImage = sortedImages.find(i => i.isMain)?.url || "";
       const otherImages = sortedImages.filter(i => !i.isMain).map(i => i.url);
-      
+
       const payload = {
         name: formData.name,
         slug: formData.slug,
@@ -335,7 +337,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
       };
 
       let targetProductId = productId;
-      
+
       if (actionType === 'NEW') {
         // Create new product
         const res = await productService.create(payload);
@@ -343,13 +345,13 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
           const allProds = await productService.getAll();
           return allProds.find(p => p.slug === formData.slug)?.id;
         })());
-        
+
         if (targetProductId && formData.variants.length > 0) {
           for (const v of formData.variants) {
             const attrObj = {};
             if (attr1Name.trim() && v.attr1Value) attrObj[attr1Name.trim()] = v.attr1Value;
             if (hasAttr2 && attr2Name.trim() && v.attr2Value) attrObj[attr2Name.trim()] = v.attr2Value;
-            
+
             await variantService.create({
               name: v.name,
               price: v.price !== '' ? Number(v.price) : Number(formData.basePrice),
@@ -366,13 +368,13 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
       } else {
         // Update existing product
         await productService.update(productId, payload);
-        
+
         // Update or create variants
         for (const v of formData.variants) {
           const attrObj = {};
           if (attr1Name.trim() && v.attr1Value) attrObj[attr1Name.trim()] = v.attr1Value;
           if (hasAttr2 && attr2Name.trim() && v.attr2Value) attrObj[attr2Name.trim()] = v.attr2Value;
-          
+
           const vPayload = {
             name: v.name,
             price: v.price !== '' ? Number(v.price) : Number(formData.basePrice),
@@ -390,7 +392,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
           }
         }
         alert('Cập nhật sản phẩm thành công!');
-        
+
         if (actionType === 'BACK') {
           onBack();
         } else if (actionType === 'STAY') {
@@ -419,21 +421,21 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
           <h2 className="text-2xl font-bold text-[#2B3674]">Cập nhật sản phẩm #{productId}</h2>
         </div>
         <div className="flex gap-3">
-          <button 
+          <button
             onClick={() => handleSave('STAY')}
             disabled={saving}
             className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E0E5F2] text-[#2B3674] rounded-xl font-bold shadow-sm hover:bg-[#F4F7FE] transition-colors disabled:opacity-70 text-sm"
           >
             Lưu lại và tiếp tục
           </button>
-          <button 
+          <button
             onClick={() => handleSave('NEW')}
             disabled={saving}
             className="flex items-center gap-2 px-4 py-2.5 bg-[#F4F7FE] text-[#4318FF] rounded-xl font-bold shadow-sm hover:bg-[#E0E5F2] transition-colors disabled:opacity-70 text-sm"
           >
             Lưu và thêm mới
           </button>
-          <button 
+          <button
             onClick={() => handleSave('BACK')}
             disabled={saving}
             className="flex items-center gap-2 px-6 py-2.5 bg-[#4318FF] text-white rounded-xl font-bold shadow-sm hover:bg-[#3911D1] transition-colors disabled:opacity-70 text-sm"
@@ -465,7 +467,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-xl outline-none text-[#A3AED0]"
                   placeholder="tu-dong-tao-tu-ten-san-pham"
                 />
@@ -474,7 +476,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Danh mục *</label>
                 <select
                   value={formData.categoryId}
-                  onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                   className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-white"
                 >
                   <option value="">-- Chọn danh mục --</option>
@@ -485,7 +487,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Thương hiệu</label>
                 <select
                   value={formData.brandId}
-                  onChange={(e) => setFormData({...formData, brandId: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, brandId: e.target.value })}
                   className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-white"
                 >
                   <option value="">-- Chọn thương hiệu --</option>
@@ -497,7 +499,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                 <textarea
                   rows="4"
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
                   placeholder="Nhập mô tả sản phẩm..."
                 />
@@ -509,7 +511,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
           <div className="bg-white p-6 rounded-[20px] shadow-sm border border-[#E0E5F2]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-[#2B3674]">D. Biến thể sản phẩm (Tùy chọn)</h3>
-              <button 
+              <button
                 onClick={addVariant}
                 className="flex items-center gap-1 px-3 py-1.5 bg-[#F4F7FE] text-[#4318FF] rounded-lg text-sm font-bold hover:bg-[#E0E5F2] transition-colors"
               >
@@ -754,7 +756,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                           </div>
                         </div>
                       </div>
-                      <button 
+                      <button
                         onClick={() => removeVariant(vIdx)}
                         className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-red-50 rounded-lg transition-colors mt-5"
                         title="Xóa biến thể"
@@ -780,7 +782,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                   <input
                     type="number"
                     value={formData.basePrice}
-                    onChange={(e) => setFormData({...formData, basePrice: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] outline-none text-[#2B3674]"
                   />
                   <span className="absolute right-4 top-3.5 text-[#A3AED0] font-bold text-sm">VNĐ</span>
@@ -792,7 +794,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                   <input
                     type="number"
                     value={formData.originalPrice}
-                    onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-xl focus:border-[#4318FF] outline-none text-[#2B3674]"
                   />
                   <span className="absolute right-4 top-3.5 text-[#A3AED0] font-bold text-sm">VNĐ</span>
@@ -809,7 +811,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                 <input
                   type="checkbox"
                   checked={formData.isActive}
-                  onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                   className="w-5 h-5 text-[#4318FF] border-[#E0E5F2] rounded focus:ring-[#4318FF]"
                 />
                 <span className="text-sm font-bold text-[#2B3674]">Đang bán (Active)</span>
@@ -818,7 +820,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                 <input
                   type="checkbox"
                   checked={formData.isFeatured}
-                  onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
+                  onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
                   className="w-5 h-5 text-[#FFB547] border-[#E0E5F2] rounded focus:ring-[#FFB547]"
                 />
                 <span className="text-sm font-bold text-[#2B3674]">Sản phẩm nổi bật</span>
@@ -871,18 +873,18 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                           <img src={img.url} alt="preview" className="w-10 h-10 object-cover rounded bg-gray-100" />
                         </td>
                         <td className="py-2 text-center">
-                          <input 
-                            type="radio" 
-                            name="mainImage" 
-                            checked={img.isMain} 
+                          <input
+                            type="radio"
+                            name="mainImage"
+                            checked={img.isMain}
                             onChange={() => setMainImage(idx)}
                             className="w-4 h-4 text-[#4318FF] cursor-pointer"
                           />
                         </td>
                         <td className="py-2 text-center">
-                          <input 
-                            type="number" 
-                            value={img.order} 
+                          <input
+                            type="number"
+                            value={img.order}
                             onChange={(e) => updateImageOrder(idx, e.target.value)}
                             className="w-12 px-1 py-1 text-center border border-[#E0E5F2] rounded outline-none focus:border-[#4318FF] text-xs"
                           />

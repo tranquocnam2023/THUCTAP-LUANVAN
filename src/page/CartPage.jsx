@@ -18,27 +18,6 @@ import {
   ShieldCheck, AlertCircle, ShoppingBag, Eye, Info, CheckCircle2
 } from 'lucide-react';
 
-// Việt Nam address data
-const VIETNAM_ADDRESSES = {
-  'Hồ Chí Minh': {
-    'Quận 1': ['Phường Bến Nghé', 'Phường Bến Thành', 'Phường Phạm Ngũ Lão', 'Phường Nguyễn Cư Trinh', 'Phường Đa Kao'],
-    'Quận 3': ['Phường Võ Thị Sáu', 'Phường 11', 'Phường 12', 'Phường 14', 'Phường 5'],
-    'Quận 10': ['Phường 1', 'Phường 2', 'Phường 12', 'Phường 15', 'Phường 14'],
-    'Bình Thạnh': ['Phường 15', 'Phường 25', 'Phường 26', 'Phường 19', 'Phường 21'],
-    'Gò Vấp': ['Phường 1', 'Phường 3', 'Phường 5', 'Phường 10', 'Phường 15']
-  },
-  'Hà Nội': {
-    'Hoàn Kiếm': ['Phường Hàng Bạc', 'Phường Hàng Bông', 'Phường Tràng Tiền', 'Phường Lý Thái Tổ'],
-    'Ba Đình': ['Phường Cống Vị', 'Phường Kim Mã', 'Phường Ngọc Khánh', 'Phường Giảng Võ'],
-    'Đống Đa': ['Phường Cát Linh', 'Phường Láng Hạ', 'Phường Láng Thượng', 'Phường Ô Chợ Dừa'],
-    'Cầu Giấy': ['Phường Dịch Vọng', 'Phường Dịch Vọng Hậu', 'Phường Mai Dịch', 'Phường Nghĩa Tân']
-  },
-  'Đà Nẵng': {
-    'Hải Châu': ['Phường Bình Hiên', 'Phường Bình Thuận', 'Phường Hòa Cường Bắc', 'Phường Hòa Cường Nam'],
-    'Thanh Khê': ['Phường An Khê', 'Phường Chính Gián', 'Phường Tam Thuận', 'Phường Thạc Gián'],
-    'Liên Chiểu': ['Phường Hòa Hiệp Bắc', 'Phường Hòa Hiệp Nam', 'Phường Hòa Khánh Bắc', 'Phường Hòa Khánh Nam']
-  }
-};
 
 export default function CartPage() {
   const { cartItems, updateQuantity, removeFromCart, cartTotal, clearCart } = useCart();

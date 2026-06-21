@@ -8,7 +8,7 @@ import { usePagination } from '../hooks/usePagination';
 const generateSkuFromName = (name) => {
   if (!name) return '';
   let str = name.toString();
-  
+
   // Remove Vietnamese accents
   str = str.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
   str = str.replace(/[èéẹẻẽêềếệểễ]/g, "e");
@@ -24,13 +24,13 @@ const generateSkuFromName = (name) => {
   str = str.replace(/[ÙÚỤỦUƯỪỨỰỬỮ]/g, "U");
   str = str.replace(/[ỲÝỴỶỸ]/g, "Y");
   str = str.replace(/Đ/g, "D");
-  
+
   // Remove special characters, keep letters, numbers, spaces, hyphens
   str = str.replace(/[^A-Za-z0-9\s\-]/g, '');
-  
+
   // Replace multiple spaces/hyphens with a single hyphen
   str = str.replace(/[\s\-]+/g, '-');
-  
+
   return str.toUpperCase().trim().replace(/^-+|-+$/g, '');
 };
 
@@ -95,11 +95,11 @@ export default function AdminProductVariants() {
       } catch (e) {
         console.error("Lỗi parse attributes", e);
       }
-      
+
       const attrList = Object.entries(parsedAttributes)
         .filter(([key]) => key !== 'SKU')
         .map(([key, value]) => ({ key, value }));
-
+      // muốn hiện sẵn thì vô đây
       if (attrList.length === 0) {
         attrList.push({ key: 'Màu sắc', value: '' });
         attrList.push({ key: 'Dung Lượng RAM - ROM', value: '' });
@@ -177,10 +177,10 @@ export default function AdminProductVariants() {
     const duplicate = variants.find(v => {
       if (v.productId !== selectedProduct.id) return false;
       if (editingVariant && v.id === editingVariant.id) return false;
-      
+
       let parsedAttr = {};
-      try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
-      
+      try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch (e) { }
+
       // Compare all non-SKU attributes
       const currentAttrs = {};
       attributes.forEach(a => {
@@ -272,7 +272,7 @@ export default function AdminProductVariants() {
     try {
       const parsed = v.attributes ? JSON.parse(v.attributes) : {};
       sku = (parsed["SKU"] || '').toLowerCase();
-    } catch (e) {}
+    } catch (e) { }
 
     const query = searchTerm.toLowerCase();
     return prodName.includes(query) || varName.includes(query) || sku.includes(query);
@@ -296,7 +296,7 @@ export default function AdminProductVariants() {
       {/* Header & Search */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý Biến thể</h2>
+          <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý Biến thể({variants.length}) </h2>
           <p className="text-sm text-[#A3AED0] font-medium mt-1">Quản lý SKU, thông số, kích thước, màu sắc và tồn kho của sản phẩm</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -347,7 +347,7 @@ export default function AdminProductVariants() {
                 paginatedVariants.map((v) => {
                   const product = getProductById(v.productId);
                   let parsedAttr = {};
-                  try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch(e){}
+                  try { parsedAttr = v.attributes ? JSON.parse(v.attributes) : {}; } catch (e) { }
                   const sku = parsedAttr["SKU"] || generateSkuFromName(v.name);
 
                   return (
@@ -480,7 +480,7 @@ export default function AdminProductVariants() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSave} className="p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Product Selection */}

@@ -542,7 +542,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-[#E0E5F2] text-[#A3AED0] text-[12px] font-bold">
-                    <th className="pb-3 px-2">Tên sản phẩm</th>
+                    <th className="pb-3 px-2">Tên sản phẩm({products.length}) </th>
                     <th className="pb-3 px-2">Thương hiệu</th>
                     <th className="pb-3 px-2">Danh mục</th>
                     <th className="pb-3 px-2">Giá bán</th>
