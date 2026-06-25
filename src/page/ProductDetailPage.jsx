@@ -573,6 +573,19 @@ export default function ProductDetailPage() {
           <div className="lg:col-span-5 space-y-8">
             <div className="sticky top-10 space-y-6">
               <div className="bg-white rounded-md border border-gray-100 p-8 space-y-8">
+                {product.isAvailable === false && (
+                  <div className="bg-[#FEECEB] border border-[#EE5D50]/30 rounded-md p-5 flex gap-3 items-start animate-in fade-in duration-200">
+                    <div className="w-8 h-8 rounded-full bg-[#EE5D50]/15 text-[#EE5D50] flex items-center justify-center font-bold flex-shrink-0">
+                      <X size={20} />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-[#EE5D50] text-sm">Sản phẩm tạm ngưng kinh doanh</h5>
+                      <p className="text-xs text-[#2B3674]/80 mt-1">
+                        Danh mục của sản phẩm này hiện đang tạm ngưng hoạt động. Quý khách vui lòng tham khảo các dòng sản phẩm khác.
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {/* 1. Chọn Dung lượng */}
                 <div>
                   <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Dung lượng:</h4>
@@ -676,23 +689,23 @@ export default function ProductDetailPage() {
                 <div className="space-y-4 pt-2">
                   <button
                     onClick={handleBuyNow}
-                    disabled={displayDetails.stock === 0}
-                    className={`w-full bg-gradient-to-r ${displayDetails.stock > 0 ? 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800' : 'from-gray-400 to-gray-500 cursor-not-allowed'} text-white font-black py-4.5 rounded-md text-xl uppercase shadow-2xl transition-all transform active:scale-95 flex flex-col items-center`}
+                    disabled={displayDetails.stock === 0 || product.isAvailable === false}
+                    className={`w-full bg-gradient-to-r ${displayDetails.stock > 0 && product.isAvailable !== false ? 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800' : 'from-gray-400 to-gray-500 cursor-not-allowed'} text-white font-black py-4.5 rounded-md text-xl uppercase shadow-2xl transition-all transform active:scale-95 flex flex-col items-center`}
                   >
-                    {displayDetails.stock > 0 ? 'MUA NGAY' : 'HẾT HÀNG'}
+                    {product.isAvailable === false ? 'TẠM NGƯNG KINH DOANH' : (displayDetails.stock > 0 ? 'MUA NGAY' : 'HẾT HÀNG')}
                     <span className="text-[10px] font-bold opacity-80 normal-case mt-0.5">
-                      {displayDetails.stock > 0 ? '(Giao tận nơi hoặc nhận tại cửa hàng)' : '(Vui lòng quay lại sau)'}
+                      {product.isAvailable === false ? '(Sản phẩm tạm ngưng kinh doanh)' : (displayDetails.stock > 0 ? '(Giao tận nơi hoặc nhận tại cửa hàng)' : '(Vui lòng quay lại sau)')}
                     </span>
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    disabled={displayDetails.stock === 0}
-                    className={`w-full border-2 ${displayDetails.stock > 0 ? 'border-blue-600 text-blue-600 hover:bg-blue-50' : 'border-gray-300 text-gray-400 cursor-not-allowed'} font-black py-3.5 rounded-md text-md uppercase transition-all flex items-center justify-center gap-2`}
+                    disabled={displayDetails.stock === 0 || product.isAvailable === false}
+                    className={`w-full border-2 ${displayDetails.stock > 0 && product.isAvailable !== false ? 'border-blue-600 text-blue-600 hover:bg-blue-50' : 'border-gray-300 text-gray-400 cursor-not-allowed'} font-black py-3.5 rounded-md text-md uppercase transition-all flex items-center justify-center gap-2`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                     </svg>
-                    THÊM VÀO GIỎ HÀNG
+                    {product.isAvailable === false ? 'SẢN PHẨM TẠM NGƯNG KINH DOANH' : 'THÊM VÀO GIỎ HÀNG'}
                   </button>
                 </div>
               </div>

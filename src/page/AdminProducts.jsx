@@ -9,6 +9,7 @@ import { inventoryService } from '../services/inventoryService';
 import { usePagination } from '../hooks/usePagination';
 import { useFormat } from '../hooks/useFormat';
 import { cleanDescription } from '../utils/productHelper';
+import PriceInput from '../components/PriceInput';
 
 // gọi API
 const TRANSACTIONS = [
@@ -18,7 +19,7 @@ const TRANSACTIONS = [
   { id: 'EXPORT_DEFECT', name: 'Xuất trả hàng lỗi cho NCC', type: 'OUT', bgColor: '#EE5D50', textColor: '#FFFFFF', borderColor: '#EE5D50' }
 ];
 
-export default function AdminProducts({ onCreate, onEdit }) {
+export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, clearBrandFilter }) {
   const [categories, setCategories] = useState([]); // Sidebar brands
   const [dbCategories, setDbCategories] = useState([]); // Database categories
   const [products, setProducts] = useState([]);
@@ -28,6 +29,13 @@ export default function AdminProducts({ onCreate, onEdit }) {
   const [isFeaturedFilter, setIsFeaturedFilter] = useState('ALL'); // 'ALL', 'TRUE', 'FALSE'
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTxTab, setActiveTxTab] = useState(null);
+
+  React.useEffect(() => {
+    if (defaultBrandFilter) {
+      setSelectedBrand(String(defaultBrandFilter));
+      if (clearBrandFilter) clearBrandFilter();
+    }
+  }, [defaultBrandFilter, clearBrandFilter]);
 
   // State for variants inside inventory
   const [variants, setVariants] = useState([]);
@@ -74,7 +82,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
 
   const fetchProducts = async () => {
     try {
-      const allProducts = await productService.getAll();
+      const allProducts = await productService.getAll(true);
       if (Array.isArray(allProducts)) {
         setProducts(allProducts);
       } else {
@@ -91,7 +99,7 @@ export default function AdminProducts({ onCreate, onEdit }) {
       try {
         const [brandsData, catsData] = await Promise.all([
           brandService.getAll(),
-          categoryService.getAll()
+          categoryService.getAll(true)
         ]);
         if (brandsData && brandsData.length > 0) {
           setCategories(brandsData);
@@ -161,6 +169,37 @@ export default function AdminProducts({ onCreate, onEdit }) {
     }
   };
 
+  const handleToggleActive = async (product) => {
+    try {
+      const updatedData = {
+        name: product.name,
+        slug: product.slug,
+        productCode: product.productCode || '',
+        description: product.description || '',
+        basePrice: product.basePrice || 0,
+        originalPrice: product.originalPrice || 0,
+        totalStock: product.totalStock ?? product.stock ?? product.stockQuantity ?? 0,
+        isActive: !product.isActive,
+        isFeatured: product.isFeatured || false,
+        categoryId: product.categoryId,
+        brandId: product.brandId,
+        thumbnailImage: product.thumbnailImage || '',
+        mainImage: product.mainImage || '',
+        images: product.images || []
+      };
+      
+      await productService.update(product.id, updatedData);
+      setProducts(prevProducts => 
+        prevProducts.map(p => 
+          p.id === product.id ? { ...p, isActive: !p.isActive } : p
+        )
+      );
+    } catch (err) {
+      console.error("Lỗi cập nhật trạng thái:", err);
+      alert('Không thể cập nhật trạng thái sản phẩm!');
+    }
+  };
+
   const handleExecuteTransaction = async () => {
     if (!txProductId) {
       alert('Vui lòng chọn sản phẩm!');
@@ -176,6 +215,11 @@ export default function AdminProducts({ onCreate, onEdit }) {
     const quantity = parseInt(txQuantity);
     if (isNaN(quantity) || quantity <= 0) {
       alert('Số lượng phải lớn hơn 0!');
+      return;
+    }
+
+    if (txPrice && (txPrice < 1000 || txPrice > 500000000)) {
+      alert('Giá trị giao dịch phải từ 1.000 đến 500.000.000 VNĐ!');
       return;
     }
 
@@ -277,11 +321,10 @@ export default function AdminProducts({ onCreate, onEdit }) {
             <label className="block text-sm font-bold text-[#2B3674] mb-2">
               {txConf.type === 'IN' ? 'Giá nhập (VNĐ)' : 'Giá xuất/Bán (VNĐ)'}
             </label>
-            <input
-              type="text"
+            <PriceInput
               placeholder="VD: 25.000.000"
               value={txPrice}
-              onChange={(e) => setTxPrice(e.target.value)}
+              onChange={(val) => setTxPrice(val)}
               className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
             />
           </div>
@@ -559,9 +602,9 @@ export default function AdminProducts({ onCreate, onEdit }) {
                       <th className="pb-3 px-2">Tên sản phẩm({products.length}) </th>
                       <th className="pb-3 px-2">Thương hiệu</th>
                       <th className="pb-3 px-2">Danh mục</th>
-                      <th className="pb-3 px-2">Giá bán</th>
+                      <th className="pb-3 px-2 text-right">Giá bán</th>
                       <th className="pb-3 px-2 text-center">Tồn kho</th>
-                      <th className="pb-3 px-2 text-center">IsActive</th>
+                      <th className="pb-3 px-2 text-center">Trạng thái</th>
                       <th className="pb-3 px-2 text-center">Thao tác</th>
                     </tr>
                   </thead>
@@ -574,9 +617,13 @@ export default function AdminProducts({ onCreate, onEdit }) {
                         const brandName = categories.find(c => c.id === product.brandId)?.name || product.brandName || 'N/A';
                         const categoryName = dbCategories.find(c => c.id === product.categoryId)?.name || 'N/A';
   
+                        const showBrandDisabledBadge = product.isActive !== false && product.brandIsActive === false;
+                        const showCategoryDisabledBadge = product.isActive !== false && product.isAvailable === false && !showBrandDisabledBadge;
+                        const isInheritedInactive = showCategoryDisabledBadge || showBrandDisabledBadge;
+                        
                         return (
                           <React.Fragment key={product.id}>
-                            <tr className="border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group cursor-pointer" onClick={() => setExpandedProducts(prev => ({ ...prev, [product.id]: !prev[product.id] }))}>
+                            <tr className={`border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group cursor-pointer ${isInheritedInactive ? 'opacity-60 grayscale bg-gray-50/50' : ''}`} onClick={() => setExpandedProducts(prev => ({ ...prev, [product.id]: !prev[product.id] }))}>
                               <td className="py-4 px-2 font-bold text-[#2B3674]">
                                 <div className="flex items-center gap-2">
                                   {productVariants.length > 0 && (
@@ -590,16 +637,47 @@ export default function AdminProducts({ onCreate, onEdit }) {
                                       Nổi bật
                                     </span>
                                   )}
+                                  {showCategoryDisabledBadge && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF9E6] text-[#D97706] border border-[#FCD34D] whitespace-nowrap animate-pulse">
+                                      Đang bị ẩn (Do danh mục tắt)
+                                    </span>
+                                  )}
+                                  {showBrandDisabledBadge && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF9E6] text-[#D97706] border border-[#FCD34D] whitespace-nowrap animate-pulse">
+                                      Đang bị ẩn (Do Thương hiệu đã tắt)
+                                    </span>
+                                  )}
                                 </div>
                               </td>
                               <td className="py-4 px-2 text-[#2B3674]">{brandName}</td>
                               <td className="py-4 px-2 text-[#2B3674]">{categoryName}</td>
-                              <td className="py-4 px-2 font-bold text-[#2B3674]">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
-                              <td className="py-4 px-2 text-center font-bold text-[#2B3674]">{product.totalStock ?? product.stock ?? product.stockQuantity ?? 0}</td>
+                              <td className="py-4 px-2 font-bold text-[#2B3674] text-right">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
+                              <td className="py-4 px-2 text-center font-bold text-[#2B3674]">
+                                {(() => {
+                                  const stock = product.totalStock ?? product.stock ?? product.stockQuantity ?? 0;
+                                  if (stock === 0) {
+                                    return <span className="px-2 py-1 bg-[#EE5D50]/10 text-[#EE5D50] rounded-md text-xs whitespace-nowrap">Hết hàng</span>;
+                                  } else if (stock < 5) {
+                                    return <span className="text-[#FFB547]">{stock}</span>;
+                                  }
+                                  return stock;
+                                })()}
+                              </td>
                               <td className="py-4 px-2 text-center">
-                                <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${product.isActive ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
-                                  {product.isActive ? 'Active' : 'Inactive'}
-                                </span>
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      className="sr-only peer"
+                                      checked={product.isActive !== false}
+                                      onChange={(e) => { e.stopPropagation(); handleToggleActive(product); }}
+                                    />
+                                    <div className="w-9 h-5 bg-[#E0E5F2] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#01B574]"></div>
+                                  </label>
+                                  <span className={`text-[10px] font-bold ${product.isActive !== false ? 'text-[#01B574]' : 'text-[#A3AED0]'}`}>
+                                    {product.isActive !== false ? 'Đang bán' : 'Ngừng kinh doanh'}
+                                  </span>
+                                </div>
                               </td>
                               <td className="py-4 px-2" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center justify-center gap-2">
@@ -630,13 +708,17 @@ export default function AdminProducts({ onCreate, onEdit }) {
                                 </td>
                                 <td className="py-3 px-2 text-center text-gray-400">-</td>
                                 <td className="py-3 px-2 text-center text-gray-400">-</td>
-                                <td className="py-3 px-2 font-semibold text-gray-700">{formatCurrency(v.price)}</td>
-                                <td className="py-3 px-2 text-center font-semibold text-gray-700">{v.totalStock}</td>
-                                <td className="py-3 px-2 text-center">
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${v.totalStock > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
-                                    {v.totalStock > 0 ? 'Còn hàng' : 'Hết hàng'}
-                                  </span>
+                                <td className="py-3 px-2 font-semibold text-gray-700 text-right">{formatCurrency(v.price)}</td>
+                                <td className="py-3 px-2 text-center font-semibold text-gray-700">
+                                  {v.totalStock === 0 ? (
+                                    <span className="px-2 py-0.5 bg-[#EE5D50]/10 text-[#EE5D50] rounded-md text-[10px] whitespace-nowrap">Hết hàng</span>
+                                  ) : v.totalStock < 5 ? (
+                                    <span className="text-[#FFB547]">{v.totalStock}</span>
+                                  ) : (
+                                    v.totalStock
+                                  )}
                                 </td>
+                                <td className="py-3 px-2 text-center text-gray-400">-</td>
                                 <td className="py-3 px-2 text-center text-gray-400">-</td>
                               </tr>
                             ))}

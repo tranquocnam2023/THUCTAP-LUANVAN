@@ -109,7 +109,7 @@ export default function Header() {
                 Trang<br/>Quản trị
               </Link>
             )}
-
+ 
             <Link 
               to="/cart" 
               className="flex items-center px-3 py-2 border rounded transition space-x-2 relative group"
@@ -138,7 +138,7 @@ export default function Header() {
                  </div>
                  <Link to="/profile" className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm hover:bg-white/30 cursor-pointer transition-colors" title="Quản lý thông tin tài khoản">
                     {(user.username || 'U')[0].toUpperCase()}
-                  </Link>
+                 </Link>
               </div>
             ) : (
               <Link 

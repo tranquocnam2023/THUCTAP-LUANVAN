@@ -4,6 +4,8 @@ import { categoryService } from '../services/categoryService';
 import { brandService } from '../services/brandService';
 import { productService } from '../services/productService';
 import { variantService } from '../services/variantService';
+import { generateProductCode } from '../utils/codeGenerator';
+import PriceInput from '../components/PriceInput';
 
 const parseRamRom = (value) => {
   if (!value) return { ram: '', rom: '' };
@@ -26,6 +28,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
+    productCode: '',
     categoryId: '',
     brandId: '',
     description: '',
@@ -129,6 +132,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
           setFormData({
             name: productData.name || '',
             slug: productData.slug || '',
+            productCode: productData.productCode || '',
             categoryId: productData.categoryId || '',
             brandId: productData.brandId || '',
             description: productData.description || '',
@@ -271,7 +275,12 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
 
   const handleSaveVariant = async (index) => {
     const v = formData.variants[index];
-    if (!v.name) return alert("Vui lòng nhập tên biến thể.");
+    if (!v.name) return alert("Vui lòng nhập tên biến thể (SKU)");
+    if (!v.attr1Value) return alert(`Vui lòng nhập ${attr1Name || 'Thuộc tính 1'}`);
+    if (hasAttr2 && !v.attr2Value) return alert(`Vui lòng nhập ${attr2Name || 'Thuộc tính 2'}`);
+    if (v.price && (v.price < 1000 || v.price > 500000000)) {
+      return alert("Giá bán của biến thể không hợp lệ (phải từ 1.000 đến 500.000.000 VNĐ)");
+    }
 
     try {
       const attrObj = {};
@@ -313,6 +322,24 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
     // ràng buộc thuộc tính màu sắc và dung lượng ram rom
     //const checkInvalid = (v) => (attr1Name.includes('RAM') && v.attr1Value !== '12GB - 256GB') || (hasAttr2 && attr2Name.includes('RAM') && v.attr2Value !== '12GB - 256GB');
     //if (formData.variants.some(checkInvalid)) return alert("Ràng buộc màu sắc và dung lượng RAM không được vi phạm!");
+    
+    if (formData.basePrice < 1000 || formData.basePrice > 500000000) {
+      return alert("Giá bán không hợp lệ (phải từ 1.000 đến 500.000.000 VNĐ)");
+    }
+    if (formData.originalPrice && (formData.originalPrice < 1000 || formData.originalPrice > 500000000)) {
+      return alert("Giá gốc không hợp lệ (phải từ 1.000 đến 500.000.000 VNĐ)");
+    }
+    
+    // Check variant prices
+    if (formData.variants.length > 0) {
+      for (let i = 0; i < formData.variants.length; i++) {
+        const vPrice = formData.variants[i].price;
+        if (vPrice && (vPrice < 1000 || vPrice > 500000000)) {
+          return alert(`Giá bán của biến thể "${formData.variants[i].name || `Biến thể ${i+1}`}" không hợp lệ (phải từ 1.000 đến 500.000.000 VNĐ)`);
+        }
+      }
+    }
+
     setSaving(true);
     try {
       // Sort images by order before saving
@@ -320,9 +347,12 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
       const mainImage = sortedImages.find(i => i.isMain)?.url || "";
       const otherImages = sortedImages.filter(i => !i.isMain).map(i => i.url);
 
+      const generatedCode = formData.productCode.trim() || generateProductCode(formData.name, 20);
+
       const payload = {
         name: formData.name,
         slug: formData.slug,
+        productCode: generatedCode,
         description: formData.description,
         basePrice: Number(formData.basePrice),
         originalPrice: formData.originalPrice !== '' ? Number(formData.originalPrice) : null,
@@ -401,7 +431,15 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
       }
 
     } catch (e) {
-      alert("Lỗi lưu sản phẩm: " + (e.message || JSON.stringify(e)));
+      let msg = typeof e === 'object' && e !== null ? (e.message || JSON.stringify(e)) : String(e);
+      if (typeof e === 'object' && e.errors) {
+        msg = JSON.stringify(e.errors);
+      }
+      if (typeof msg === 'string' && msg.toLowerCase().includes('mã này đã tồn tại')) {
+        alert("Mã ProductCode đã tồn tại. Vui lòng kiểm tra lại.");
+      } else {
+        alert("Lỗi lưu sản phẩm: " + msg);
+      }
     } finally {
       setSaving(false);
     }
@@ -462,7 +500,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                   placeholder="Nhập tên sản phẩm..."
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Đường dẫn (Slug)</label>
                 <input
                   type="text"
@@ -470,6 +508,16 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-md outline-none text-[#A3AED0]"
                   placeholder="tu-dong-tao-tu-ten-san-pham"
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-sm font-bold text-[#2B3674] mb-2">Mã (ProductCode)</label>
+                <input
+                  type="text"
+                  value={formData.productCode}
+                  onChange={(e) => setFormData({...formData, productCode: e.target.value.toUpperCase().replace(/\s+/g, '')})}
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md outline-none text-[#2B3674] uppercase focus:border-[#4318FF]"
+                  placeholder="Để trống tự tạo..."
                 />
               </div>
               <div>
@@ -658,10 +706,9 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                           )}
                           <div>
                             <label className="block text-xs font-bold text-[#2B3674] mb-1">Giá bán (VNĐ)</label>
-                            <input
-                              type="number"
+                            <PriceInput
                               value={variant.price}
-                              onChange={(e) => updateVariant(vIdx, 'price', e.target.value)}
+                              onChange={(val) => updateVariant(vIdx, 'price', val)}
                               className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
                               placeholder="Để trống = Giá SP"
                             />
@@ -689,7 +736,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
                                 </button>
                                 <input
                                   type="file"
-                                  accept="image/*"
+                                  accept=".jpg,.jpeg,.png,.webp,.svg"
                                   onChange={async (e) => {
                                     const file = e.target.files[0];
                                     if (!file) return;
@@ -779,11 +826,11 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
               <div>
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá khuyến mãi / Giá bán *</label>
                 <div className="relative">
-                  <input
-                    type="number"
+                  <PriceInput
                     value={formData.basePrice}
-                    onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
+                    onChange={(val) => setFormData({ ...formData, basePrice: val })}
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674]"
+                    required={true}
                   />
                   <span className="absolute right-4 top-3.5 text-[#A3AED0] font-bold text-sm">VNĐ</span>
                 </div>
@@ -791,10 +838,9 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
               <div>
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá gốc</label>
                 <div className="relative">
-                  <input
-                    type="number"
+                  <PriceInput
                     value={formData.originalPrice}
-                    onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
+                    onChange={(val) => setFormData({ ...formData, originalPrice: val })}
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674]"
                   />
                   <span className="absolute right-4 top-3.5 text-[#A3AED0] font-bold text-sm">VNĐ</span>
@@ -833,7 +879,7 @@ export default function AdminUpdateProduct({ productId, onBack, onCreateNew }) {
             <h3 className="text-lg font-bold text-[#2B3674] mb-4">E. Hình ảnh sản phẩm</h3>
             <div className="border-2 border-dashed border-[#E0E5F2] rounded-md p-6 flex flex-col items-center justify-center bg-[#F4F7FE]/30 relative hover:border-[#4318FF] transition-colors mb-4">
               <input
-                type="file" multiple accept="image/*"
+                type="file" multiple accept=".jpg,.jpeg,.png,.webp,.svg"
                 onChange={handleImageUpload}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />

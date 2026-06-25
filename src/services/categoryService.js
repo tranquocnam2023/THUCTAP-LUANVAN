@@ -1,9 +1,13 @@
 import api from './api';
 
 export const categoryService = {
-  getAll: () => api.get('/Category'),
+  getAll: (includeInactive = false) => api.get(`/Category?includeInactive=${includeInactive}`),
   
-  getById: (id) => api.get(`/Category/${id}`),
+  getRoots: (includeInactive = false) => api.get(`/Category?isRoot=true&includeInactive=${includeInactive}`),
+
+  getDetails: (id, includeInactive = false) => api.get(`/Category/${id}/details?includeInactive=${includeInactive}`),
+
+  getById: (id, includeInactive = false) => api.get(`/Category/${id}?includeInactive=${includeInactive}`),
   
   create: (data) => api.post('/Category', data),
   

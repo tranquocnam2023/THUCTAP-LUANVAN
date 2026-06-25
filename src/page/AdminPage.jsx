@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import AdminProducts from './AdminProducts';
 import AdminOrders from '../components/AdminOrders';
 import AdminDashboard from '../components/AdminDashboard';
@@ -22,8 +22,22 @@ const DASHBOARD_STATS = [
 ];
 
 export default function AdminPage() {
-  const [activeAdminTab, setActiveAdminTab] = useState('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeAdminTab = searchParams.get('tab') || 'dashboard';
   const [editProductId, setEditProductId] = useState(null);
+  const [selectedBrandId, setSelectedBrandId] = useState(null);
+
+  const setActiveAdminTab = (tab, brandId = null) => {
+    setSearchParams(prev => {
+      prev.set('tab', tab);
+      if (brandId) {
+        prev.set('brandId', brandId);
+      } else {
+        prev.delete('brandId');
+      }
+      return prev;
+    });
+  };
 
   // Khởi tạo state trống để sau này truyền API
   const [stats, setStats] = useState({ users: 0, revenue: 0, orders: 0, products: 0 });
@@ -154,11 +168,28 @@ export default function AdminPage() {
 
         {/* Dynamic Page Content */}
         <main className="flex-1 overflow-y-auto px-8 pb-8 pt-4 bg-[#F4F7FE] scroll-smooth">
-          {activeAdminTab === 'products' && <AdminProducts onCreate={() => setActiveAdminTab('create_product')} onEdit={(id) => { setEditProductId(id); setActiveAdminTab('update_product'); }} />}
+          {activeAdminTab === 'products' && (
+            <AdminProducts 
+              onCreate={() => setActiveAdminTab('create_product')} 
+              onEdit={(id) => { setEditProductId(id); setActiveAdminTab('update_product'); }} 
+              defaultBrandFilter={selectedBrandId}
+              clearBrandFilter={() => setSelectedBrandId(null)}
+            />
+          )}
           {activeAdminTab === 'create_product' && <AdminCreateProduct onBack={() => setActiveAdminTab('products')} />}
           {activeAdminTab === 'update_product' && <AdminUpdateProduct productId={editProductId} onBack={() => setActiveAdminTab('products')} onCreateNew={() => setActiveAdminTab('create_product')} />}
           {activeAdminTab === 'categories' && <AdminCategories />}
-          {activeAdminTab === 'brands' && <AdminBrands />}
+          {activeAdminTab === 'brands' && (
+            <AdminBrands 
+              onRedirectToProducts={(brandId) => { 
+                setSelectedBrandId(brandId); 
+                setActiveAdminTab('products'); 
+              }} 
+              onRedirectToCreateProduct={(brandId) => {
+                setActiveAdminTab('create_product', brandId);
+              }}
+            />
+          )}
           {activeAdminTab === 'variants' && <AdminProductVariants />}
           {activeAdminTab === 'orders' && <AdminOrders />}
           {activeAdminTab === 'customers' && <AdminCustomers />}

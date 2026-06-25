@@ -63,6 +63,8 @@ export default function AuthPage() {
   const [provinces, setProvinces] = useState([]);
   const [wards, setWards] = useState([]);
   const [selectedProvinceId, setSelectedProvinceId] = useState('');
+  const [provinceSearch, setProvinceSearch] = useState('');
+  const [wardSearch, setWardSearch] = useState('');
   const [addressForm, setAddressForm] = useState({
     recipientName: '',
     phoneNumber: '',
@@ -455,12 +457,15 @@ export default function AuthPage() {
       });
       setSelectedProvinceId('');
     }
+    setProvinceSearch('');
+    setWardSearch('');
     setIsAddressFormOpen(true);
   };
 
   const handleProvinceChange = (e) => {
     const provinceId = e.target.value;
     setSelectedProvinceId(provinceId);
+    setWardSearch('');
     setAddressForm(prev => ({
       ...prev,
       wardId: ''
@@ -522,6 +527,18 @@ export default function AuthPage() {
       }
     }
   };
+
+  const filteredProvinces = provinces.filter(p => {
+    const matchesSearch = (p.fullName || p.name || '').toLowerCase().includes(provinceSearch.toLowerCase());
+    const isCurrentlySelected = String(p.id) === String(selectedProvinceId);
+    return matchesSearch || isCurrentlySelected;
+  });
+
+  const filteredWards = wards.filter(w => {
+    const matchesSearch = (w.fullName || w.name || '').toLowerCase().includes(wardSearch.toLowerCase());
+    const isCurrentlySelected = String(w.id) === String(addressForm.wardId);
+    return matchesSearch || isCurrentlySelected;
+  });
 
   // ================= IF LOBBED IN: RENDER PROFILE PANEL (TGDĐ / ĐMX Style) =================
   if (isLoggedIn) {
@@ -751,6 +768,13 @@ export default function AuthPage() {
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-gray-700 mb-1">Tỉnh / Thành phố *</label>
+                        <input
+                          type="text"
+                          placeholder="🔍 Tìm nhanh Tỉnh/Thành..."
+                          value={provinceSearch}
+                          onChange={(e) => setProvinceSearch(e.target.value)}
+                          className="w-full border border-gray-300 p-2 rounded-md text-xs font-semibold focus:outline-none focus:border-primary mb-1"
+                        />
                         <select
                           required
                           value={selectedProvinceId}
@@ -758,7 +782,7 @@ export default function AuthPage() {
                           className="w-full border border-gray-300 p-2.5 rounded-md text-sm font-semibold focus:outline-none focus:border-primary"
                         >
                           <option value="">Chọn Tỉnh/Thành phố</option>
-                          {provinces.map(p => (
+                          {filteredProvinces.map(p => (
                             <option key={p.id} value={p.id}>{p.fullName || p.name}</option>
                           ))}
                         </select>
@@ -775,6 +799,15 @@ export default function AuthPage() {
                       </div>
                       <div className="sm:col-span-2">
                         <label className="block text-xs font-bold text-gray-700 mb-1">Phường / Xã *</label>
+                        {selectedProvinceId && (
+                          <input
+                            type="text"
+                            placeholder="🔍 Tìm nhanh Phường/Xã..."
+                            value={wardSearch}
+                            onChange={(e) => setWardSearch(e.target.value)}
+                            className="w-full border border-gray-300 p-2 rounded-md text-xs font-semibold focus:outline-none focus:border-primary mb-1"
+                          />
+                        )}
                         <select
                           required
                           value={addressForm.wardId}
@@ -783,7 +816,7 @@ export default function AuthPage() {
                           className="w-full border border-gray-300 p-2.5 rounded-md text-sm font-semibold focus:outline-none focus:border-primary disabled:opacity-50"
                         >
                           <option value="">Chọn Phường/Xã</option>
-                          {wards.map(w => (
+                          {filteredWards.map(w => (
                             <option key={w.id} value={w.id}>{w.fullName || w.name}</option>
                           ))}
                         </select>

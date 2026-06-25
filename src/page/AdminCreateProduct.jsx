@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Save, Plus, Trash2, UploadCloud, Loader2, GripVertical, Image as ImageIcon } from 'lucide-react';
 import { categoryService } from '../services/categoryService';
 import { brandService } from '../services/brandService';
 import { productService } from '../services/productService';
 import { variantService } from '../services/variantService';
+import { generateProductCode } from '../utils/codeGenerator';
+import PriceInput from '../components/PriceInput';
 
 const parseRamRom = (value) => {
   if (!value) return { ram: '', rom: '' };
@@ -25,6 +28,7 @@ export default function AdminCreateProduct({ onBack }) {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
+    productCode: '',
     categoryId: '',
     brandId: '',
     description: '',
@@ -40,6 +44,9 @@ export default function AdminCreateProduct({ onBack }) {
   const [attr2Name, setAttr2Name] = useState('Phiên bản');
   const [hasAttr2, setHasAttr2] = useState(false);
 
+  const [searchParams] = useSearchParams();
+  const queryBrandId = searchParams.get('brandId');
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -49,12 +56,19 @@ export default function AdminCreateProduct({ onBack }) {
         ]);
         if (brandsData) setBrands(brandsData);
         if (catsData) setCategories(catsData);
+
+        if (queryBrandId) {
+          setFormData(prev => ({
+            ...prev,
+            brandId: queryBrandId
+          }));
+        }
       } catch (e) {
         console.error("Lỗi tải danh mục/thương hiệu", e);
       }
     };
     fetchData();
-  }, []);
+  }, [queryBrandId]);
 
   // Handle auto slug with Vietnamese diacritic removal
   const generateSlug = (text) => {
@@ -171,16 +185,36 @@ export default function AdminCreateProduct({ onBack }) {
       return alert("Trùng lặp thuộc tính! Vui lòng đặt tên hai thuộc tính khác nhau.");
     }
     if (!formData.name) return alert("Vui lòng nhập tên sản phẩm.");
+    
+    if (formData.basePrice < 1000 || formData.basePrice > 500000000) {
+      return alert("Giá bán không hợp lệ (phải từ 1.000 đến 500.000.000 VNĐ)");
+    }
+    if (formData.originalPrice && (formData.originalPrice < 1000 || formData.originalPrice > 500000000)) {
+      return alert("Giá gốc không hợp lệ (phải từ 1.000 đến 500.000.000 VNĐ)");
+    }
+    
+    // Check variant prices
+    if (formData.variants.length > 0) {
+      for (let i = 0; i < formData.variants.length; i++) {
+        const vPrice = formData.variants[i].price;
+        if (vPrice && (vPrice < 1000 || vPrice > 500000000)) {
+          return alert(`Giá bán của biến thể "${formData.variants[i].name || `Biến thể ${i+1}`}" không hợp lệ (phải từ 1.000 đến 500.000.000 VNĐ)`);
+        }
+      }
+    }
+
     setSaving(true);
     try {
       // Sort images by order before saving
       const sortedImages = [...formData.images].sort((a, b) => a.order - b.order);
       const mainImage = sortedImages.find(i => i.isMain)?.url || "";
       const otherImages = sortedImages.filter(i => !i.isMain).map(i => i.url);
-      
+      const generatedCode = formData.productCode.trim() || generateProductCode(formData.name, 20);
+
       const payload = {
         name: formData.name,
         slug: formData.slug,
+        productCode: generatedCode,
         description: formData.description,
         basePrice: Number(formData.basePrice),
         originalPrice: formData.originalPrice !== '' ? Number(formData.originalPrice) : null,
@@ -221,11 +255,19 @@ export default function AdminCreateProduct({ onBack }) {
       alert('Thêm sản phẩm thành công!');
       // Reset form
       setFormData({
-        name: '', slug: '', categoryId: '', brandId: '', description: '',
+        name: '', slug: '', productCode: '', categoryId: '', brandId: '', description: '',
         basePrice: 0, originalPrice: 0, isActive: true, isFeatured: false, images: [], variants: []
       });
     } catch (e) {
-      alert("Lỗi lưu sản phẩm: " + (e.message || JSON.stringify(e)));
+      let msg = typeof e === 'object' && e !== null ? (e.message || JSON.stringify(e)) : String(e);
+      if (typeof e === 'object' && e.errors) {
+        msg = JSON.stringify(e.errors);
+      }
+      if (typeof msg === 'string' && msg.toLowerCase().includes('mã này đã tồn tại')) {
+        alert("Mã ProductCode đã tồn tại. Vui lòng kiểm tra lại.");
+      } else {
+        alert("Lỗi lưu sản phẩm: " + msg);
+      }
     } finally {
       setSaving(false);
     }
@@ -268,7 +310,7 @@ export default function AdminCreateProduct({ onBack }) {
                   placeholder="Nhập tên sản phẩm..."
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Đường dẫn (Slug)</label>
                 <input
                   type="text"
@@ -276,6 +318,16 @@ export default function AdminCreateProduct({ onBack }) {
                   onChange={(e) => setFormData({...formData, slug: e.target.value})}
                   className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-md outline-none text-[#A3AED0]"
                   placeholder="tu-dong-tao-tu-ten-san-pham"
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-sm font-bold text-[#2B3674] mb-2">Mã (ProductCode)</label>
+                <input
+                  type="text"
+                  value={formData.productCode}
+                  onChange={(e) => setFormData({...formData, productCode: e.target.value.toUpperCase().replace(/\s+/g, '')})}
+                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md outline-none text-[#2B3674] uppercase focus:border-[#4318FF]"
+                  placeholder="Để trống tự tạo..."
                 />
               </div>
               <div>
@@ -293,8 +345,9 @@ export default function AdminCreateProduct({ onBack }) {
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Thương hiệu</label>
                 <select
                   value={formData.brandId}
+                  disabled={!!queryBrandId}
                   onChange={(e) => setFormData({...formData, brandId: e.target.value})}
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-white"
+                  className={`w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-white ${queryBrandId ? 'opacity-65 cursor-not-allowed bg-gray-50' : ''}`}
                 >
                   <option value="">-- Chọn thương hiệu --</option>
                   {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -464,10 +517,9 @@ export default function AdminCreateProduct({ onBack }) {
                           )}
                           <div>
                             <label className="block text-xs font-bold text-[#2B3674] mb-1">Giá bán (VNĐ)</label>
-                            <input
-                              type="number"
+                            <PriceInput
                               value={variant.price}
-                              onChange={(e) => updateVariant(vIdx, 'price', e.target.value)}
+                              onChange={(val) => updateVariant(vIdx, 'price', val)}
                               className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
                               placeholder="Để trống = Giá SP"
                             />
@@ -495,7 +547,7 @@ export default function AdminCreateProduct({ onBack }) {
                                 </button>
                                 <input
                                   type="file"
-                                  accept="image/*"
+                                  accept=".jpg,.jpeg,.png,.webp,.svg"
                                   onChange={async (e) => {
                                     const file = e.target.files[0];
                                     if (!file) return;
@@ -586,11 +638,11 @@ export default function AdminCreateProduct({ onBack }) {
               <div>
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá khuyến mãi / Giá bán *</label>
                 <div className="relative">
-                  <input
-                    type="number"
+                  <PriceInput
                     value={formData.basePrice}
-                    onChange={(e) => setFormData({...formData, basePrice: e.target.value})}
+                    onChange={(val) => setFormData({...formData, basePrice: val})}
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674]"
+                    required={true}
                   />
                   <span className="absolute right-4 top-3.5 text-[#A3AED0] font-bold text-sm">VNĐ</span>
                 </div>
@@ -598,10 +650,9 @@ export default function AdminCreateProduct({ onBack }) {
               <div>
                 <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá gốc</label>
                 <div className="relative">
-                  <input
-                    type="number"
+                  <PriceInput
                     value={formData.originalPrice}
-                    onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
+                    onChange={(val) => setFormData({...formData, originalPrice: val})}
                     className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674]"
                   />
                   <span className="absolute right-4 top-3.5 text-[#A3AED0] font-bold text-sm">VNĐ</span>
@@ -640,7 +691,7 @@ export default function AdminCreateProduct({ onBack }) {
             <h3 className="text-lg font-bold text-[#2B3674] mb-4">E. Hình ảnh sản phẩm</h3>
             <div className="border-2 border-dashed border-[#E0E5F2] rounded-md p-6 flex flex-col items-center justify-center bg-[#F4F7FE]/30 relative hover:border-[#4318FF] transition-colors mb-4">
               <input
-                type="file" multiple accept="image/*"
+                type="file" multiple accept=".jpg,.jpeg,.png,.webp,.svg"
                 onChange={handleImageUpload}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />

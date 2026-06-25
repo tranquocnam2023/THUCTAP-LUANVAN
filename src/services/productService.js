@@ -1,7 +1,7 @@
 import api from './api';
 
 export const productService = {
-  getAll: () => api.get('/Product'),
+  getAll: (includeInactive = false) => api.get(`/Product?includeInactive=${includeInactive}`),
   
   getById: (id) => api.get(`/Product/${id}`),
   

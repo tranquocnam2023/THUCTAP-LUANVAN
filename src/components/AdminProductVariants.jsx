@@ -628,7 +628,7 @@ export default function AdminProductVariants() {
                     <div className="relative border-2 border-dashed border-[#E0E5F2] rounded-md p-6 flex flex-col items-center justify-center bg-[#F4F7FE]/10 h-28 cursor-pointer hover:border-[#4318FF] transition-colors">
                       <input
                         type="file"
-                        accept="image/*"
+                        accept=".jpg,.jpeg,.png,.webp,.svg"
                         onChange={handleFileChange}
                         disabled={uploading}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
