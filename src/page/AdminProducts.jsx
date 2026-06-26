@@ -29,6 +29,8 @@ export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, cl
   const [isFeaturedFilter, setIsFeaturedFilter] = useState('ALL'); // 'ALL', 'TRUE', 'FALSE'
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTxTab, setActiveTxTab] = useState(null);
+  const [isTxDropdownOpen, setIsTxDropdownOpen] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState('products'); // 'products' or 'history'
 
   React.useEffect(() => {
     if (defaultBrandFilter) {
@@ -187,10 +189,10 @@ export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, cl
         mainImage: product.mainImage || '',
         images: product.images || []
       };
-      
+
       await productService.update(product.id, updatedData);
-      setProducts(prevProducts => 
-        prevProducts.map(p => 
+      setProducts(prevProducts =>
+        prevProducts.map(p =>
           p.id === product.id ? { ...p, isActive: !p.isActive } : p
         )
       );
@@ -261,104 +263,122 @@ export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, cl
   };
 
   // Tái sử dụng form giao dịch chung cho cả 4 loại
+  // Tái sử dụng form giao dịch chung cho cả 4 loại dưới dạng Modal/Popup
   const renderReusableTransactionForm = () => {
     if (!activeTxTab) return null;
     const txConf = TRANSACTIONS.find(t => t.id === activeTxTab);
 
     return (
-      <div className="bg-[#FFFFFF] p-6 rounded-md animate-fade-in mb-8">
-        <div className="flex justify-between items-center mb-6 border-b border-[#E0E5F2] pb-4">
-          <h3 className="text-xl font-bold text-[#2B3674] flex items-center">
-            <span className="inline-block w-3 h-3 rounded-full mr-3" style={{ backgroundColor: txConf.bgColor === '#FFFFFF' ? '#A3AED0' : txConf.bgColor }}></span>
-            {txConf.name} ({selectedBrand})
-          </h3>
-          <button
-            onClick={() => setActiveTxTab(null)}
-            className="text-sm font-bold px-4 py-2 rounded-md transition-colors hover:bg-[#F4F7FE] text-[#A3AED0] hover:text-[#2B3674]"
-          >
-            Đóng
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-bold text-[#2B3674] mb-2">Chọn sản phẩm</label>
-            <select
-              value={txProductId}
-              onChange={(e) => {
-                const prodId = e.target.value;
-                setTxProductId(prodId);
-                const selectedProd = products.find(p => p.id === parseInt(prodId));
-                if (selectedProd) {
-                  setTxPrice((selectedProd.basePrice || selectedProd.price || 0).toString());
-                  setTxNote(activeTxTab === 'IMPORT_SUPPLIER' ? 'Nhập hàng từ nhà cung cấp' :
-                            activeTxTab === 'IMPORT_RETURN' ? 'Khách trả hàng' :
-                            activeTxTab === 'EXPORT_SELL' ? 'Xuất bán lẻ trực tiếp tại quầy' :
-                            activeTxTab === 'EXPORT_DEFECT' ? 'Trả hàng lỗi cho nhà cung cấp' : '');
-                } else {
-                  setTxPrice('');
-                  setTxNote('');
-                }
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in">
+        <div className="bg-[#FFFFFF] p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative border border-[#E0E5F2]">
+          <div className="flex justify-between items-center mb-6 border-b border-[#E0E5F2] pb-4">
+            <h3 className="text-xl font-bold text-[#2B3674] flex items-center">
+              <span className="inline-block w-3 h-3 rounded-full mr-3 animate-pulse" style={{ backgroundColor: txConf.bgColor === '#FFFFFF' ? '#A3AED0' : txConf.bgColor }}></span>
+              {txConf.name}
+            </h3>
+            <button
+              onClick={() => {
+                setActiveTxTab(null);
+                setTxProductId('');
+                setTxQuantity(1);
+                setTxPrice('');
+                setTxNote('');
               }}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              className="text-sm font-bold px-4 py-2 rounded-md transition-colors hover:bg-[#F4F7FE] text-[#A3AED0] hover:text-[#2B3674]"
             >
-              <option value="">-- Chọn sản phẩm {selectedBrand} --</option>
-              {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#2B3674] mb-2">Số lượng</label>
-            <input
-              type="number"
-              min="1"
-              value={txQuantity}
-              onChange={(e) => setTxQuantity(e.target.value)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
-            />
+              Đóng
+            </button>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-[#2B3674] mb-2">
-              {txConf.type === 'IN' ? 'Giá nhập (VNĐ)' : 'Giá xuất/Bán (VNĐ)'}
-            </label>
-            <PriceInput
-              placeholder="VD: 25.000.000"
-              value={txPrice}
-              onChange={(val) => setTxPrice(val)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-bold text-[#2B3674] mb-2">Chọn sản phẩm</label>
+              <select
+                value={txProductId}
+                onChange={(e) => {
+                  const prodId = e.target.value;
+                  setTxProductId(prodId);
+                  const selectedProd = products.find(p => p.id === parseInt(prodId));
+                  if (selectedProd) {
+                    setTxPrice((selectedProd.basePrice || selectedProd.price || 0).toString());
+                    setTxNote(activeTxTab === 'IMPORT_SUPPLIER' ? 'Nhập hàng từ nhà cung cấp' :
+                      activeTxTab === 'IMPORT_RETURN' ? 'Khách trả hàng' :
+                        activeTxTab === 'EXPORT_SELL' ? 'Xuất bán lẻ trực tiếp tại quầy' :
+                          activeTxTab === 'EXPORT_DEFECT' ? 'Trả hàng lỗi cho nhà cung cấp' : '');
+                  } else {
+                    setTxPrice('');
+                    setTxNote('');
+                  }
+                }}
+                className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              >
+                <option value="">-- Chọn sản phẩm --</option>
+                {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-[#2B3674] mb-2">Số lượng</label>
+              <input
+                type="number"
+                min="1"
+                value={txQuantity}
+                onChange={(e) => setTxQuantity(e.target.value)}
+                className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-[#2B3674] mb-2">
+                {txConf.type === 'IN' ? 'Giá nhập (VNĐ)' : 'Giá xuất/Bán (VNĐ)'}
+              </label>
+              <PriceInput
+                placeholder="VD: 25.000.000"
+                value={txPrice}
+                onChange={(val) => setTxPrice(val)}
+                className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-[#2B3674] mb-2">Ghi chú</label>
+              <input
+                type="text"
+                placeholder="Lý do, mã phiếu..."
+                value={txNote}
+                onChange={(e) => setTxNote(e.target.value)}
+                className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-[#2B3674] mb-2">Ghi chú</label>
-            <input
-              type="text"
-              placeholder="Lý do, mã phiếu..."
-              value={txNote}
-              onChange={(e) => setTxNote(e.target.value)}
-              className="w-full border border-[#E0E5F2] text-[#2B3674] rounded-md px-4 py-3 focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none bg-[#FFFFFF]"
-            />
+          <div className="mt-8 flex justify-end gap-3 border-t border-[#E0E5F2] pt-4">
+            <button
+              onClick={() => {
+                setActiveTxTab(null);
+                setTxProductId('');
+                setTxQuantity(1);
+                setTxPrice('');
+                setTxNote('');
+              }}
+              className="px-5 py-2.5 rounded-md font-bold text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleExecuteTransaction}
+              className="px-6 py-2.5 rounded-md font-bold transition-all hover:opacity-90 bg-[#4318FF] text-[#FFFFFF]"
+            >
+              Xác nhận {txConf.type === 'IN' ? 'Nhập Kho' : 'Xuất Kho'}
+            </button>
           </div>
         </div>
-
-        <div className="mt-8 flex justify-end">
-          <button
-            onClick={handleExecuteTransaction}
-            className="px-6 py-3 rounded-md font-bold transition-all hover:opacity-90 bg-[#4318FF] text-[#FFFFFF]"
-          >
-            Xác nhận {txConf.type === 'IN' ? 'Nhập Kho' : 'Xuất Kho'}
-          </button>
-        </div>
-
-        {/* Render filtered transaction history below the form */}
-        {renderInventoryHistory(activeTxTab)}
       </div>
     );
   };
 
   const renderInventoryHistory = (filterType = null) => {
     // Filter history based on filterType
-    const filteredHistory = filterType 
+    const filteredHistory = filterType
       ? txHistory.filter(t => t.transactionType === filterType)
       : txHistory;
 
@@ -389,7 +409,7 @@ export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, cl
                   const formattedDate = new Date(t.createdAt).toLocaleString('vi-VN');
                   const qty = Math.abs(t.quantityChanged);
                   const totalVal = t.price * qty;
-                  
+
                   return (
                     <tr key={t.id} className={`border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors ${t.isReverted ? 'opacity-50 line-through' : ''}`}>
                       <td className="py-3 px-2 font-mono font-bold text-xs text-blue-600">{code}</td>
@@ -398,19 +418,18 @@ export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, cl
                         {t.productName} <span className="text-xs font-normal text-gray-500">({t.variantName})</span>
                       </td>
                       <td className="py-3 px-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          t.transactionType === 'IMPORT_SUPPLIER' ? 'bg-blue-50 text-blue-600' :
-                          t.transactionType === 'IMPORT_RETURN' ? 'bg-green-50 text-green-600' :
-                          t.transactionType === 'EXPORT_SELL' ? 'bg-purple-50 text-purple-600' :
-                          'bg-red-50 text-red-600'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${t.transactionType === 'IMPORT_SUPPLIER' ? 'bg-blue-50 text-blue-600' :
+                            t.transactionType === 'IMPORT_RETURN' ? 'bg-green-50 text-green-600' :
+                              t.transactionType === 'EXPORT_SELL' ? 'bg-purple-50 text-purple-600' :
+                                'bg-red-50 text-red-600'
+                          }`}>
                           {t.transactionType === 'IMPORT_SUPPLIER' ? 'Nhập NCC' :
-                           t.transactionType === 'IMPORT_RETURN' ? 'Khách trả' :
-                           t.transactionType === 'EXPORT_SELL' ? 'Xuất bán lẻ' : 'Xuất lỗi'}
+                            t.transactionType === 'IMPORT_RETURN' ? 'Khách trả' :
+                              t.transactionType === 'EXPORT_SELL' ? 'Xuất bán lẻ' : 'Xuất lỗi'}
                         </span>
                       </td>
                       <td className="py-3 px-2 text-right font-bold text-[#2B3674]">
-                        {t.quantityChanged > 0 ? `+${qty}` : `-${qty}`}
+                        {qty}
                       </td>
                       <td className="py-3 px-2 text-right font-bold text-[#2B3674]">{formatCurrency(totalVal)}</td>
                       <td className="py-3 px-2 text-xs text-[#2B3674]">{t.createdByUsername}</td>
@@ -457,7 +476,7 @@ export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, cl
           Bộ lọc sản phẩm
         </div>
         <div className="flex flex-col p-4 gap-4">
-          
+
           {/* Lọc theo Brand */}
           <div>
             <label className="block text-sm font-bold text-[#2B3674] mb-2">Thương hiệu</label>
@@ -535,6 +554,37 @@ export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, cl
                 className="w-full pl-11 pr-4 py-2.5 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-semibold text-[#2B3674] placeholder-[#A3AED0] text-sm"
               />
             </div>
+            <div className="relative">
+              <button
+                onClick={() => setIsTxDropdownOpen(!isTxDropdownOpen)}
+                className="flex items-center gap-2 px-5 py-2.5 bg-[#0ea5e9] text-[#FFFFFF] rounded-md font-bold hover:bg-[#0284c7] transition-all active:scale-95 text-sm whitespace-nowrap"
+              >
+                <span> Thao tác kho</span>
+                <ChevronDown size={16} className={`transition-transform duration-200 ${isTxDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isTxDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setIsTxDropdownOpen(false)}></div>
+                  <div className="absolute right-0 mt-2 w-64 rounded-md shadow-xl bg-white border border-[#E0E5F2] focus:outline-none z-20 animate-fade-in">
+                    <div className="py-1">
+                      {TRANSACTIONS.map((tx) => (
+                        <button
+                          key={tx.id}
+                          onClick={() => {
+                            setActiveTxTab(tx.id);
+                            setIsTxDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] font-semibold transition-colors flex items-center gap-2"
+                        >
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: tx.bgColor === '#FFFFFF' ? '#A3AED0' : tx.bgColor }}></span>
+                          {tx.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
             <button
               onClick={onCreate}
               className="flex items-center gap-2 px-5 py-2.5 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 text-sm whitespace-nowrap"
@@ -572,207 +622,209 @@ export default function AdminProducts({ onCreate, onEdit, defaultBrandFilter, cl
           })}
         </div>
 
-        {/* 4 Nút điều hướng Nhập/Xuất */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {TRANSACTIONS.map(tx => (
-            <button
-              key={tx.id}
-              onClick={() => setActiveTxTab(tx.id)}
-              className={`p-4 rounded-md font-bold text-sm transition-all transform hover:-translate-y-1 ${activeTxTab === tx.id ? 'ring-2 ring-offset-2 ring-[#4318FF] shadow-md' : 'shadow-sm border border-[#E0E5F2]'}`}
-              style={{ backgroundColor: tx.bgColor, color: tx.textColor }}
-            >
-              <div className="flex flex-col items-center justify-center w-full h-full text-center">
-                <span>{tx.name}</span>
-              </div>
-            </button>
-          ))}
+        {/* Tab Selector */}
+        <div className="flex border-b border-[#E0E5F2] mb-6">
+          <button
+            onClick={() => setActiveSubTab('products')}
+            className={`py-3 px-6 font-bold text-sm transition-all border-b-2 flex items-center gap-2 ${activeSubTab === 'products' ? 'border-[#4318FF] text-[#4318FF]' : 'border-transparent text-[#A3AED0] hover:text-[#2B3674]'}`}
+          >
+            <Package size={18} />
+            Danh sách sản phẩm
+          </button>
+          <button
+            onClick={() => setActiveSubTab('history')}
+            className={`py-3 px-6 font-bold text-sm transition-all border-b-2 flex items-center gap-2 ${activeSubTab === 'history' ? 'border-[#4318FF] text-[#4318FF]' : 'border-transparent text-[#A3AED0] hover:text-[#2B3674]'}`}
+          >
+            <Settings2 size={18} />
+            Lịch sử giao dịch kho
+          </button>
         </div>
 
-        {/* Hiển thị form tái sử dụng hoặc danh sách mặc định */}
-        {activeTxTab ? renderReusableTransactionForm() : (
-          <>
-            <div className="bg-[#FFFFFF] rounded-md p-6 flex-1 flex flex-col mb-8">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-[#2B3674]">Danh sách sản phẩm</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-[#E0E5F2] text-[#A3AED0] text-[12px] font-bold">
-                      <th className="pb-3 px-2">Tên sản phẩm({products.length}) </th>
-                      <th className="pb-3 px-2">Thương hiệu</th>
-                      <th className="pb-3 px-2">Danh mục</th>
-                      <th className="pb-3 px-2 text-right">Giá bán</th>
-                      <th className="pb-3 px-2 text-center">Tồn kho</th>
-                      <th className="pb-3 px-2 text-center">Trạng thái</th>
-                      <th className="pb-3 px-2 text-center">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm">
-                    {paginatedProducts.length > 0 ? (
-                      paginatedProducts.map((product) => {
-                        const productVariants = variants.filter(v => v.productId === product.id);
-                        const isExpanded = expandedProducts[product.id];
-                        
-                        const brandName = categories.find(c => c.id === product.brandId)?.name || product.brandName || 'N/A';
-                        const categoryName = dbCategories.find(c => c.id === product.categoryId)?.name || 'N/A';
-  
-                        const showBrandDisabledBadge = product.isActive !== false && product.brandIsActive === false;
-                        const showCategoryDisabledBadge = product.isActive !== false && product.isAvailable === false && !showBrandDisabledBadge;
-                        const isInheritedInactive = showCategoryDisabledBadge || showBrandDisabledBadge;
-                        
-                        return (
-                          <React.Fragment key={product.id}>
-                            <tr className={`border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group cursor-pointer ${isInheritedInactive ? 'opacity-60 grayscale bg-gray-50/50' : ''}`} onClick={() => setExpandedProducts(prev => ({ ...prev, [product.id]: !prev[product.id] }))}>
-                              <td className="py-4 px-2 font-bold text-[#2B3674]">
-                                <div className="flex items-center gap-2">
-                                  {productVariants.length > 0 && (
-                                    <span className="text-[#A3AED0]">
-                                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                    </span>
-                                  )}
-                                  {product.name}
-                                  {product.isFeatured && (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFB547]/10 text-[#FFB547]">
-                                      Nổi bật
-                                    </span>
-                                  )}
-                                  {showCategoryDisabledBadge && (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF9E6] text-[#D97706] border border-[#FCD34D] whitespace-nowrap animate-pulse">
-                                      Đang bị ẩn (Do danh mục tắt)
-                                    </span>
-                                  )}
-                                  {showBrandDisabledBadge && (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF9E6] text-[#D97706] border border-[#FCD34D] whitespace-nowrap animate-pulse">
-                                      Đang bị ẩn (Do Thương hiệu đã tắt)
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="py-4 px-2 text-[#2B3674]">{brandName}</td>
-                              <td className="py-4 px-2 text-[#2B3674]">{categoryName}</td>
-                              <td className="py-4 px-2 font-bold text-[#2B3674] text-right">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
-                              <td className="py-4 px-2 text-center font-bold text-[#2B3674]">
-                                {(() => {
-                                  const stock = product.totalStock ?? product.stock ?? product.stockQuantity ?? 0;
-                                  if (stock === 0) {
-                                    return <span className="px-2 py-1 bg-[#EE5D50]/10 text-[#EE5D50] rounded-md text-xs whitespace-nowrap">Hết hàng</span>;
-                                  } else if (stock < 5) {
-                                    return <span className="text-[#FFB547]">{stock}</span>;
-                                  }
-                                  return stock;
-                                })()}
-                              </td>
-                              <td className="py-4 px-2 text-center">
-                                <div className="flex flex-col items-center justify-center gap-1">
-                                  <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                      type="checkbox"
-                                      className="sr-only peer"
-                                      checked={product.isActive !== false}
-                                      onChange={(e) => { e.stopPropagation(); handleToggleActive(product); }}
-                                    />
-                                    <div className="w-9 h-5 bg-[#E0E5F2] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#01B574]"></div>
-                                  </label>
-                                  <span className={`text-[10px] font-bold ${product.isActive !== false ? 'text-[#01B574]' : 'text-[#A3AED0]'}`}>
-                                    {product.isActive !== false ? 'Đang bán' : 'Ngừng kinh doanh'}
+        {/* Tab Content */}
+        {activeSubTab === 'products' ? (
+          <div className="bg-[#FFFFFF] rounded-md p-6 flex-1 flex flex-col mb-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-[#2B3674]">Danh sách sản phẩm</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-[#E0E5F2] text-[#A3AED0] text-[12px] font-bold">
+                    <th className="pb-3 px-2">Tên sản phẩm({products.length}) </th>
+                    <th className="pb-3 px-2">Thương hiệu</th>
+                    <th className="pb-3 px-2">Danh mục</th>
+                    <th className="pb-3 px-2 text-right">Giá bán</th>
+                    <th className="pb-3 px-2 text-center">Tồn kho</th>
+                    <th className="pb-3 px-2 text-center">Trạng thái</th>
+                    <th className="pb-3 px-2 text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {paginatedProducts.length > 0 ? (
+                    paginatedProducts.map((product) => {
+                      const productVariants = variants.filter(v => v.productId === product.id);
+                      const isExpanded = expandedProducts[product.id];
+
+                      const brandName = categories.find(c => c.id === product.brandId)?.name || product.brandName || 'N/A';
+                      const categoryName = dbCategories.find(c => c.id === product.categoryId)?.name || 'N/A';
+
+                      const showBrandDisabledBadge = product.isActive !== false && product.brandIsActive === false;
+                      const showCategoryDisabledBadge = product.isActive !== false && product.isAvailable === false && !showBrandDisabledBadge;
+                      const isInheritedInactive = showCategoryDisabledBadge || showBrandDisabledBadge;
+
+                      return (
+                        <React.Fragment key={product.id}>
+                          <tr className={`border-b border-[#E0E5F2] hover:bg-[#F4F7FE] transition-colors group cursor-pointer ${isInheritedInactive ? 'opacity-60 grayscale bg-gray-50/50' : ''}`} onClick={() => setExpandedProducts(prev => ({ ...prev, [product.id]: !prev[product.id] }))}>
+                            <td className="py-4 px-2 font-bold text-[#2B3674]">
+                              <div className="flex items-center gap-2">
+                                {productVariants.length > 0 && (
+                                  <span className="text-[#A3AED0]">
+                                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                   </span>
-                                </div>
+                                )}
+                                {product.name}
+                                {product.isFeatured && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFB547]/10 text-[#FFB547]">
+                                    Nổi bật
+                                  </span>
+                                )}
+                                {showCategoryDisabledBadge && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF9E6] text-[#D97706] border border-[#FCD34D] whitespace-nowrap animate-pulse">
+                                    Đang bị ẩn (Do danh mục tắt)
+                                  </span>
+                                )}
+                                {showBrandDisabledBadge && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF9E6] text-[#D97706] border border-[#FCD34D] whitespace-nowrap animate-pulse">
+                                    Đang bị ẩn (Do Thương hiệu đã tắt)
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-4 px-2 text-[#2B3674]">{brandName}</td>
+                            <td className="py-4 px-2 text-[#2B3674]">{categoryName}</td>
+                            <td className="py-4 px-2 font-bold text-[#2B3674] text-right">{formatCurrency(product.basePrice ?? product.price ?? 0)}</td>
+                            <td className="py-4 px-2 text-center font-bold text-[#2B3674]">
+                              {(() => {
+                                const stock = product.totalStock ?? product.stock ?? product.stockQuantity ?? 0;
+                                if (stock === 0) {
+                                  return <span className="px-2 py-1 bg-[#EE5D50]/10 text-[#EE5D50] rounded-md text-xs whitespace-nowrap">Hết hàng</span>;
+                                } else if (stock < 5) {
+                                  return <span className="text-[#FFB547]">{stock}</span>;
+                                }
+                                return stock;
+                              })()}
+                            </td>
+                            <td className="py-4 px-2 text-center">
+                              <div className="flex flex-col items-center justify-center gap-1">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={product.isActive !== false}
+                                    onChange={(e) => { e.stopPropagation(); handleToggleActive(product); }}
+                                  />
+                                  <div className="w-9 h-5 bg-[#E0E5F2] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#01B574]"></div>
+                                </label>
+                                <span className={`text-[10px] font-bold ${product.isActive !== false ? 'text-[#01B574]' : 'text-[#A3AED0]'}`}>
+                                  {product.isActive !== false ? 'Đang bán' : 'Ngừng kinh doanh'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-2" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
+                                  className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-md transition-all"
+                                  title="Sửa"
+                                >
+                                  <Edit size={18} />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }}
+                                  className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-md transition-all"
+                                  title="Xóa"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* Variant Rows (Chỉ hiển thị khi expanded) */}
+                          {isExpanded && productVariants.length > 0 && productVariants.map((v) => (
+                            <tr key={`v-${v.id}`} className="border-b border-[#E0E5F2]/60 hover:bg-[#F4F7FE]/40 transition-colors text-xs text-gray-600 bg-gray-50/50">
+                              <td className="py-3 px-6 font-medium text-gray-700 flex items-center gap-2">
+                                <span className="text-gray-400">↳</span>
+                                <span>{v.name}</span>
                               </td>
-                              <td className="py-4 px-2" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex items-center justify-center gap-2">
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
-                                    className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-md transition-all"
-                                    title="Sửa"
-                                  >
-                                    <Edit size={18} />
-                                  </button>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }}
-                                    className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-md transition-all"
-                                    title="Xóa"
-                                  >
-                                    <Trash2 size={18} />
-                                  </button>
-                                </div>
+                              <td className="py-3 px-2 text-center text-gray-400">-</td>
+                              <td className="py-3 px-2 text-center text-gray-400">-</td>
+                              <td className="py-3 px-2 font-semibold text-gray-700 text-right">{formatCurrency(v.price)}</td>
+                              <td className="py-3 px-2 text-center font-semibold text-gray-700">
+                                {v.totalStock === 0 ? (
+                                  <span className="px-2 py-0.5 bg-[#EE5D50]/10 text-[#EE5D50] rounded-md text-[10px] whitespace-nowrap">Hết hàng</span>
+                                ) : v.totalStock < 5 ? (
+                                  <span className="text-[#FFB547]">{v.totalStock}</span>
+                                ) : (
+                                  v.totalStock
+                                )}
                               </td>
+                              <td className="py-3 px-2 text-center text-gray-400">-</td>
+                              <td className="py-3 px-2 text-center text-gray-400">-</td>
                             </tr>
-                            
-                            {/* Variant Rows (Chỉ hiển thị khi expanded) */}
-                            {isExpanded && productVariants.length > 0 && productVariants.map((v) => (
-                              <tr key={`v-${v.id}`} className="border-b border-[#E0E5F2]/60 hover:bg-[#F4F7FE]/40 transition-colors text-xs text-gray-600 bg-gray-50/50">
-                                <td className="py-3 px-6 font-medium text-gray-700 flex items-center gap-2">
-                                  <span className="text-gray-400">↳</span>
-                                  <span>{v.name}</span>
-                                </td>
-                                <td className="py-3 px-2 text-center text-gray-400">-</td>
-                                <td className="py-3 px-2 text-center text-gray-400">-</td>
-                                <td className="py-3 px-2 font-semibold text-gray-700 text-right">{formatCurrency(v.price)}</td>
-                                <td className="py-3 px-2 text-center font-semibold text-gray-700">
-                                  {v.totalStock === 0 ? (
-                                    <span className="px-2 py-0.5 bg-[#EE5D50]/10 text-[#EE5D50] rounded-md text-[10px] whitespace-nowrap">Hết hàng</span>
-                                  ) : v.totalStock < 5 ? (
-                                    <span className="text-[#FFB547]">{v.totalStock}</span>
-                                  ) : (
-                                    v.totalStock
-                                  )}
-                                </td>
-                                <td className="py-3 px-2 text-center text-gray-400">-</td>
-                                <td className="py-3 px-2 text-center text-gray-400">-</td>
-                              </tr>
-                            ))}
-                          </React.Fragment>
-                        );
-                      })
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="p-8 text-center text-gray-500 bg-white">
-                          Chưa có dữ liệu sản phẩm
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                          ))}
+                        </React.Fragment>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="p-8 text-center text-gray-500 bg-white">
+                        Chưa có dữ liệu sản phẩm
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="text-sm font-bold text-[#A3AED0]">
+                Hiển thị {startIndex}-{endIndex} trên {totalItems} sản phẩm
               </div>
-              <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="text-sm font-bold text-[#A3AED0]">
-                  Hiển thị {startIndex}-{endIndex} trên {totalItems} sản phẩm
-                </div>
-                <div className="flex gap-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  TRƯỚC
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
                   <button
-                    onClick={prevPage}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    key={i}
+                    onClick={() => goToPage(i + 1)}
+                    className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-[#4318FF] text-[#FFFFFF] shadow-md' : 'bg-transparent text-[#A3AED0] hover:bg-[#F4F7FE]'}`}
                   >
-                    TRƯỚC
+                    {i + 1}
                   </button>
-                  {[...Array(totalPages)].map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => goToPage(i + 1)}
-                      className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-[#4318FF] text-[#FFFFFF] shadow-md' : 'bg-transparent text-[#A3AED0] hover:bg-[#F4F7FE]'}`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-                  <button
-                    onClick={nextPage}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    SAU
-                  </button>
-                </div>
+                ))}
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  SAU
+                </button>
               </div>
             </div>
-            
-            {/* Lịch sử giao dịch kho chung */}
-            <div className="bg-[#FFFFFF] rounded-md p-6 mb-8">
-              {renderInventoryHistory(null)}
-            </div>
-          </>
+          </div>
+        ) : (
+          <div className="bg-[#FFFFFF] rounded-md p-6 mb-8 flex-1 flex flex-col">
+            {renderInventoryHistory(null)}
+          </div>
         )}
+
+        {/* Form giao dịch kho dưới dạng Modal Popup */}
+        {renderReusableTransactionForm()}
       </div>
     </div>
   );
