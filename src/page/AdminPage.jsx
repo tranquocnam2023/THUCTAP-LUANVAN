@@ -83,11 +83,11 @@ export default function AdminPage() {
     <button
       onClick={() => setActiveAdminTab(id)}
       className={`w-full flex items-center px-4 py-3 rounded-md transition-all duration-200 font-bold ${activeAdminTab === id
-        ? 'bg-[#F4F7FE] text-[#4318FF] border-r-4 border-[#4318FF]'
-        : 'text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#2B3674]'
+        ? 'bg-[#24303d] text-[#4318FF] border-l-4 border-[#4318FF]'
+        : 'text-[#98a6ad] hover:bg-[#24303d] hover:text-[#ffffff]'
         }`}
     >
-      <Icon className={`w-5 h-5 mr-3 ${activeAdminTab === id ? 'text-[#4318FF]' : 'text-[#A3AED0]'}`} />
+      <Icon className={`w-5 h-5 mr-3 ${activeAdminTab === id ? 'text-[#4318FF]' : 'text-[#98a6ad]'}`} />
       <span className="text-sm">{label}</span>
     </button>
   );
@@ -95,16 +95,16 @@ export default function AdminPage() {
   return (
     <div className="flex h-screen bg-[#F4F7FE] overflow-hidden font-sans">
       {/* Admin Sidebar */}
-      <aside className="w-64 bg-[#FFFFFF] flex flex-col hidden md:flex shrink-0 border-r border-[#E0E5F2]">
-        <div className="h-20 flex items-center px-8 border-b border-[#E0E5F2]">
+      <aside className="w-64 bg-[#2f3e4e] flex flex-col hidden md:flex shrink-0 border-r border-[#3e4d5e]">
+        <div className="h-20 flex items-center px-8 border-b border-[#3e4d5e]">
           <div className="w-8 h-8 bg-[#4318FF] rounded-md flex items-center justify-center mr-3">
-            <span className="font-bold text-lg text-[#FFFFFF]">AD</span>
+            <span className="font-bold text-lg text-[#ffffff]">AD</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#2B3674] uppercase">PhoneShop</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-[#ffffff] uppercase">PhoneShop</h1>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Chính</p>
+          <p className="px-4 text-[12px] font-bold text-[#798897] uppercase tracking-widest mb-4">Chính</p>
           <SidebarItem id="dashboard" icon={Layout} label="Bảng thống kê" />
           <SidebarItem id="categories" icon={FolderTree} label="Danh mục" />
           <SidebarItem id="brands" icon={Star} label="Thương hiệu" />
@@ -116,22 +116,22 @@ export default function AdminPage() {
           <SidebarItem id="promotions" icon={Ticket} label="Khuyến mãi" />
 
           <div className="pt-6">
-            <p className="px-4 text-[12px] font-bold text-[#A3AED0] uppercase tracking-widest mb-4">Hệ thống</p>
+            <p className="px-4 text-[12px] font-bold text-[#798897] uppercase tracking-widest mb-4">Hệ thống</p>
             <SidebarItem id="settings" icon={Settings} label="Cài đặt" />
           </div>
         </nav>
 
-        <div className="p-4 bg-[#FFFFFF] border-t border-[#E0E5F2] space-y-2">
+        <div className="p-4 bg-[#2f3e4e] border-t border-[#3e4d5e] space-y-2">
           <Link
             to="/"
-            className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#4318FF] transition-colors rounded-md hover:bg-[#F4F7FE] group"
+            className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#98a6ad] hover:text-[#38bdf8] hover:bg-[#24303d] transition-colors rounded-md group"
           >
             <LayoutGrid className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
             Xem cửa hàng
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#A3AED0] hover:text-[#EE5D50] transition-colors rounded-md hover:bg-[#FFF5F5] group"
+            className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#98a6ad] hover:text-[#EE5D50] hover:bg-red-500/10 transition-colors rounded-md group"
           >
             <LogOut className="w-5 h-5 mr-3 group-hover:translate-x-1 transition-transform" />
             Đăng xuất
@@ -172,9 +172,9 @@ export default function AdminPage() {
         {/* Dynamic Page Content */}
         <main className="flex-1 overflow-y-auto px-8 pb-8 pt-4 bg-[#F4F7FE] scroll-smooth">
           {activeAdminTab === 'products' && (
-            <AdminProducts 
-              onCreate={() => setActiveAdminTab('create_product')} 
-              onEdit={(id) => { setEditProductId(id); setActiveAdminTab('update_product'); }} 
+            <AdminProducts
+              onCreate={() => setActiveAdminTab('create_product')}
+              onEdit={(id) => { setEditProductId(id); setActiveAdminTab('update_product'); }}
               defaultBrandFilter={selectedBrandId}
               clearBrandFilter={() => setSelectedBrandId(null)}
             />
@@ -183,11 +183,11 @@ export default function AdminPage() {
           {activeAdminTab === 'update_product' && <AdminUpdateProduct productId={editProductId} onBack={() => setActiveAdminTab('products')} onCreateNew={() => setActiveAdminTab('create_product')} />}
           {activeAdminTab === 'categories' && <AdminCategories />}
           {activeAdminTab === 'brands' && (
-            <AdminBrands 
-              onRedirectToProducts={(brandId) => { 
-                setSelectedBrandId(brandId); 
-                setActiveAdminTab('products'); 
-              }} 
+            <AdminBrands
+              onRedirectToProducts={(brandId) => {
+                setSelectedBrandId(brandId);
+                setActiveAdminTab('products');
+              }}
               onRedirectToCreateProduct={(brandId) => {
                 setActiveAdminTab('create_product', brandId);
               }}
