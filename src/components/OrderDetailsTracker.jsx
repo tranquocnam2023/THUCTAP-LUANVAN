@@ -2,6 +2,17 @@ import React, { useState } from 'react';
 import { CheckCircle2, Clock, Package, Truck, Smile, ExternalLink, Calendar, MapPin, CreditCard, Tag, X, AlertTriangle } from 'lucide-react';
 import api from '../services/api';
 
+const getPaymentMethodLabel = (method) => {
+  if (!method) return 'Chưa xác định';
+  switch (method.toLowerCase()) {
+    case 'cod': return 'Thanh toán tiền mặt khi nhận hàng (COD)';
+    case 'transfer': return 'Chuyển khoản ngân hàng trực tuyến';
+    case 'momo': return 'Ví điện tử MoMo';
+    case 'stripe': return 'Thanh toán qua Stripe';
+    default: return method;
+  }
+};
+
 export default function OrderDetailsTracker({ order, onOrderCancelled }) {
   if (!order) return null;
 
@@ -314,7 +325,7 @@ export default function OrderDetailsTracker({ order, onOrderCancelled }) {
           <div className="space-y-2 text-xs font-bold text-gray-500 uppercase tracking-tighter">
             <div className="flex justify-between">
               <span>Phương thức thanh toán:</span>
-              <span className="text-gray-800 font-black">Chuyển khoản / COD</span>
+              <span className="text-gray-800 font-black">{getPaymentMethodLabel(order.paymentMethod || order.PaymentMethod)}</span>
             </div>
             {order.promotionCode && (
               <div className="flex justify-between text-green-600">

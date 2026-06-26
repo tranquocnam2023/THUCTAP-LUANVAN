@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import AdminProducts from './AdminProducts';
+import AdminInventory from '../components/AdminInventory';
 import AdminOrders from '../components/AdminOrders';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminCustomers from '../components/AdminCustomers';
@@ -12,7 +13,7 @@ import AdminCreateProduct from './AdminCreateProduct';
 import AdminUpdateProduct from './AdminUpdateProduct';
 import { dashboardService } from '../services/dashboardService';
 import { authService } from '../services/authService';
-import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star, LayoutGrid, Ticket, Layers } from 'lucide-react';
+import { Layout, Package, Users, ShoppingCart, Settings, LogOut, Bell, FolderTree, Star, LayoutGrid, Ticket, Layers, Boxes } from 'lucide-react';
 
 const DASHBOARD_STATS = [
   { label: 'Tổng khách hàng', icon: Users, bgColor: '#5856d6', textColor: '#ffffff' },
@@ -64,6 +65,7 @@ export default function AdminPage() {
   const getHeaderTitle = () => {
     switch (activeAdminTab) {
       case 'products': return 'Quản lý sản phẩm';
+      case 'inventory': return 'Quản lý kho hàng';
       case 'categories': return 'Quản lý danh mục';
       case 'brands': return 'Quản lý thương hiệu';
       case 'variants': return 'Quản lý biến thể';
@@ -107,6 +109,7 @@ export default function AdminPage() {
           <SidebarItem id="categories" icon={FolderTree} label="Danh mục" />
           <SidebarItem id="brands" icon={Star} label="Thương hiệu" />
           <SidebarItem id="products" icon={Package} label="Sản phẩm" />
+          <SidebarItem id="inventory" icon={Boxes} label="Quản lý kho" />
           <SidebarItem id="variants" icon={Layers} label="Biến thể" />
           <SidebarItem id="orders" icon={ShoppingCart} label="Đơn hàng" />
           <SidebarItem id="customers" icon={Users} label="Khách hàng" />
@@ -190,6 +193,7 @@ export default function AdminPage() {
               }}
             />
           )}
+          {activeAdminTab === 'inventory' && <AdminInventory />}
           {activeAdminTab === 'variants' && <AdminProductVariants />}
           {activeAdminTab === 'orders' && <AdminOrders />}
           {activeAdminTab === 'customers' && <AdminCustomers />}

@@ -21,6 +21,29 @@ const ORDER_STATS_CONFIG = [
   { label: 'Đã hoàn thành', countKey: 'delivered', icon: CheckCircle, bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#01B574' },
 ];
 
+// ánh xạ tên phương thức thanh toán
+const getPaymentMethodLabel = (method) => {
+  if (!method) return 'N/A';
+  switch (method.toLowerCase()) {
+    case 'cod': return 'Tiền mặt (COD)';
+    case 'transfer': return 'Chuyển khoản';
+    case 'momo': return 'Ví MoMo';
+    case 'stripe': return 'Thẻ Stripe';
+    default: return method;
+  }
+};
+
+const getPaymentMethodStyle = (method) => {
+  switch (method?.toLowerCase()) {
+    case 'cod': return 'bg-orange-50 text-orange-600 border-orange-100';
+    case 'transfer': return 'bg-blue-50 text-blue-600 border-blue-100';
+    case 'momo': return 'bg-pink-50 text-pink-600 border-pink-100';
+    case 'stripe': return 'bg-indigo-50 text-indigo-600 border-indigo-100';
+    default: return 'bg-gray-50 text-gray-600 border-gray-100';
+  }
+};
+
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
@@ -59,6 +82,7 @@ export default function AdminOrders() {
                 payment: order.statusId === 2 || order.statusId === 3 || order.statusId === 4 ? 'Đã thanh toán' : 'Chờ thanh toán',
                 amount: order.totalPrice,
                 status: statusStr,
+                paymentMethod: order.paymentMethod || 'cod',
                 failedDeliveryCount: order.failedDeliveryCount || 0,
                 items: order.items || []
               };
@@ -213,9 +237,9 @@ export default function AdminOrders() {
     // - Đơn hàng ở trạng thái chờ (pending) thì không được trừ hàng trong kho.
     let stockMessage = "";
     if (currentStatus === 'pending' && (newStatus === 'confirmed' || newStatus === 'shipping' || newStatus === 'delivered')) {
-      stockMessage = "\n➡️ Đơn hàng đã được xác nhận: Thực hiện trừ số lượng hàng trong kho!";
+      stockMessage = "\n Đơn hàng đã được xác nhận: Thực hiện trừ số lượng hàng trong kho!";
     } else if ((currentStatus === 'confirmed' || currentStatus === 'shipping' || currentStatus === 'preparing' || currentStatus === 'shipping_failed') && newStatus === 'cancelled') {
-      stockMessage = "\n➡️ Đơn hàng đã hủy: Thực hiện hoàn lại số lượng hàng vào kho!";
+      stockMessage = "\n Đơn hàng đã hủy: Thực hiện hoàn lại số lượng hàng vào kho!";
     }
 
     orderService.updateStatus(orderId, newStatus)
@@ -263,7 +287,7 @@ export default function AdminOrders() {
     <div className="animate-in fade-in duration-500 space-y-6">
       {error && (
         <div className="p-5 bg-[#EE5D50]/10 border border-[#EE5D50]/20 text-[#EE5D50] rounded-md font-bold text-sm">
-          ⚠️ Có lỗi xảy ra khi tải dữ liệu đơn hàng: {error}
+           Có lỗi xảy ra khi tải dữ liệu đơn hàng: {error}
         </div>
       )}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -344,7 +368,8 @@ export default function AdminOrders() {
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Đơn hàng</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Khách hàng</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Ngày đặt</th>
-                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Thanh toán</th>
+                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Trạng thái</th>
+                <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Hình thức TT</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Tổng cộng</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Tình trạng đơn hàng</th>
                 <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Trạng thái đơn hàng</th>
@@ -368,6 +393,11 @@ export default function AdminOrders() {
                       <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${order.payment === 'Đã thanh toán' ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#F4F7FE] text-[#A3AED0]'
                         }`}>
                         {order.payment}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold border ${getPaymentMethodStyle(order.paymentMethod)}`}>
+                        {getPaymentMethodLabel(order.paymentMethod)}
                       </span>
                     </td>
                     <td className="px-6 py-4 font-bold text-[#2B3674]">
