@@ -31,7 +31,7 @@ const FilterSection = ({ title, options, selected, onSelect, columns = 4 }) => {
               key={opt}
               onClick={() => onSelect(title, opt)}
               className={`px-2 py-2 border rounded-md text-[13px] text-center transition-colors break-words ${isSelected
-                ? 'border-primary text-primary bg-[#f2f8ff]'
+                ? 'border-primary text-primary bg-primary/5'
                 : 'border-gray-200 text-gray-700 hover:border-gray-300'
                 }`}
             >
@@ -142,10 +142,10 @@ export default function FilterModal({ onClose, onApply }) {
               <div className="flex-1 px-2">
                 <Slider
                   range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
-                  trackStyle={[{ backgroundColor: '#288ad6', height: 2 }]}
+                  trackStyle={[{ backgroundColor: 'var(--color-primary)', height: 2 }]}
                   handleStyle={[
-                    { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff' },
-                    { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff' }
+                    { borderColor: 'var(--color-primary)', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff' },
+                    { borderColor: 'var(--color-primary)', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff' }
                   ]}
                   railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
                 />
@@ -159,10 +159,10 @@ export default function FilterModal({ onClose, onApply }) {
             <div className="mb-6 px-3 pt-2 mt-2">
               <Slider
                 range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
-                trackStyle={[{backgroundColor: '#288ad6', height: 2}]}
+                trackStyle={[{backgroundColor: 'var(--color-primary)', height: 2}]}
                 handleStyle={[
-                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
-                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
+                  { borderColor: 'var(--color-primary)', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
+                  { borderColor: 'var(--color-primary)', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
                 ]}
                 railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
               />
@@ -186,10 +186,10 @@ export default function FilterModal({ onClose, onApply }) {
             <div className="px-3 pb-2">
               <Slider
                 range min={0} max={60000000} step={500000} value={priceRange} onChange={handlePriceChange}
-                trackStyle={[{backgroundColor: '#288ad6', height: 2}]}
+                trackStyle={[{backgroundColor: 'var(--color-primary)', height: 2}]}
                 handleStyle={[
-                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
-                  { borderColor: '#288ad6', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
+                  { borderColor: 'var(--color-primary)', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'},
+                  { borderColor: 'var(--color-primary)', height: 14, width: 14, marginTop: -6, backgroundColor: '#fff'}
                 ]}
                 railStyle={{ backgroundColor: '#e5e7eb', height: 2 }}
               />

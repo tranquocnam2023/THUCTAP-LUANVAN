@@ -5,7 +5,7 @@ import api from '../services/api';
 const getPaymentMethodLabel = (method) => {
   if (!method) return 'Chưa xác định';
   switch (method.toLowerCase()) {
-    case 'cod': return 'Thanh toán tiền mặt khi nhận hàng (COD)';
+    case 'cod': return 'Thanh toán khi nhận hàng (COD)';
     case 'transfer': return 'Chuyển khoản ngân hàng trực tuyến';
     case 'momo': return 'Ví điện tử MoMo';
     case 'stripe': return 'Thanh toán qua Stripe';

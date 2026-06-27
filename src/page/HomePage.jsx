@@ -7,11 +7,7 @@ import FilterBar from '../components/FilterBar';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
 
-const THEME = {
-  primary: '#288ad6', 
-  secondary: '#0d5cb6', 
-  border: '#e5e7eb', 
-};
+import { THEME } from '../utils/theme';
 
 export default function HomePage() {
   const { brand } = useParams();
@@ -119,8 +115,7 @@ export default function HomePage() {
       </h2>
       {!selectedBrand && !advancedFilters && (
         <div 
-          className="p-4 rounded mb-6 border"
-          style={{ backgroundColor: 'rgba(40, 138, 214, 0.05)', color: THEME.secondary, borderColor: 'rgba(40, 138, 214, 0.2)' }}
+          className="p-4 rounded mb-6 border bg-primary/5 text-secondary border-primary/20"
         >
           Khám phá các sản phẩm điện thoại, phụ kiện và nhiều ưu đãi Mùa hè hấp dẫn.
         </div>

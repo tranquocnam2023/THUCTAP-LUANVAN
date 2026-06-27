@@ -32,16 +32,16 @@ export default function Sidebar() {
               to={path}
               className={`group flex items-center justify-between px-4 py-3.5 rounded-md transition-all duration-200 font-semibold text-sm ${
                 isActive 
-                  ? 'bg-[rgba(40,138,214,0.08)] text-[#288ad6]' 
-                  : 'text-gray-700 hover:bg-[rgba(40,138,214,0.05)] hover:text-[#288ad6]'
+                  ? 'bg-primary/10 text-primary' 
+                  : 'text-gray-700 hover:bg-primary/5 hover:text-primary'
               }`}
             >
               <span className="transition-transform duration-200 group-hover:translate-x-0.5">{cat.name}</span>
               <ChevronRight 
                 className={`w-4 h-4 transition-all duration-200 ${
                   isActive 
-                    ? 'text-[#288ad6] translate-x-0.5' 
-                    : 'text-gray-300 group-hover:text-[#288ad6] group-hover:translate-x-0.5'
+                    ? 'text-primary translate-x-0.5' 
+                    : 'text-gray-300 group-hover:text-primary group-hover:translate-x-0.5'
                 }`} 
               />
             </Link>

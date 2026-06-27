@@ -1,5 +1,4 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import productsData from '../utils/products.json';
 import Breadcrumb from '../components/Breadcrumb';
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
@@ -7,15 +6,7 @@ import { productService } from '../services/productService';
 import api from '../services/api';
 import { Check, X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const THEME = {
-  primary: '#288ad6',
-  accent: '#ff9500',
-  secondary: '#0d5cb6',
-  background: '#f8f9fa',
-  border: '#e9ecef',
-  textDark: '#212529',
-  textGray: '#6c757d'
-};
+// Unused theme removed
 
 // Hàm phụ trợ phân loại màu sang mã HEX tương đương
 const getHexForColor = (colorName) => {
@@ -574,13 +565,13 @@ export default function ProductDetailPage() {
             <div className="sticky top-10 space-y-6">
               <div className="bg-white rounded-md border border-gray-100 p-8 space-y-8">
                 {product.isAvailable === false && (
-                  <div className="bg-[#FEECEB] border border-[#EE5D50]/30 rounded-md p-5 flex gap-3 items-start animate-in fade-in duration-200">
-                    <div className="w-8 h-8 rounded-full bg-[#EE5D50]/15 text-[#EE5D50] flex items-center justify-center font-bold flex-shrink-0">
+                  <div className="bg-admin-danger/10 border border-admin-danger/30 rounded-md p-5 flex gap-3 items-start animate-in fade-in duration-200">
+                    <div className="w-8 h-8 rounded-full bg-admin-danger/15 text-admin-danger flex items-center justify-center font-bold flex-shrink-0">
                       <X size={20} />
                     </div>
                     <div>
-                      <h5 className="font-bold text-[#EE5D50] text-sm">Sản phẩm tạm ngưng kinh doanh</h5>
-                      <p className="text-xs text-[#2B3674]/80 mt-1">
+                      <h5 className="font-bold text-admin-danger text-sm">Sản phẩm tạm ngưng kinh doanh</h5>
+                      <p className="text-xs text-admin-text-main/80 mt-1">
                         Danh mục của sản phẩm này hiện đang tạm ngưng hoạt động. Quý khách vui lòng tham khảo các dòng sản phẩm khác.
                       </p>
                     </div>

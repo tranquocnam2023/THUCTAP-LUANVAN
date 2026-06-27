@@ -82,29 +82,29 @@ export default function AdminPage() {
   const SidebarItem = ({ id, icon: Icon, label }) => (
     <button
       onClick={() => setActiveAdminTab(id)}
-      className={`w-full flex items-center px-4 py-3 rounded-md transition-all duration-200 font-bold ${activeAdminTab === id
-        ? 'bg-[#24303d] text-[#4318FF] border-l-4 border-[#4318FF]'
-        : 'text-[#98a6ad] hover:bg-[#24303d] hover:text-[#ffffff]'
+      className={`w-full flex items-center px-4 py-3 rounded-md transition-all duration-200 font-bold cursor-pointer ${activeAdminTab === id
+        ? 'bg-admin-sidebar-hover text-primary border-l-4 border-primary'
+        : 'text-admin-sidebar-text hover:bg-admin-sidebar-hover hover:text-white'
         }`}
     >
-      <Icon className={`w-5 h-5 mr-3 ${activeAdminTab === id ? 'text-[#4318FF]' : 'text-[#98a6ad]'}`} />
+      <Icon className={`w-5 h-5 mr-3 ${activeAdminTab === id ? 'text-primary' : 'text-admin-sidebar-text'}`} />
       <span className="text-sm">{label}</span>
     </button>
   );
 
   return (
-    <div className="flex h-screen bg-[#F4F7FE] overflow-hidden font-sans">
+    <div className="flex h-screen bg-admin-bg overflow-hidden font-sans">
       {/* Admin Sidebar */}
-      <aside className="w-64 bg-[#2f3e4e] flex flex-col hidden md:flex shrink-0 border-r border-[#3e4d5e]">
-        <div className="h-20 flex items-center px-8 border-b border-[#3e4d5e]">
-          <div className="w-8 h-8 bg-[#4318FF] rounded-md flex items-center justify-center mr-3">
-            <span className="font-bold text-lg text-[#ffffff]">AD</span>
+      <aside className="w-64 bg-admin-sidebar-bg flex flex-col hidden md:flex shrink-0 border-r border-admin-sidebar-border">
+        <div className="h-20 flex items-center px-8 border-b border-admin-sidebar-border">
+          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center mr-3">
+            <span className="font-bold text-lg text-white">AD</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#ffffff] uppercase">PhoneShop</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white uppercase">PhoneShop</h1>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          <p className="px-4 text-[12px] font-bold text-[#798897] uppercase tracking-widest mb-4">Chính</p>
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto no-scrollbar">
+          <p className="px-4 text-[12px] font-bold text-admin-sidebar-text/60 uppercase tracking-widest mb-4">Chính</p>
           <SidebarItem id="dashboard" icon={Layout} label="Bảng thống kê" />
           <SidebarItem id="categories" icon={FolderTree} label="Danh mục" />
           <SidebarItem id="brands" icon={Star} label="Thương hiệu" />
@@ -116,22 +116,22 @@ export default function AdminPage() {
           <SidebarItem id="promotions" icon={Ticket} label="Khuyến mãi" />
 
           <div className="pt-6">
-            <p className="px-4 text-[12px] font-bold text-[#798897] uppercase tracking-widest mb-4">Hệ thống</p>
+            <p className="px-4 text-[12px] font-bold text-admin-sidebar-text/60 uppercase tracking-widest mb-4">Hệ thống</p>
             <SidebarItem id="settings" icon={Settings} label="Cài đặt" />
           </div>
         </nav>
 
-        <div className="p-4 bg-[#2f3e4e] border-t border-[#3e4d5e] space-y-2">
+        <div className="p-4 bg-admin-sidebar-bg border-t border-admin-sidebar-border space-y-2">
           <Link
             to="/"
-            className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#98a6ad] hover:text-[#38bdf8] hover:bg-[#24303d] transition-colors rounded-md group"
+            className="w-full flex items-center px-4 py-3 text-sm font-bold text-admin-sidebar-text hover:text-primary hover:bg-admin-sidebar-hover transition-colors rounded-md group"
           >
             <LayoutGrid className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
             Xem cửa hàng
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center px-4 py-3 text-sm font-bold text-[#98a6ad] hover:text-[#EE5D50] hover:bg-red-500/10 transition-colors rounded-md group"
+            className="w-full flex items-center px-4 py-3 text-sm font-bold text-admin-sidebar-text hover:text-admin-danger hover:bg-red-500/10 transition-colors rounded-md group cursor-pointer"
           >
             <LogOut className="w-5 h-5 mr-3 group-hover:translate-x-1 transition-transform" />
             Đăng xuất
@@ -140,29 +140,26 @@ export default function AdminPage() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navigation Bar */}
-        <header className="h-20 bg-[#F4F7FE] flex items-center justify-between px-8 shrink-0 z-20 mt-4">
-          <div className="flex flex-col justify-center">
-            <div className="flex items-center">
-              <button className="p-2 -ml-2 text-[#A3AED0] hover:text-[#2B3674] md:hidden">
-                <Layout size={24} />
-              </button>
-              <p className="text-sm font-medium text-[#A3AED0]">Trang chủ / {getHeaderTitle()}</p>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Admin Header */}
+        <header className="h-20 bg-white border-b border-admin-border flex items-center justify-between px-8 shrink-0">
+          <div className="flex items-center">
+            <div>
+              <p className="text-sm font-medium text-admin-text-muted">Trang chủ / {getHeaderTitle()}</p>
             </div>
           </div>
 
-          <div className="flex items-center bg-[#FFFFFF] rounded-full px-4 py-2 border border-[#E0E5F2]">
-            <div className="flex items-center bg-[#F4F7FE] rounded-full px-4 py-2 mr-4">
-              <svg className="w-4 h-4 text-[#2B3674]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-              <input type="text" placeholder="Tìm kiếm..." className="bg-transparent border-none outline-none text-sm ml-2 w-32 placeholder-[#A3AED0] text-[#2B3674]" />
+          <div className="flex items-center bg-white rounded-full px-4 py-2 border border-admin-border">
+            <div className="flex items-center bg-admin-bg rounded-full px-4 py-2 mr-4">
+              <svg className="w-4 h-4 text-admin-text-main" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <input type="text" placeholder="Tìm kiếm..." className="bg-transparent border-none outline-none text-sm ml-2 w-32 placeholder-admin-text-muted text-admin-text-main" />
             </div>
-            <button className="relative p-2 text-[#A3AED0] hover:text-[#4318FF] transition-colors mr-2">
+            <button className="relative p-2 text-admin-text-muted hover:text-primary transition-colors mr-2">
               <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-[#EE5D50] rounded-full border-2 border-[#FFFFFF]"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-admin-danger rounded-full border-2 border-white"></span>
             </button>
             <div className="flex items-center gap-3 ml-2 cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-[#4318FF] text-[#FFFFFF] flex items-center justify-center font-bold text-sm">
+              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
                 {user?.username?.charAt(0) || 'A'}
               </div>
             </div>
@@ -170,7 +167,7 @@ export default function AdminPage() {
         </header>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 overflow-y-auto px-8 pb-8 pt-4 bg-[#F4F7FE] scroll-smooth">
+        <main className="flex-1 overflow-y-auto px-8 pb-8 pt-4 bg-admin-bg scroll-smooth">
           {activeAdminTab === 'products' && (
             <AdminProducts
               onCreate={() => setActiveAdminTab('create_product')}

@@ -277,16 +277,16 @@ export default function AdminCreateProduct({ onBack }) {
     <div className="flex flex-col gap-6 font-sans">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 bg-white rounded-full text-[#A3AED0] hover:text-[#2B3674] transition-colors">
+          <button onClick={onBack} className="p-2 bg-white rounded-full text-admin-text-muted hover:text-admin-text-main transition-colors">
             <ArrowLeft size={20} />
           </button>
-          <h2 className="text-2xl font-bold text-[#2B3674]">Thêm sản phẩm mới</h2>
+          <h2 className="text-2xl font-bold text-admin-text-main">Thêm sản phẩm mới</h2>
         </div>
         <div className="flex gap-3">
           <button 
             onClick={handleSaveAndNew}
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#4318FF] text-white rounded-md font-bold hover:bg-[#3911D1] transition-colors disabled:opacity-70"
+            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-md font-bold hover:bg-admin-primary-hover transition-colors disabled:opacity-70"
           >
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
             Lưu và thêm mới
@@ -297,69 +297,69 @@ export default function AdminCreateProduct({ onBack }) {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 flex flex-col gap-6">
           {/* A. Thông tin cơ bản */}
-          <div className="bg-white p-6 rounded-md border border-[#E0E5F2]">
-            <h3 className="text-lg font-bold text-[#2B3674] mb-4">A. Thông tin cơ bản</h3>
+          <div className="bg-white p-6 rounded-md border border-admin-border">
+            <h3 className="text-lg font-bold text-admin-text-main mb-4">A. Thông tin cơ bản</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Tên sản phẩm *</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Tên sản phẩm *</label>
                 <input
                   type="text" required
                   value={formData.name}
                   onChange={handleNameChange}
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
+                  className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main"
                   placeholder="Nhập tên sản phẩm..."
                 />
               </div>
               <div className="md:col-span-1">
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Đường dẫn (Slug)</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Đường dẫn (Slug)</label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({...formData, slug: e.target.value})}
-                  className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-md outline-none text-[#A3AED0]"
+                  className="w-full px-4 py-3 border border-admin-border bg-admin-bg rounded-md outline-none text-admin-text-muted"
                   placeholder="tu-dong-tao-tu-ten-san-pham"
                 />
               </div>
               <div className="md:col-span-1">
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Mã (ProductCode)</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Mã (ProductCode)</label>
                 <input
                   type="text"
                   value={formData.productCode}
                   onChange={(e) => setFormData({...formData, productCode: e.target.value.toUpperCase().replace(/\s+/g, '')})}
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md outline-none text-[#2B3674] uppercase focus:border-[#4318FF]"
+                  className="w-full px-4 py-3 border border-admin-border rounded-md outline-none text-admin-text-main uppercase focus:border-primary"
                   placeholder="Để trống tự tạo..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Danh mục *</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Danh mục *</label>
                 <select
                   value={formData.categoryId}
                   onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-white"
+                  className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main bg-white"
                 >
                   <option value="">-- Chọn danh mục --</option>
                   {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Thương hiệu</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Thương hiệu</label>
                 <select
                   value={formData.brandId}
                   disabled={!!queryBrandId}
                   onChange={(e) => setFormData({...formData, brandId: e.target.value})}
-                  className={`w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-white ${queryBrandId ? 'opacity-65 cursor-not-allowed bg-gray-50' : ''}`}
+                  className={`w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main bg-white ${queryBrandId ? 'opacity-65 cursor-not-allowed bg-gray-50' : ''}`}
                 >
                   <option value="">-- Chọn thương hiệu --</option>
                   {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Mô tả chi tiết</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Mô tả chi tiết</label>
                 <textarea
                   rows="4"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
+                  className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main"
                   placeholder="Nhập mô tả sản phẩm..."
                 />
               </div>
@@ -367,37 +367,37 @@ export default function AdminCreateProduct({ onBack }) {
           </div>
 
           {/* D. Biến thể */}
-          <div className="bg-white p-6 rounded-md border border-[#E0E5F2]">
+          <div className="bg-white p-6 rounded-md border border-admin-border">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-[#2B3674]">D. Biến thể sản phẩm (Tùy chọn)</h3>
+              <h3 className="text-lg font-bold text-admin-text-main">D. Biến thể sản phẩm (Tùy chọn)</h3>
               <button 
                 onClick={addVariant}
-                className="flex items-center gap-1 px-3 py-1.5 bg-[#F4F7FE] text-[#4318FF] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 bg-admin-bg text-primary rounded-md text-sm font-bold hover:bg-admin-border transition-colors"
               >
                 <Plus size={16} /> Thêm biến thể
               </button>
             </div>
             {formData.variants.length > 0 && (
-              <div className="mb-4 p-4 bg-[#F4F7FE] rounded-md border border-[#E0E5F2]">
-                <h4 className="text-sm font-bold text-[#2B3674] mb-3">Cấu hình Thuộc tính</h4>
+              <div className="mb-4 p-4 bg-admin-bg rounded-md border border-admin-border">
+                <h4 className="text-sm font-bold text-admin-text-main mb-3">Cấu hình Thuộc tính</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#2B3674] mb-1">Thuộc tính 1 *</label>
+                    <label className="block text-xs font-bold text-admin-text-main mb-1">Thuộc tính 1 *</label>
                     <input
                       type="text"
                       value={attr1Name}
                       onChange={(e) => setAttr1Name(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
+                      className="w-full px-3 py-2 border border-admin-border rounded-md text-sm outline-none focus:border-primary"
                       placeholder="VD: Màu sắc"
                     />
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-bold text-[#2B3674]">Thuộc tính 2</label>
+                      <label className="block text-xs font-bold text-admin-text-main">Thuộc tính 2</label>
                       {!hasAttr2 ? (
-                        <button onClick={() => setHasAttr2(true)} className="text-[10px] text-[#4318FF] font-bold">+ Thêm</button>
+                        <button onClick={() => setHasAttr2(true)} className="text-[10px] text-primary font-bold">+ Thêm</button>
                       ) : (
-                        <button onClick={() => setHasAttr2(false)} className="text-[10px] text-[#EE5D50] font-bold">Xóa</button>
+                        <button onClick={() => setHasAttr2(false)} className="text-[10px] text-admin-danger font-bold">Xóa</button>
                       )}
                     </div>
                     {hasAttr2 && (
@@ -405,42 +405,42 @@ export default function AdminCreateProduct({ onBack }) {
                         type="text"
                         value={attr2Name}
                         onChange={(e) => setAttr2Name(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
+                        className="w-full px-3 py-2 border border-admin-border rounded-md text-sm outline-none focus:border-primary"
                         placeholder="VD: Phiên bản"
                       />
                     )}
                   </div>
                 </div>
                 {hasAttr2 && attr1Name.trim().toLowerCase() === attr2Name.trim().toLowerCase() && (
-                  <p className="text-xs text-[#EE5D50] font-bold mt-2">Trùng lặp thuộc tính!</p>
+                  <p className="text-xs text-admin-danger font-bold mt-2">Trùng lặp thuộc tính!</p>
                 )}
               </div>
             )}
 
             {formData.variants.length === 0 ? (
-              <p className="text-sm text-[#A3AED0] italic">Chưa có biến thể nào. Sản phẩm sẽ sử dụng giá và tồn kho mặc định.</p>
+              <p className="text-sm text-admin-text-muted italic">Chưa có biến thể nào. Sản phẩm sẽ sử dụng giá và tồn kho mặc định.</p>
             ) : (
               <div className="space-y-4">
                 {formData.variants.map((variant, vIdx) => (
-                  <div key={vIdx} className="p-4 border border-[#E0E5F2] rounded-md bg-white relative hover:border-[#4318FF]/50 transition-colors">
+                  <div key={vIdx} className="p-4 border border-admin-border rounded-md bg-white relative hover:border-primary/50 transition-colors">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 flex flex-col gap-4">
                         {/* Hàng 1 */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                           <div className="lg:col-span-2">
-                            <label className="block text-xs font-bold text-[#2B3674] mb-1">Tên biến thể (SKU) *</label>
+                            <label className="block text-xs font-bold text-admin-text-main mb-1">Tên biến thể (SKU) *</label>
                             <input
                               type="text"
                               value={variant.name}
                               onChange={(e) => updateVariant(vIdx, 'name', e.target.value)}
-                              className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
+                              className="w-full px-3 py-2 border border-admin-border rounded-md text-sm outline-none focus:border-primary"
                               placeholder="VD: Đen - 256GB"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-[#2B3674] mb-1">{attr1Name || 'Thuộc tính 1'} *</label>
+                            <label className="block text-xs font-bold text-admin-text-main mb-1">{attr1Name || 'Thuộc tính 1'} *</label>
                             {(attr1Name || '').trim().toLowerCase() === 'dung lượng ram - rom' ? (
-                              <div className="flex items-center gap-1 border border-[#E0E5F2] rounded-md px-2 bg-white h-9 focus-within:border-[#4318FF] focus-within:ring-1 focus-within:ring-[#4318FF] w-fit">
+                              <div className="flex items-center gap-1 border border-admin-border rounded-md px-2 bg-white h-9 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary w-fit">
                                 <input
                                   type="number"
                                   placeholder="RAM"
@@ -470,16 +470,16 @@ export default function AdminCreateProduct({ onBack }) {
                                 type="text"
                                 value={variant.attr1Value}
                                 onChange={(e) => updateVariant(vIdx, 'attr1Value', e.target.value)}
-                                className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
+                                className="w-full px-3 py-2 border border-admin-border rounded-md text-sm outline-none focus:border-primary"
                                 placeholder="VD: Đen"
                               />
                             )}
                           </div>
                           {hasAttr2 && (
                             <div>
-                              <label className="block text-xs font-bold text-[#2B3674] mb-1">{attr2Name || 'Thuộc tính 2'} *</label>
+                              <label className="block text-xs font-bold text-admin-text-main mb-1">{attr2Name || 'Thuộc tính 2'} *</label>
                               {(attr2Name || '').trim().toLowerCase() === 'dung lượng ram - rom' ? (
-                                <div className="flex items-center gap-1 border border-[#E0E5F2] rounded-md px-2 bg-white h-9 focus-within:border-[#4318FF] focus-within:ring-1 focus-within:ring-[#4318FF] w-fit">
+                                <div className="flex items-center gap-1 border border-admin-border rounded-md px-2 bg-white h-9 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary w-fit">
                                   <input
                                     type="number"
                                     placeholder="RAM"
@@ -509,18 +509,18 @@ export default function AdminCreateProduct({ onBack }) {
                                   type="text"
                                   value={variant.attr2Value}
                                   onChange={(e) => updateVariant(vIdx, 'attr2Value', e.target.value)}
-                                  className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
+                                  className="w-full px-3 py-2 border border-admin-border rounded-md text-sm outline-none focus:border-primary"
                                   placeholder="VD: 256GB"
                                 />
                               )}
                             </div>
                           )}
                           <div>
-                            <label className="block text-xs font-bold text-[#2B3674] mb-1">Giá bán (VNĐ)</label>
+                            <label className="block text-xs font-bold text-admin-text-main mb-1">Giá bán (VNĐ)</label>
                             <PriceInput
                               value={variant.price}
                               onChange={(val) => updateVariant(vIdx, 'price', val)}
-                              className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
+                              className="w-full px-3 py-2 border border-admin-border rounded-md text-sm outline-none focus:border-primary"
                               placeholder="Để trống = Giá SP"
                             />
                           </div>
@@ -529,19 +529,19 @@ export default function AdminCreateProduct({ onBack }) {
                         {/* Hàng 2 */}
                         <div className="flex flex-wrap items-end gap-6 border-t border-gray-100 pt-3">
                           <div>
-                            <label className="block text-xs font-bold text-[#2B3674] mb-1">Hình ảnh biến thể</label>
+                            <label className="block text-xs font-bold text-admin-text-main mb-1">Hình ảnh biến thể</label>
                             <div className="flex items-center gap-2">
-                              <div className="w-10 h-10 rounded-md border border-[#E0E5F2] flex items-center justify-center bg-gray-50 overflow-hidden shrink-0">
+                              <div className="w-10 h-10 rounded-md border border-admin-border flex items-center justify-center bg-gray-50 overflow-hidden shrink-0">
                                 {variant.imageId ? (
                                   <img src={variant.imageId} alt="Variant" className="w-full h-full object-contain" />
                                 ) : (
-                                  <ImageIcon className="text-[#A3AED0]" size={16} />
+                                  <ImageIcon className="text-admin-text-muted" size={16} />
                                 )}
                               </div>
                               <div className="relative">
                                 <button
                                   type="button"
-                                  className="px-2.5 py-1.5 bg-[#F4F7FE] text-[#4318FF] hover:bg-[#E0E5F2] text-xs font-bold rounded-md transition-colors whitespace-nowrap"
+                                  className="px-2.5 py-1.5 bg-admin-bg text-primary hover:bg-admin-border text-xs font-bold rounded-md transition-colors whitespace-nowrap"
                                 >
                                   Tải ảnh
                                 </button>
@@ -573,7 +573,7 @@ export default function AdminCreateProduct({ onBack }) {
                                 <button
                                   type="button"
                                   onClick={() => updateVariant(vIdx, 'imageId', '')}
-                                  className="text-[#EE5D50] hover:text-red-700 text-xs font-bold"
+                                  className="text-admin-danger hover:text-red-700 text-xs font-bold"
                                 >
                                   Xóa
                                 </button>
@@ -582,12 +582,12 @@ export default function AdminCreateProduct({ onBack }) {
                           </div>
 
                           <div className="w-32">
-                            <label className="block text-xs font-bold text-[#2B3674] mb-1">Tồn kho</label>
+                            <label className="block text-xs font-bold text-admin-text-main mb-1">Tồn kho</label>
                             <input
                               type="number"
                               value={variant.totalStock}
                               onChange={(e) => updateVariant(vIdx, 'totalStock', e.target.value)}
-                              className="w-full px-3 py-2 border border-[#E0E5F2] rounded-md text-sm outline-none focus:border-[#4318FF]"
+                              className="w-full px-3 py-2 border border-admin-border rounded-md text-sm outline-none focus:border-primary"
                             />
                           </div>
 
@@ -597,9 +597,9 @@ export default function AdminCreateProduct({ onBack }) {
                                 type="checkbox"
                                 checked={variant.isActive}
                                 onChange={(e) => updateVariant(vIdx, 'isActive', e.target.checked)}
-                                className="w-4 h-4 text-[#4318FF] border-[#E0E5F2] rounded focus:ring-[#4318FF]"
+                                className="w-4 h-4 text-primary border-admin-border rounded focus:ring-primary"
                               />
-                              <span className="text-xs font-bold text-[#2B3674]">Đang bán</span>
+                              <span className="text-xs font-bold text-admin-text-main">Đang bán</span>
                             </label>
                           </div>
 
@@ -617,7 +617,7 @@ export default function AdminCreateProduct({ onBack }) {
                       </div>
                       <button 
                         onClick={() => removeVariant(vIdx)}
-                        className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-red-50 rounded-md transition-colors mt-5"
+                        className="p-2 text-admin-text-muted hover:text-admin-danger hover:bg-red-50 rounded-md transition-colors mt-5"
                         title="Xóa biến thể"
                       >
                         <Trash2 size={18} />
@@ -632,78 +632,78 @@ export default function AdminCreateProduct({ onBack }) {
 
         <div className="flex flex-col gap-6">
           {/* B. Giá cả */}
-          <div className="bg-white p-6 rounded-md border border-[#E0E5F2]">
-            <h3 className="text-lg font-bold text-[#2B3674] mb-4">B. Giá cả cơ bản</h3>
+          <div className="bg-white p-6 rounded-md border border-admin-border">
+            <h3 className="text-lg font-bold text-admin-text-main mb-4">B. Giá cả cơ bản</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá khuyến mãi / Giá bán *</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Giá khuyến mãi / Giá bán *</label>
                 <div className="relative">
                   <PriceInput
                     value={formData.basePrice}
                     onChange={(val) => setFormData({...formData, basePrice: val})}
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674]"
+                    className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary outline-none text-admin-text-main"
                     required={true}
                   />
-                  <span className="absolute right-4 top-3.5 text-[#A3AED0] font-bold text-sm">VNĐ</span>
+                  <span className="absolute right-4 top-3.5 text-admin-text-muted font-bold text-sm">VNĐ</span>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá gốc</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Giá gốc</label>
                 <div className="relative">
                   <PriceInput
                     value={formData.originalPrice}
                     onChange={(val) => setFormData({...formData, originalPrice: val})}
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674]"
+                    className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary outline-none text-admin-text-main"
                   />
-                  <span className="absolute right-4 top-3.5 text-[#A3AED0] font-bold text-sm">VNĐ</span>
+                  <span className="absolute right-4 top-3.5 text-admin-text-muted font-bold text-sm">VNĐ</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* C. Trạng thái */}
-          <div className="bg-white p-6 rounded-md border border-[#E0E5F2]">
-            <h3 className="text-lg font-bold text-[#2B3674] mb-4">C. Trạng thái hiển thị</h3>
+          <div className="bg-white p-6 rounded-md border border-admin-border">
+            <h3 className="text-lg font-bold text-admin-text-main mb-4">C. Trạng thái hiển thị</h3>
             <div className="space-y-4">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                  className="w-5 h-5 text-[#4318FF] border-[#E0E5F2] rounded focus:ring-[#4318FF]"
+                  className="w-5 h-5 text-primary border-admin-border rounded focus:ring-primary"
                 />
-                <span className="text-sm font-bold text-[#2B3674]">Đang bán (Active)</span>
+                <span className="text-sm font-bold text-admin-text-main">Đang bán (Active)</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.isFeatured}
                   onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
-                  className="w-5 h-5 text-[#FFB547] border-[#E0E5F2] rounded focus:ring-[#FFB547]"
+                  className="w-5 h-5 text-warning border-admin-border rounded focus:ring-warning"
                 />
-                <span className="text-sm font-bold text-[#2B3674]">Sản phẩm nổi bật</span>
+                <span className="text-sm font-bold text-admin-text-main">Sản phẩm nổi bật</span>
               </label>
             </div>
           </div>
 
           {/* E. Hình ảnh */}
-          <div className="bg-white p-6 rounded-md border border-[#E0E5F2]">
-            <h3 className="text-lg font-bold text-[#2B3674] mb-4">E. Hình ảnh sản phẩm</h3>
-            <div className="border-2 border-dashed border-[#E0E5F2] rounded-md p-6 flex flex-col items-center justify-center bg-[#F4F7FE]/30 relative hover:border-[#4318FF] transition-colors mb-4">
+          <div className="bg-white p-6 rounded-md border border-admin-border">
+            <h3 className="text-lg font-bold text-admin-text-main mb-4">E. Hình ảnh sản phẩm</h3>
+            <div className="border-2 border-dashed border-admin-border rounded-md p-6 flex flex-col items-center justify-center bg-admin-bg/30 relative hover:border-primary transition-colors mb-4">
               <input
                 type="file" multiple accept=".jpg,.jpeg,.png,.webp,.svg"
                 onChange={handleImageUpload}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
               {uploading ? (
-                <div className="flex flex-col items-center gap-2 text-[#4318FF]">
+                <div className="flex flex-col items-center gap-2 text-primary">
                   <Loader2 size={32} className="animate-spin" />
                   <span className="text-sm font-bold">Đang tải...</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center text-[#A3AED0]">
+                <div className="flex flex-col items-center text-admin-text-muted">
                   <UploadCloud size={32} className="mb-2" />
-                  <span className="text-sm font-bold text-[#2B3674]">Tải ảnh từ máy tính</span>
+                  <span className="text-sm font-bold text-admin-text-main">Tải ảnh từ máy tính</span>
                   <span className="text-xs mt-1">Hỗ trợ nhiều ảnh</span>
                 </div>
               )}
@@ -713,7 +713,7 @@ export default function AdminCreateProduct({ onBack }) {
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-[#E0E5F2] text-[10px] text-[#A3AED0] uppercase">
+                    <tr className="border-b border-admin-border text-[10px] text-admin-text-muted uppercase">
                       <th className="pb-2">Hình ảnh</th>
                       <th className="pb-2">Preview</th>
                       <th className="pb-2 text-center w-24">Ảnh đại diện</th>
@@ -723,8 +723,8 @@ export default function AdminCreateProduct({ onBack }) {
                   </thead>
                   <tbody>
                     {formData.images.map((img, idx) => (
-                      <tr key={idx} className="border-b border-[#E0E5F2] last:border-0">
-                        <td className="py-2 text-xs text-[#2B3674] max-w-[120px] truncate" title={img.url}>
+                      <tr key={idx} className="border-b border-admin-border last:border-0">
+                        <td className="py-2 text-xs text-admin-text-main max-w-[120px] truncate" title={img.url}>
                           {img.url.split('/').pop()}
                         </td>
                         <td className="py-2">
@@ -736,7 +736,7 @@ export default function AdminCreateProduct({ onBack }) {
                             name="mainImage" 
                             checked={img.isMain} 
                             onChange={() => setMainImage(idx)}
-                            className="w-4 h-4 text-[#4318FF] cursor-pointer"
+                            className="w-4 h-4 text-primary cursor-pointer"
                           />
                         </td>
                         <td className="py-2 text-center">
@@ -744,11 +744,11 @@ export default function AdminCreateProduct({ onBack }) {
                             type="number" 
                             value={img.order} 
                             onChange={(e) => updateImageOrder(idx, e.target.value)}
-                            className="w-12 px-1 py-1 text-center border border-[#E0E5F2] rounded outline-none focus:border-[#4318FF] text-xs"
+                            className="w-12 px-1 py-1 text-center border border-admin-border rounded outline-none focus:border-primary text-xs"
                           />
                         </td>
                         <td className="py-2 text-right">
-                          <button onClick={() => removeImage(idx)} className="text-[#A3AED0] hover:text-[#EE5D50] p-1">
+                          <button onClick={() => removeImage(idx)} className="text-admin-text-muted hover:text-admin-danger p-1">
                             <Trash2 size={14} />
                           </button>
                         </td>

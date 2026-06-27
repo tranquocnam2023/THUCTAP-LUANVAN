@@ -6,15 +6,15 @@ import { usePagination } from '../hooks/usePagination';
 import { useFormat } from '../hooks/useFormat';
 
 const CUSTOMER_TABS = [
-  { id: 'all', name: 'Tất cả', count: 0, icon: Users, color: 'text-[#A3AED0]', bgColor: 'bg-[#F4F7FE]' },
-  { id: 'User', name: 'Khách hàng', count: 0, icon: UserCheck, color: 'text-[#01B574]', bgColor: 'bg-[#01B574]/10' },
-  { id: 'Admin', name: 'Quản trị viên', count: 0, icon: Award, color: 'text-[#4318FF]', bgColor: 'bg-[#4318FF]/10' },
+  { id: 'all', name: 'Tất cả', count: 0, icon: Users, color: 'text-admin-text-muted', bgColor: 'bg-admin-bg' },
+  { id: 'User', name: 'Khách hàng', count: 0, icon: UserCheck, color: 'text-success', bgColor: 'bg-success/10' },
+  { id: 'Admin', name: 'Quản trị viên', count: 0, icon: Award, color: 'text-primary', bgColor: 'bg-primary/10' },
 ];
 
 const CUSTOMER_STATS_CONFIG = [
-  { label: 'Tổng người dùng', countKey: 'all', icon: Users, bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#4318FF' },
-  { label: 'Khách hàng (User)', countKey: 'User', icon: UserCheck, bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#01B574' },
-  { label: 'Quản trị viên (Admin)', countKey: 'Admin', icon: Award, bgColor: '#FFFFFF', textColor: '#2B3674', iconColor: '#4318FF' },
+  { label: 'Tổng người dùng', countKey: 'all', icon: Users, bgColor: '#FFFFFF', textColor: 'var(--color-admin-text-main)', iconColor: 'var(--color-primary)' },
+  { label: 'Khách hàng (User)', countKey: 'User', icon: UserCheck, bgColor: '#FFFFFF', textColor: 'var(--color-admin-text-main)', iconColor: 'var(--color-success)' },
+  { label: 'Quản trị viên (Admin)', countKey: 'Admin', icon: Award, bgColor: '#FFFFFF', textColor: 'var(--color-admin-text-main)', iconColor: 'var(--color-primary)' },
 ];
 
 export default function AdminCustomers() {
@@ -126,9 +126,9 @@ export default function AdminCustomers() {
 
   const getRoleBadgeStyle = (role) => {
     switch (role) {
-      case 'Admin': return 'bg-[#4318FF]/10 text-[#4318FF] border border-[#4318FF]/20';
-      case 'User': return 'bg-[#01B574]/10 text-[#01B574] border border-[#01B574]/20';
-      default: return 'bg-[#F4F7FE] text-[#A3AED0]';
+      case 'Admin': return 'bg-primary/10 text-primary border border-primary/20';
+      case 'User': return 'bg-success/10 text-success border border-success/20';
+      default: return 'bg-admin-bg text-admin-text-muted';
     }
   };
 
@@ -137,25 +137,25 @@ export default function AdminCustomers() {
       {/* Header & Search */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý khách hàng</h2>
-          <p className="text-sm text-[#A3AED0] font-medium mt-1">Theo dõi thông tin, phân quyền và trạng thái hoạt động của tài khoản người dùng</p>
+          <h2 className="text-2xl font-bold text-admin-text-main">Quản lý khách hàng</h2>
+          <p className="text-sm text-admin-text-muted font-medium mt-1">Theo dõi thông tin, phân quyền và trạng thái hoạt động của tài khoản người dùng</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <div className="relative group w-full md:w-80">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#A3AED0] group-focus-within:text-[#4318FF] transition-colors">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-admin-text-muted group-focus-within:text-primary transition-colors">
               <Search size={18} />
             </div>
             <input
               type="text"
               placeholder="Tìm username, email, mã người dùng..."
-              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
+              className="w-full pl-11 pr-4 py-3 border border-admin-border rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-medium text-admin-text-main placeholder-admin-text-muted"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button 
             onClick={handleOpenModal}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-md font-bold hover:bg-admin-primary-hover transition-all active:scale-95 whitespace-nowrap"
           >
             <UserPlus size={18} />
             <span>Thêm tài khoản</span>
@@ -171,17 +171,17 @@ export default function AdminCustomers() {
           return (
             <div 
               key={i} 
-              className="p-5 rounded-md transition-all flex items-center justify-between h-28 bg-[#FFFFFF] border border-[#E0E5F2]"
+              className="p-5 rounded-md transition-all flex items-center justify-between h-28 bg-white border border-admin-border"
             >
               <div className="flex flex-col">
-                <p className="text-[12px] font-bold text-[#A3AED0] mb-1">
+                <p className="text-[12px] font-bold text-admin-text-muted mb-1">
                   {item.label}
                 </p>
-                <h3 className="text-2xl font-bold text-[#2B3674] leading-none">
+                <h3 className="text-2xl font-bold text-admin-text-main leading-none">
                   {count.toLocaleString('vi-VN')}
                 </h3>
               </div>
-              <div className="w-14 h-14 rounded-full bg-[#F4F7FE] flex items-center justify-center flex-shrink-0">
+              <div className="w-14 h-14 rounded-full bg-admin-bg flex items-center justify-center flex-shrink-0">
                 <Icon size={24} style={{ color: item.iconColor }} />
               </div>
             </div>
@@ -201,13 +201,13 @@ export default function AdminCustomers() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center px-6 py-3 rounded-md text-sm font-bold transition-all whitespace-nowrap border ${
                 isActive 
-                ? 'bg-[#4318FF] text-[#FFFFFF] border-[#4318FF] shadow-md scale-[1.02]' 
-                : 'bg-[#FFFFFF] text-[#A3AED0] border-[#E0E5F2] hover:border-[#4318FF] hover:text-[#4318FF]'
+                ? 'bg-primary text-white border-primary shadow-md scale-[1.02]' 
+                : 'bg-white text-admin-text-muted border-admin-border hover:border-primary hover:text-primary'
               }`}
             >
-              {Icon && <Icon className={`w-4 h-4 mr-3 ${isActive ? 'text-[#FFFFFF]' : tab.color}`} />}
+              {Icon && <Icon className={`w-4 h-4 mr-3 ${isActive ? 'text-white' : tab.color}`} />}
               {tab.name}
-              <span className={`ml-3 px-2 py-0.5 rounded-md text-[11px] font-bold tracking-tighter ${isActive ? 'bg-[#FFFFFF]/20 text-[#FFFFFF]' : 'bg-[#F4F7FE] text-[#2B3674]'}`}>
+              <span className={`ml-3 px-2 py-0.5 rounded-md text-[11px] font-bold tracking-tighter ${isActive ? 'bg-white/20 text-white' : 'bg-admin-bg text-admin-text-main'}`}>
                 {count}
               </span>
             </button>
@@ -216,58 +216,59 @@ export default function AdminCustomers() {
       </div>
 
       {/* Table */}
-      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8 border border-[#E0E5F2]">
+      <div className="bg-white rounded-md overflow-hidden mb-8 border border-admin-border">
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-[#4318FF] gap-3">
-              <div className="w-8 h-8 border-4 border-[#4318FF] border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex flex-col items-center justify-center py-20 text-primary gap-3">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
               <span className="font-bold text-sm">Đang tải danh sách người dùng...</span>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[#E0E5F2] bg-[#F4F7FE]/50">
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Tên người dùng</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Mã số tài khoản</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Email liên hệ</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Vai trò</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0]">Ngày đăng ký</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Trạng thái</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Thao tác</th>
+                <tr className="border-b border-admin-border bg-admin-bg/50">
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted">Tên người dùng</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted">Mã số tài khoản</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted">Thứ hạng</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted">Email liên hệ</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted text-center">Vai trò</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted">Ngày đăng ký</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted text-center">Trạng thái</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted text-center">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E0E5F2] text-sm">
+              <tbody className="divide-y divide-admin-border text-sm">
                 {paginatedCustomers.length > 0 ? (
                   paginatedCustomers.map((customer) => {
                     return (
-                      <tr key={customer.id} className="hover:bg-[#F4F7FE] transition-colors group">
+                      <tr key={customer.id} className="hover:bg-admin-bg transition-colors group">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#4318FF]/10 flex items-center justify-center text-[#4318FF] font-bold text-sm">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                               {(customer.username || 'U').charAt(0).toUpperCase()}
                             </div>
-                            <span className="font-bold text-[#2B3674]">{customer.username}</span>
+                            <span className="font-bold text-admin-text-main">{customer.username}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 font-medium text-[#A3AED0]">
+                        <td className="px-6 py-4 font-medium text-admin-text-muted">
                           <span className="text-xs">{customer.id}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-[13px] font-medium text-[#2B3674]">{customer.email}</span>
+                          <span className="text-[13px] font-medium text-admin-text-main">{customer.email}</span>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <span className={`px-3 py-1 rounded-full text-[11px] font-bold inline-block ${getRoleBadgeStyle(customer.role)}`}>
                             {customer.role}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-bold text-[#2B3674]">
+                        <td className="px-6 py-4 font-bold text-admin-text-main">
                           {formatDate(customer.createdAt)}
                         </td>
                         <td className="px-6 py-4 text-center">
                           <span className={`px-3 py-1 rounded-full text-[11px] font-bold inline-block ${
                             customer.isActive 
-                            ? 'bg-[#01B574]/10 text-[#01B574]' 
-                            : 'bg-[#EE5D50]/10 text-[#EE5D50]'
+                            ? 'bg-success/10 text-success' 
+                            : 'bg-admin-danger/10 text-admin-danger'
                           }`}>
                             {customer.isActive ? 'Hoạt động' : 'Đã khóa'}
                           </span>
@@ -278,8 +279,8 @@ export default function AdminCustomers() {
                               onClick={() => handleToggleStatus(customer.id, customer.username, customer.isActive)}
                               className={`p-2 rounded-md transition-all ${
                                 customer.isActive 
-                                ? 'text-[#EE5D50] hover:bg-[#FFF5F5]' 
-                                : 'text-[#01B574] hover:bg-[#E8F8F2]'
+                                ? 'text-admin-danger hover:bg-admin-danger/10' 
+                                : 'text-success hover:bg-success/10'
                               }`}
                               title={customer.isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"}
                             >
@@ -293,9 +294,9 @@ export default function AdminCustomers() {
                 ) : (
                   <tr>
                     <td colSpan="7" className="px-6 py-20 text-center">
-                      <div className="flex flex-col items-center justify-center text-[#A3AED0]">
+                      <div className="flex flex-col items-center justify-center text-admin-text-muted">
                         <Users size={64} strokeWidth={1} className="mb-4 opacity-50" />
-                        <p className="text-lg font-bold text-[#2B3674]">Không tìm thấy tài khoản người dùng nào</p>
+                        <p className="text-lg font-bold text-admin-text-main">Không tìm thấy tài khoản người dùng nào</p>
                         <p className="text-sm font-medium mt-1">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
                       </div>
                     </td>
@@ -308,15 +309,15 @@ export default function AdminCustomers() {
         
         {/* Pagination footer */}
         {!loading && filteredCustomers.length > 0 && (
-          <div className="px-6 py-4 border-t border-[#E0E5F2] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span className="text-sm font-bold text-[#A3AED0]">
+          <div className="px-6 py-4 border-t border-admin-border flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="text-sm font-bold text-admin-text-muted">
               Hiển thị {startIndex}-{endIndex} trên {totalItems} tài khoản
             </span>
             <div className="flex gap-2">
               <button 
                 onClick={prevPage}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-admin-bg text-admin-text-main rounded-md text-sm font-bold hover:bg-admin-border transition-colors disabled:opacity-50"
               >
                 TRƯỚC
               </button>
@@ -324,7 +325,7 @@ export default function AdminCustomers() {
                 <button
                   key={i}
                   onClick={() => goToPage(i + 1)}
-                  className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-[#4318FF] text-[#FFFFFF] shadow-md' : 'bg-transparent text-[#A3AED0] hover:bg-[#F4F7FE]'}`}
+                  className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-primary text-white shadow-md' : 'bg-transparent text-admin-text-muted hover:bg-admin-bg'}`}
                 >
                   {i + 1}
                 </button>
@@ -332,7 +333,7 @@ export default function AdminCustomers() {
               <button 
                 onClick={nextPage}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-admin-bg text-admin-text-main rounded-md text-sm font-bold hover:bg-admin-border transition-colors disabled:opacity-50"
               >
                 SAU
               </button>
@@ -344,24 +345,24 @@ export default function AdminCustomers() {
       {/* Add User Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-[#FFFFFF] rounded-md w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F4F7FE]">
-              <h3 className="text-xl font-bold text-[#2B3674] flex items-center gap-2">
-                <UserPlus size={22} className="text-[#4318FF]" />
+          <div className="bg-white rounded-md w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-admin-border flex justify-between items-center bg-admin-bg">
+              <h3 className="text-xl font-bold text-admin-text-main flex items-center gap-2">
+                <UserPlus size={22} className="text-primary" />
                 Tạo tài khoản mới
               </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-[#A3AED0] hover:text-[#EE5D50] hover:rotate-90 transition-all">
+              <button onClick={() => setIsModalOpen(false)} className="text-admin-text-muted hover:text-admin-danger hover:rotate-90 transition-all">
                 <X size={24} />
               </button>
             </div>
             
             <form onSubmit={handleCreateUser} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Tên đăng nhập (Username)</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Tên đăng nhập (Username)</label>
                 <input 
                   type="text" 
                   required
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                  className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main font-medium"
                   placeholder="Nhập tên tài khoản..."
                   value={formData.username}
                   onChange={(e) => setFormData({...formData, username: e.target.value})}
@@ -369,11 +370,11 @@ export default function AdminCustomers() {
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Email</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Email</label>
                 <input 
                   type="email" 
                   required
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                  className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main font-medium"
                   placeholder="example@gmail.com..."
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -381,19 +382,19 @@ export default function AdminCustomers() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-[#2B3674] mb-2">Mật khẩu</label>
+                <label className="block text-sm font-bold text-admin-text-main mb-2">Mật khẩu</label>
                 <input 
                   type="password" 
                   required
                   minLength={6}
-                  className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                  className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main font-medium"
                   placeholder="Tối thiểu 6 ký tự..."
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
               </div>
 
-              <div className="bg-[#FFF8ED] p-4 rounded-md border border-[#FFB547]/20 flex items-start gap-3 text-xs text-[#FFB547] font-medium">
+              <div className="bg-warning/10 p-4 rounded-md border border-warning/20 flex items-start gap-3 text-xs text-warning font-medium">
                 <ShieldAlert size={20} className="shrink-0" />
                 <p>Tài khoản được đăng ký tại đây mặc định sẽ có vai trò là <strong>Khách hàng (User)</strong> và được kích hoạt hoạt động ngay.</p>
               </div>
@@ -402,14 +403,14 @@ export default function AdminCustomers() {
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-md font-bold hover:bg-[#E0E5F2] transition-colors"
+                  className="px-6 py-3 bg-admin-bg text-admin-text-main rounded-md font-bold hover:bg-admin-border transition-colors"
                 >
                   Hủy
                 </button>
                 <button 
                   type="submit"
                   disabled={modalLoading}
-                  className="px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 disabled:opacity-50"
+                  className="px-6 py-3 bg-primary text-white rounded-md font-bold hover:bg-admin-primary-hover transition-all active:scale-95 disabled:opacity-50"
                 >
                   {modalLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
                 </button>

@@ -26,9 +26,9 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
   };
 
   const getLevelBadgeColor = (lvl) => {
-    if (lvl === 1) return 'bg-[#E0E5F2] text-[#2B3674]';
-    if (lvl === 2) return 'bg-[#EBF4FF] text-[#4318FF]';
-    return 'bg-[#D3F5E4] text-[#01B574]';
+    if (lvl === 1) return 'bg-admin-border text-admin-text-main';
+    if (lvl === 2) return 'bg-primary/10 text-primary';
+    return 'bg-success/10 text-success';
   };
 
   // Check if any ancestor is inactive
@@ -48,47 +48,47 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
 
   return (
     <>
-      <tr className={`hover:bg-[#F4F7FE] transition-colors group border-b border-[#E0E5F2] ${inheritedInactive ? 'opacity-60 grayscale bg-gray-50/50' : ''}`}>
+      <tr className={`hover:bg-admin-bg transition-colors group border-b border-admin-border ${inheritedInactive ? 'opacity-60 grayscale bg-gray-50/50' : ''}`}>
         <td className="px-6 py-4">
           <div className="flex items-center gap-3">
             {currentLevel > 1 && (
-              <span className="text-[#A3AED0] font-mono select-none flex-shrink-0 mr-1 text-sm tracking-widest">
+              <span className="text-admin-text-muted font-mono select-none flex-shrink-0 mr-1 text-sm tracking-widest">
                 {currentLevel === 2 ? '├──' : '└──'}
               </span>
             )}
-            <div className="w-10 h-10 rounded-md bg-[#FFFFFF] border border-[#E0E5F2] flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-10 h-10 rounded-md bg-white border border-admin-border flex items-center justify-center overflow-hidden flex-shrink-0">
               {category.iconUrl ? (
                 <img src={category.iconUrl} alt={category.name} className="w-full h-full object-cover" />
               ) : (
-                <ImageIcon className="text-[#A3AED0]" size={20} />
+                <ImageIcon className="text-admin-text-muted" size={20} />
               )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-[#2B3674]">{category.name}</span>
+                <span className="text-base font-bold text-admin-text-main">{category.name}</span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${getLevelBadgeColor(currentLevel)}`}>
                   Cấp {currentLevel}
                 </span>
                 {inheritedInactive && (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#FEECEB] text-[#EE5D50]">
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-admin-danger/10 text-admin-danger">
                     Kế thừa ẩn
                   </span>
                 )}
               </div>
               {category.categoryCode && (
-                <span className="block text-xs text-[#A3AED0] mt-0.5">Mã: {category.categoryCode}</span>
+                <span className="block text-xs text-admin-text-muted mt-0.5">Mã: {category.categoryCode}</span>
               )}
             </div>
           </div>
         </td>
         <td className="px-6 py-4 text-center">
-          <span className="text-sm font-semibold text-[#2B3674]">
-            {category.subCategoriesCount || 0} <span className="text-[#A3AED0] font-normal">danh mục con</span>
+          <span className="text-sm font-semibold text-admin-text-main">
+            {category.subCategoriesCount || 0} <span className="text-admin-text-muted font-normal">danh mục con</span>
           </span>
         </td>
         <td className="px-6 py-4 text-center">
-          <span className="text-sm font-semibold text-[#2B3674]">
-            {(category.productsCount || 0).toLocaleString('vi-VN')} <span className="text-[#A3AED0] font-normal">Sản phẩm</span>
+          <span className="text-sm font-semibold text-admin-text-main">
+            {(category.productsCount || 0).toLocaleString('vi-VN')} <span className="text-admin-text-muted font-normal">Sản phẩm</span>
           </span>
         </td>
         <td className="px-6 py-4 text-center">
@@ -101,10 +101,10 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
                 disabled={inheritedInactive}
                 readOnly 
               />
-              <div className="w-11 h-6 bg-[#E0E5F2] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#01B574]"></div>
+              <div className="w-11 h-6 bg-admin-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success"></div>
             </label>
             {inheritedInactive && (
-              <span className="text-[9px] text-[#EE5D50] font-bold block max-w-[120px] text-center leading-tight">
+              <span className="text-[9px] text-admin-danger font-bold block max-w-[120px] text-center leading-tight">
                 Danh mục cha đang tắt
               </span>
             )}
@@ -115,7 +115,7 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
             {currentLevel < 3 && (
               <button
                 onClick={() => onAddSubCategory(category.id, currentLevel + 1, category.name)}
-                className="p-2 text-[#01B574] hover:bg-[#D3F5E4] rounded-md transition-colors"
+                className="p-2 text-success hover:bg-success/10 rounded-md transition-colors"
                 title={`Thêm danh mục con cho ${category.name}`}
               >
                 <FolderPlus size={18} />
@@ -123,7 +123,7 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
             )}
             <button
               onClick={() => onEdit(category)}
-              className="p-2 text-[#4318FF] hover:bg-[#EBF4FF] rounded-md transition-colors"
+              className="p-2 text-primary hover:bg-primary/10 rounded-md transition-colors"
               title="Chỉnh sửa"
             >
               <Edit size={18} />
@@ -131,7 +131,7 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
             {category.subCategoriesCount === 0 && category.productsCount === 0 && (
               <button
                 onClick={() => onDelete(category.id)}
-                className="p-2 text-[#EE5D50] hover:bg-[#FEECEB] rounded-md transition-colors"
+                className="p-2 text-admin-danger hover:bg-admin-danger/10 rounded-md transition-colors"
                 title="Xóa danh mục"
               >
                 <Trash2 size={18} />
@@ -140,7 +140,7 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
             {category.subCategoriesCount > 0 && (
               <button
                 onClick={handleToggle}
-                className={`p-2 rounded-md transition-all ${expanded ? 'bg-[#4318FF] text-white' : 'text-[#A3AED0] hover:text-[#4318FF] hover:bg-[#F4F7FE]'}`}
+                className={`p-2 rounded-md transition-all ${expanded ? 'bg-primary text-white' : 'text-admin-text-muted hover:text-primary hover:bg-admin-bg'}`}
                 title={expanded ? 'Thu gọn' : 'Xem danh mục con'}
               >
                 {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -152,12 +152,12 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
       
       {/* Expanded Row */}
       {expanded && (
-        <tr className="bg-[#F8FAFC]/40">
-          <td colSpan="5" className="p-0 border-b border-[#E0E5F2]">
-            <div className="pl-12 pr-6 py-1 border-l-2 border-dashed border-[#4318FF]/20 ml-12">
+        <tr className="bg-slate-50/40">
+          <td colSpan="5" className="p-0 border-b border-admin-border">
+            <div className="pl-12 pr-6 py-1 border-l-2 border-dashed border-primary/20 ml-12">
               {loadingDetails ? (
                 <div className="flex justify-center items-center py-6">
-                  <Loader2 size={24} className="animate-spin text-[#4318FF]" />
+                  <Loader2 size={24} className="animate-spin text-primary" />
                 </div>
               ) : (
                 <table className="w-full text-left border-collapse">
@@ -176,7 +176,7 @@ const CategoryRow = ({ category, level = 1, onEdit, onAddSubCategory, onDelete, 
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-[#A3AED0] text-sm">
+                        <td colSpan="5" className="px-6 py-4 text-center text-admin-text-muted text-sm">
                           Chưa có danh mục con nào.
                         </td>
                       </tr>
@@ -468,18 +468,18 @@ export default function AdminCategories() {
       {/* Header & Search */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý Danh Mục</h2>
-          <p className="text-sm text-[#A3AED0] font-medium mt-1">Quản lý cấu trúc danh mục kinh doanh 3 cấp</p>
+          <h2 className="text-2xl font-bold text-admin-text-main">Quản lý Danh Mục</h2>
+          <p className="text-sm text-admin-text-muted font-medium mt-1">Quản lý cấu trúc danh mục kinh doanh 3 cấp</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <div className="relative group w-full md:w-80">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#A3AED0] group-focus-within:text-[#4318FF] transition-colors">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-admin-text-muted group-focus-within:text-primary transition-colors">
               <Search size={18} />
             </div>
             <input
               type="text"
               placeholder="Tìm danh mục gốc..."
-              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
+              className="w-full pl-11 pr-4 py-3 border border-admin-border rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-medium text-admin-text-main placeholder-admin-text-muted"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -487,24 +487,24 @@ export default function AdminCategories() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleOpenModal(null, '', false, true)}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-md font-bold hover:bg-admin-primary-hover transition-all active:scale-95 whitespace-nowrap"
               title="Thêm danh mục gốc mới. Phím tắt: Shift + N"
             >
               <Plus size={18} />
               <span>Thêm danh mục gốc</span>
             </button>
             <div className="relative group">
-              <div className="p-2 bg-[#F4F7FE] hover:bg-[#E0E5F2] text-[#A3AED0] hover:text-[#4318FF] rounded-md cursor-help transition-all">
+              <div className="p-2 bg-admin-bg hover:bg-admin-border text-admin-text-muted hover:text-primary rounded-md cursor-help transition-all">
                 <HelpCircle size={18} />
               </div>
-              <div className="absolute right-0 top-full mt-2 w-64 p-4 bg-[#0B1437] text-white text-xs rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-white/10">
+              <div className="absolute right-0 top-full mt-2 w-64 p-4 bg-indigo-950 text-white text-xs rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-white/10">
                 <div className="font-bold text-sm mb-1 text-white">Thêm danh mục gốc</div>
-                <div className="text-[#A3AED0] leading-relaxed">
+                <div className="text-admin-text-muted leading-relaxed">
                   Tạo một danh mục cha cấp cao nhất (Cấp 1) dùng để phân chia các ngành hàng chính.
                 </div>
                 <div className="mt-3 flex items-center justify-between text-[10px] bg-white/10 px-2.5 py-1 rounded-md font-bold text-white w-full border border-white/5">
                   <span>Phím tắt mở nhanh:</span>
-                  <span className="bg-[#4318FF] px-1.5 py-0.5 rounded text-white font-mono">Shift + N</span>
+                  <span className="bg-primary px-1.5 py-0.5 rounded text-white font-mono">Shift + N</span>
                 </div>
               </div>
             </div>
@@ -513,21 +513,21 @@ export default function AdminCategories() {
       </div>
 
       {/* Main Table */}
-      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8 border border-[#E0E5F2]">
+      <div className="bg-white rounded-md overflow-hidden mb-8 border border-admin-border">
         <div className="overflow-x-auto">
           {loading ? (
             <div className="flex justify-center items-center py-20">
-              <Loader2 size={40} className="animate-spin text-[#4318FF]" />
+              <Loader2 size={40} className="animate-spin text-primary" />
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
-              <thead className="bg-[#F8FAFC]">
-                <tr className="border-b border-[#E0E5F2]">
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] uppercase">Tên danh mục gốc</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] uppercase text-center">Số danh mục con</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] uppercase text-center">Tổng sản phẩm</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] uppercase text-center">Trạng thái</th>
-                  <th className="px-6 py-4 text-[12px] font-bold text-[#A3AED0] uppercase text-center">Thao tác</th>
+              <thead className="bg-slate-50">
+                <tr className="border-b border-admin-border">
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted uppercase">Tên danh mục gốc</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted uppercase text-center">Số danh mục con</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted uppercase text-center">Tổng sản phẩm</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted uppercase text-center">Trạng thái</th>
+                  <th className="px-6 py-4 text-[12px] font-bold text-admin-text-muted uppercase text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="text-sm bg-white">
@@ -546,9 +546,9 @@ export default function AdminCategories() {
                 ) : (
                   <tr>
                     <td colSpan="6" className="px-6 py-20 text-center">
-                      <div className="flex flex-col items-center justify-center text-[#A3AED0]">
-                        <FolderOpen size={64} strokeWidth={1} className="mb-4 opacity-50 text-[#4318FF]" />
-                        <p className="text-lg font-bold text-[#2B3674]">Không tìm thấy danh mục gốc nào</p>
+                      <div className="flex flex-col items-center justify-center text-admin-text-muted">
+                        <FolderOpen size={64} strokeWidth={1} className="mb-4 opacity-50 text-primary" />
+                        <p className="text-lg font-bold text-admin-text-main">Không tìm thấy danh mục gốc nào</p>
                       </div>
                     </td>
                   </tr>
@@ -561,11 +561,11 @@ export default function AdminCategories() {
 
       {/* Modal Cập nhật/Thêm mới */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#0B1437]/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#FFFFFF] rounded-md w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F8FAFC]">
-              <h3 className="text-xl font-bold text-[#2B3674] flex items-center gap-2">
-                {editingCategory ? <Edit size={20} className="text-[#4318FF]" /> : <Plus size={20} className="text-[#4318FF]" />}
+        <div className="fixed inset-0 bg-indigo-950/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-md w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-admin-border flex justify-between items-center bg-slate-50">
+              <h3 className="text-xl font-bold text-admin-text-main flex items-center gap-2">
+                {editingCategory ? <Edit size={20} className="text-primary" /> : <Plus size={20} className="text-primary" />}
                 {editingCategory 
                   ? 'Cập nhật danh mục' 
                   : parentName 
@@ -575,7 +575,7 @@ export default function AdminCategories() {
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-[#A3AED0] hover:text-[#EE5D50] hover:bg-red-50 p-2 rounded-full transition-colors"
+                className="text-admin-text-muted hover:text-admin-danger hover:bg-red-50 p-2 rounded-full transition-colors"
               >
                 <X size={20} />
               </button>
@@ -583,17 +583,17 @@ export default function AdminCategories() {
 
             <form onSubmit={handleSave} className="p-6">
               {formError && (
-                <div className="mb-6 p-4 bg-[#FEECEB] border border-[#EE5D50]/30 rounded-md flex gap-3 items-start animate-in fade-in duration-200">
-                  <div className="w-8 h-8 rounded-full bg-[#EE5D50]/15 text-[#EE5D50] flex items-center justify-center font-bold flex-shrink-0">
+                <div className="mb-6 p-4 bg-admin-danger/10 border border-admin-danger/30 rounded-md flex gap-3 items-start animate-in fade-in duration-200">
+                  <div className="w-8 h-8 rounded-full bg-admin-danger/15 text-admin-danger flex items-center justify-center font-bold flex-shrink-0">
                     <AlertCircle size={20} />
                   </div>
                   <div className="flex-1">
-                    <h5 className="font-bold text-[#EE5D50] text-sm">{formError.message}</h5>
+                    <h5 className="font-bold text-admin-danger text-sm">{formError.message}</h5>
                     {formError.details && formError.details.length > 0 && (
-                      <ul className="list-none text-xs text-[#2B3674] mt-2 space-y-1.5 bg-white/60 p-3 rounded-md border border-[#EE5D50]/10">
+                      <ul className="list-none text-xs text-admin-text-main mt-2 space-y-1.5 bg-white/60 p-3 rounded-md border border-admin-danger/10">
                         {formError.details.map((d, i) => (
                           <li key={i} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-[#EE5D50] mt-0.5">•</span>
+                            <span className="text-admin-danger mt-0.5">•</span>
                             <span>{d}</span>
                           </li>
                         ))}
@@ -605,20 +605,20 @@ export default function AdminCategories() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* Image Upload Area */}
-                <div className="md:col-span-2 flex flex-col items-center sm:flex-row gap-6 p-4 bg-[#F4F7FE] rounded-md border border-[#E0E5F2] border-dashed">
-                  <div className="w-24 h-24 bg-white rounded-md border border-[#E0E5F2] flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="md:col-span-2 flex flex-col items-center sm:flex-row gap-6 p-4 bg-admin-bg rounded-md border border-admin-border border-dashed">
+                  <div className="w-24 h-24 bg-white rounded-md border border-admin-border flex items-center justify-center overflow-hidden flex-shrink-0">
                     {uploading ? (
-                      <Loader2 className="animate-spin text-[#4318FF]" size={24} />
+                      <Loader2 className="animate-spin text-primary" size={24} />
                     ) : formData.iconUrl ? (
                       <img src={formData.iconUrl} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
-                      <ImageIcon className="text-[#A3AED0]" size={32} />
+                      <ImageIcon className="text-admin-text-muted" size={32} />
                     )}
                   </div>
                   <div className="flex-1 text-center sm:text-left">
-                    <h4 className="font-bold text-[#2B3674] mb-1">Ảnh đại diện (Tùy chọn)</h4>
-                    <p className="text-xs text-[#A3AED0] mb-3">Chỉ hỗ trợ định dạng ảnh (JPG, PNG, WEBP, SVG). Tối đa 2MB.</p>
-                    <label className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#E0E5F2] text-[#2B3674] text-sm font-bold rounded-md cursor-pointer hover:bg-[#F8FAFC] transition-colors">
+                    <h4 className="font-bold text-admin-text-main mb-1">Ảnh đại diện (Tùy chọn)</h4>
+                    <p className="text-xs text-admin-text-muted mb-3">Chỉ hỗ trợ định dạng ảnh (JPG, PNG, WEBP, SVG). Tối đa 2MB.</p>
+                    <label className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-admin-border text-admin-text-main text-sm font-bold rounded-md cursor-pointer hover:bg-slate-50 transition-colors">
                       <UploadCloud size={16} />
                       Tải ảnh lên
                       <input 
@@ -635,12 +635,12 @@ export default function AdminCategories() {
                 {/* Form Fields */}
                 <div className="md:col-span-1 space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-[#2B3674] mb-2">Tên danh mục *</label>
+                    <label className="block text-sm font-bold text-admin-text-main mb-2">Tên danh mục *</label>
                     <input
                       type="text"
                       required
                       placeholder="VD: Điện thoại, Tai nghe..."
-                      className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674] font-medium"
+                      className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary outline-none text-admin-text-main font-medium"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                     />
@@ -648,7 +648,7 @@ export default function AdminCategories() {
 
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="block text-sm font-bold text-[#2B3674]">Mã (CategoryCode)</label>
+                      <label className="block text-sm font-bold text-admin-text-main">Mã (CategoryCode)</label>
                       {editingCategory && !isCodeEditable && (
                         <button
                           type="button"
@@ -657,7 +657,7 @@ export default function AdminCategories() {
                               setIsCodeEditable(true);
                             }
                           }}
-                          className="text-xs text-[#4318FF] hover:underline font-bold"
+                          className="text-xs text-primary hover:underline font-bold"
                         >
                           Thay đổi mã
                         </button>
@@ -666,20 +666,20 @@ export default function AdminCategories() {
                     <input
                       type="text"
                       placeholder="Tự động tạo nếu để trống"
-                      className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674] font-medium uppercase disabled:bg-[#F4F7FE] disabled:text-[#A3AED0]"
+                      className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary outline-none text-admin-text-main font-medium uppercase disabled:bg-admin-bg disabled:text-admin-text-muted"
                       value={formData.categoryCode}
                       onChange={(e) => setFormData({...formData, categoryCode: e.target.value.toUpperCase().replace(/\s+/g, '')})}
                       disabled={!isCodeEditable}
                     />
-                    {catErrorMessage && <p className="text-[#EE5D50] text-xs font-bold mt-1">{catErrorMessage}</p>}
+                    {catErrorMessage && <p className="text-admin-danger text-xs font-bold mt-1">{catErrorMessage}</p>}
                   </div>
                 </div>
 
                 <div className="md:col-span-1 space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-[#2B3674] mb-2">Phân cấp (Danh mục cha)</label>
+                    <label className="block text-sm font-bold text-admin-text-main mb-2">Phân cấp (Danh mục cha)</label>
                     <select
-                      className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674] font-medium bg-white disabled:bg-[#F4F7FE] disabled:text-[#A3AED0] disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary outline-none text-admin-text-main font-medium bg-white disabled:bg-admin-bg disabled:text-admin-text-muted disabled:cursor-not-allowed"
                       value={formData.parentId || ''}
                       onChange={(e) => setFormData({...formData, parentId: e.target.value})}
                       disabled={lockParentRoot}
@@ -701,7 +701,7 @@ export default function AdminCategories() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-bold text-[#2B3674] mb-2">Trạng thái hiển thị</label>
+                    <label className="block text-sm font-bold text-admin-text-main mb-2">Trạng thái hiển thị</label>
                     {(() => {
                       const checkInheritedInactiveForId = (parentId) => {
                         let currentId = parentId;
@@ -717,7 +717,7 @@ export default function AdminCategories() {
 
                       return (
                         <>
-                          <label className={`flex items-center gap-3 p-3 border border-[#E0E5F2] rounded-md bg-[#F8FAFC] ${inheritedInactiveModal ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                          <label className={`flex items-center gap-3 p-3 border border-admin-border rounded-md bg-slate-50 ${inheritedInactiveModal ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                             <div className="relative inline-flex items-center">
                               <input 
                                 type="checkbox" 
@@ -726,14 +726,14 @@ export default function AdminCategories() {
                                 onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
                                 disabled={inheritedInactiveModal}
                               />
-                              <div className="w-11 h-6 bg-[#E0E5F2] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#01B574]"></div>
+                              <div className="w-11 h-6 bg-admin-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success"></div>
                             </div>
-                            <span className="text-sm font-bold text-[#2B3674]">
+                            <span className="text-sm font-bold text-admin-text-main">
                               {inheritedInactiveModal ? 'Đã ẩn (Kế thừa từ cha)' : (formData.isActive ? 'Đang hoạt động' : 'Đã ẩn')}
                             </span>
                           </label>
                           {inheritedInactiveModal && (
-                            <span className="text-xs text-[#EE5D50] font-bold mt-1 block">
+                            <span className="text-xs text-admin-danger font-bold mt-1 block">
                               Danh mục cha đang bị ẩn, không thể kích hoạt danh mục này.
                             </span>
                           )}
@@ -744,29 +744,29 @@ export default function AdminCategories() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Mô tả danh mục</label>
+                  <label className="block text-sm font-bold text-admin-text-main mb-2">Mô tả danh mục</label>
                   <textarea
                     rows="3"
                     placeholder="Mô tả tóm tắt..."
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] outline-none text-[#2B3674] font-medium resize-none"
+                    className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary outline-none text-admin-text-main font-medium resize-none"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-end pt-6 mt-6 border-t border-[#E0E5F2]">
+              <div className="flex gap-3 justify-end pt-6 mt-6 border-t border-admin-border">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2.5 bg-[#F4F7FE] text-[#2B3674] rounded-md font-bold hover:bg-[#E0E5F2] transition-colors"
+                  className="px-6 py-2.5 bg-admin-bg text-admin-text-main rounded-md font-bold hover:bg-admin-border transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={saving || uploading}
-                  className="px-6 py-2.5 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-6 py-2.5 bg-primary text-white rounded-md font-bold hover:bg-admin-primary-hover transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {saving && <Loader2 size={18} className="animate-spin" />}
                   {saving ? "Đang lưu..." : (editingCategory ? "Cập nhật" : "Tạo mới")}
@@ -780,29 +780,29 @@ export default function AdminCategories() {
       {/* Premium Toast Notification */}
       {toast && (
         <div className={`fixed bottom-5 right-5 z-[200] max-w-sm w-full bg-white rounded-md shadow-xl border p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-5 duration-300 ${
-          toast.type === 'success' ? 'border-l-4 border-l-[#01B574] border-[#E0E5F2]' : 
-          toast.type === 'error' ? 'border-l-4 border-l-[#EE5D50] border-[#E0E5F2]' : 
-          'border-l-4 border-l-[#FFB800] border-[#E0E5F2]'
+          toast.type === 'success' ? 'border-l-4 border-l-success border-admin-border' : 
+          toast.type === 'error' ? 'border-l-4 border-l-admin-danger border-admin-border' : 
+          'border-l-4 border-l-[#FFB800] border-admin-border'
         }`}>
           <div className="flex-shrink-0 mt-0.5">
             {toast.type === 'success' ? (
-              <div className="w-8 h-8 rounded-full bg-[#D3F5E4] text-[#01B574] flex items-center justify-center font-bold">✓</div>
+              <div className="w-8 h-8 rounded-full bg-success/10 text-success flex items-center justify-center font-bold">✓</div>
             ) : toast.type === 'error' ? (
-              <div className="w-8 h-8 rounded-full bg-[#FEECEB] text-[#EE5D50] flex items-center justify-center font-bold">✕</div>
+              <div className="w-8 h-8 rounded-full bg-admin-danger/10 text-admin-danger flex items-center justify-center font-bold">✕</div>
             ) : (
-              <div className="w-8 h-8 rounded-full bg-[#FFF9E6] text-[#FFB800] flex items-center justify-center font-bold">!</div>
+              <div className="w-8 h-8 rounded-full bg-warning/10 text-warning flex items-center justify-center font-bold">!</div>
             )}
           </div>
           <div className="flex-1">
-            <h4 className="font-bold text-[#2B3674] text-sm">
+            <h4 className="font-bold text-admin-text-main text-sm">
               {toast.type === 'success' ? 'Thành công' : toast.type === 'error' ? 'Lỗi hệ thống' : 'Cảnh báo'}
             </h4>
-            <p className="text-xs text-[#A3AED0] mt-1 font-semibold leading-relaxed">{toast.message}</p>
+            <p className="text-xs text-admin-text-muted mt-1 font-semibold leading-relaxed">{toast.message}</p>
             {toast.description && (
-              <p className="text-[10px] text-[#EE5D50] mt-1.5 bg-[#FEECEB] p-2 rounded-md font-mono break-all leading-normal whitespace-pre-wrap">{toast.description}</p>
+              <p className="text-[10px] text-admin-danger mt-1.5 bg-admin-danger/10 p-2 rounded-md font-mono break-all leading-normal whitespace-pre-wrap">{toast.description}</p>
             )}
           </div>
-          <button onClick={() => setToast(null)} className="text-[#A3AED0] hover:text-[#2B3674] flex-shrink-0 transition-colors p-1 hover:bg-[#F4F7FE] rounded-md">
+          <button onClick={() => setToast(null)} className="text-admin-text-muted hover:text-admin-text-main flex-shrink-0 transition-colors p-1 hover:bg-admin-bg rounded-md">
             <X size={16} />
           </button>
         </div>

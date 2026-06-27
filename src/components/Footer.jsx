@@ -1,12 +1,7 @@
 // Footer.jsx
 import { Link } from 'react-router-dom';
 
-const THEME = {
-  primary: '#288ad6',
-  footerBg: '#ffffff',
-  border: '#e5e7eb',
-  textDark: '#333333',
-};
+import { THEME } from '../utils/theme';
 
 export default function Footer() {
   return (

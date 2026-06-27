@@ -1,13 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { BRANDS, OTHER_CATEGORIES } from '../utils/constants';
 import { useCart } from '../context/CartContext';
 
-const THEME = {
-  primary: '#288ad6', 
-  secondary: '#0d5cb6', 
-  accent: '#fbd535', 
-  textLight: '#ffffff', 
-};
+import { THEME } from '../utils/theme';
 
 export default function Header() {
   const { cartCount } = useCart();

@@ -296,18 +296,18 @@ export default function AdminProductVariants() {
       {/* Header & Search */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#2B3674]">Quản lý Biến thể({variants.length}) </h2>
-          <p className="text-sm text-[#A3AED0] font-medium mt-1">Quản lý SKU, thông số, kích thước, màu sắc và tồn kho của sản phẩm</p>
+          <h2 className="text-2xl font-bold text-admin-text-main">Quản lý Biến thể({variants.length}) </h2>
+          <p className="text-sm text-admin-text-muted font-medium mt-1">Quản lý SKU, thông số, kích thước, màu sắc và tồn kho của sản phẩm</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <div className="relative group w-full md:w-80">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#A3AED0] group-focus-within:text-[#4318FF] transition-colors">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-admin-text-muted group-focus-within:text-primary transition-colors">
               <Search size={18} />
             </div>
             <input
               type="text"
               placeholder="Tìm theo sản phẩm, biến thể, SKU..."
-              className="w-full pl-11 pr-4 py-3 border border-[#E0E5F2] rounded-md focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] transition-all bg-[#FFFFFF] font-medium text-[#2B3674] placeholder-[#A3AED0]"
+              className="w-full pl-11 pr-4 py-3 border border-admin-border rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-medium text-admin-text-main placeholder-admin-text-muted"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -317,7 +317,7 @@ export default function AdminProductVariants() {
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-md font-bold hover:bg-admin-primary-hover transition-all active:scale-95 whitespace-nowrap"
           >
             <Plus size={18} />
             <span>Thêm biến thể</span>
@@ -326,23 +326,23 @@ export default function AdminProductVariants() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-[#FFFFFF] rounded-md overflow-hidden mb-8 p-6 flex flex-col">
+      <div className="bg-white rounded-md overflow-hidden mb-8 p-6 flex flex-col">
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#E0E5F2]">
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] w-16">ID</th>
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] w-24">Hình ảnh</th>
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0]">Sản phẩm gốc</th>
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0]">Mã SKU</th>
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0]">Thông số biến thể</th>
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] text-right">Giá bán</th>
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Tồn kho</th>
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Trạng thái</th>
-                <th className="px-4 py-4 text-[12px] font-bold text-[#A3AED0] text-center">Thao tác</th>
+              <tr className="border-b border-admin-border">
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted w-16">ID</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted w-24">Hình ảnh</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted">Sản phẩm gốc</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted">Mã SKU</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted">Thông số biến thể</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted text-right">Giá bán</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted text-center">Tồn kho</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted text-center">Trạng thái</th>
+                <th className="px-4 py-4 text-[12px] font-bold text-admin-text-muted text-center">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E0E5F2] text-sm">
+            <tbody className="divide-y divide-admin-border text-sm">
               {paginatedVariants.length > 0 ? (
                 paginatedVariants.map((v) => {
                   const product = getProductById(v.productId);
@@ -351,21 +351,21 @@ export default function AdminProductVariants() {
                   const sku = parsedAttr["SKU"] || generateSkuFromName(v.name);
 
                   return (
-                    <tr key={v.id} className="hover:bg-[#F4F7FE] transition-colors group">
+                    <tr key={v.id} className="hover:bg-admin-bg transition-colors group">
                       <td className="px-4 py-4">
-                        <span className="text-[#A3AED0] font-bold">#{v.id}</span>
+                        <span className="text-admin-text-muted font-bold">#{v.id}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="w-14 h-14 rounded-md bg-[#F4F7FE] flex items-center justify-center overflow-hidden border border-[#E0E5F2] p-1">
+                        <div className="w-14 h-14 rounded-md bg-admin-bg flex items-center justify-center overflow-hidden border border-admin-border p-1">
                           {v.imageId ? (
                             <img src={v.imageId} alt="Variant" className="w-full h-full object-contain" />
                           ) : (
-                            <ImageIcon className="text-[#A3AED0]" size={20} />
+                            <ImageIcon className="text-admin-text-muted" size={20} />
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="font-bold text-[#2B3674]">{product ? product.name : `Sản phẩm #${v.productId}`}</span>
+                        <span className="font-bold text-admin-text-main">{product ? product.name : `Sản phẩm #${v.productId}`}</span>
                       </td>
                       <td className="px-4 py-4">
                         <span className="font-mono text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-200">
@@ -388,15 +388,15 @@ export default function AdminProductVariants() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <span className="font-bold text-[#2B3674] text-base">{v.price.toLocaleString('vi-VN')} ₫</span>
+                        <span className="font-bold text-admin-text-main text-base">{v.price.toLocaleString('vi-VN')} ₫</span>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${v.totalStock > 0 ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${v.totalStock > 0 ? 'bg-success/10 text-success' : 'bg-admin-danger/10 text-admin-danger'}`}>
                           {v.totalStock > 0 ? `Còn ${v.totalStock}` : 'Hết hàng'}
                         </span>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${v.isActive ? 'bg-[#01B574]/10 text-[#01B574]' : 'bg-[#EE5D50]/10 text-[#EE5D50]'}`}>
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${v.isActive ? 'bg-success/10 text-success' : 'bg-admin-danger/10 text-admin-danger'}`}>
                           {v.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
@@ -404,14 +404,14 @@ export default function AdminProductVariants() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleOpenModal(v)}
-                            className="p-2 text-[#A3AED0] hover:text-[#FFB547] hover:bg-[#FFF8ED] rounded-md transition-all"
+                            className="p-2 text-admin-text-muted hover:text-warning hover:bg-warning/10 rounded-md transition-all"
                             title="Chỉnh sửa"
                           >
                             <Edit2 size={16} />
                           </button>
                           <button
                             onClick={() => handleDelete(v.id)}
-                            className="p-2 text-[#A3AED0] hover:text-[#EE5D50] hover:bg-[#FFF5F5] rounded-md transition-all"
+                            className="p-2 text-admin-text-muted hover:text-admin-danger hover:bg-admin-danger/10 rounded-md transition-all"
                             title="Xóa"
                           >
                             <Trash2 size={16} />
@@ -423,10 +423,10 @@ export default function AdminProductVariants() {
                 })
               ) : (
                 <tr>
-                  <td colSpan="9" className="px-6 py-20 text-center bg-[#FFFFFF]">
-                    <div className="flex flex-col items-center justify-center text-[#A3AED0]">
+                  <td colSpan="9" className="px-6 py-20 text-center bg-white">
+                    <div className="flex flex-col items-center justify-center text-admin-text-muted">
                       <FolderOpen size={64} strokeWidth={1} className="mb-4 opacity-50" />
-                      <p className="text-lg font-bold text-[#2B3674]">Không tìm thấy biến thể nào</p>
+                      <p className="text-lg font-bold text-admin-text-main">Không tìm thấy biến thể nào</p>
                     </div>
                   </td>
                 </tr>
@@ -437,15 +437,15 @@ export default function AdminProductVariants() {
 
         {/* Pagination controls */}
         {totalPages > 1 && (
-          <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-[#E0E5F2] pt-4">
-            <div className="text-sm font-bold text-[#A3AED0]">
+          <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-admin-border pt-4">
+            <div className="text-sm font-bold text-admin-text-muted">
               Hiển thị {startIndex}-{endIndex} trên {totalItems} biến thể
             </div>
             <div className="flex gap-2">
               <button
                 onClick={prevPage}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="px-4 py-2 bg-admin-bg text-admin-text-main rounded-md text-sm font-bold hover:bg-admin-border transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 <ChevronLeft size={16} /> TRƯỚC
               </button>
@@ -453,7 +453,7 @@ export default function AdminProductVariants() {
                 <button
                   key={i}
                   onClick={() => goToPage(i + 1)}
-                  className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-[#4318FF] text-[#FFFFFF] shadow-md' : 'bg-transparent text-[#A3AED0] hover:bg-[#F4F7FE]'}`}
+                  className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${currentPage === i + 1 ? 'bg-primary text-white shadow-md' : 'bg-transparent text-admin-text-muted hover:bg-admin-bg'}`}
                 >
                   {i + 1}
                 </button>
@@ -461,7 +461,7 @@ export default function AdminProductVariants() {
               <button
                 onClick={nextPage}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-[#F4F7FE] text-[#2B3674] rounded-md text-sm font-bold hover:bg-[#E0E5F2] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="px-4 py-2 bg-admin-bg text-admin-text-main rounded-md text-sm font-bold hover:bg-admin-border transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 SAU <ChevronRight size={16} />
               </button>
@@ -473,10 +473,10 @@ export default function AdminProductVariants() {
       {/* CRUD Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#FFFFFF] rounded-md w-full max-w-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-[#E0E5F2] flex justify-between items-center bg-[#F4F7FE]">
-              <h3 className="text-xl font-bold text-[#2B3674]">{editingVariant ? 'Cập nhật Biến thể' : 'Thêm Biến thể mới'}</h3>
-              <button onClick={() => setShowModal(false)} className="text-[#A3AED0] hover:text-[#EE5D50] transition-colors">
+          <div className="bg-white rounded-md w-full max-w-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-admin-border flex justify-between items-center bg-admin-bg">
+              <h3 className="text-xl font-bold text-admin-text-main">{editingVariant ? 'Cập nhật Biến thể' : 'Thêm Biến thể mới'}</h3>
+              <button onClick={() => setShowModal(false)} className="text-admin-text-muted hover:text-admin-danger transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -485,9 +485,9 @@ export default function AdminProductVariants() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Product Selection */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Sản phẩm gốc *</label>
+                  <label className="block text-sm font-bold text-admin-text-main mb-2">Sản phẩm gốc *</label>
                   <select
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] bg-[#FFFFFF] font-medium"
+                    className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main bg-white font-medium"
                     value={selectedProductId}
                     onChange={(e) => setSelectedProductId(e.target.value)}
                     required
@@ -498,32 +498,32 @@ export default function AdminProductVariants() {
 
                 {/* Variant Name & SKU Preview */}
                 <div>
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Tên biến thể (Tự động sinh)</label>
+                  <label className="block text-sm font-bold text-admin-text-main mb-2">Tên biến thể (Tự động sinh)</label>
                   <input
                     type="text"
                     readOnly
-                    className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-md outline-none text-[#2B3674] font-medium select-all"
+                    className="w-full px-4 py-3 border border-admin-border bg-admin-bg rounded-md outline-none text-admin-text-main font-medium select-all"
                     value={generatedVariantName}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Mã SKU (Tự động sinh)</label>
+                  <label className="block text-sm font-bold text-admin-text-main mb-2">Mã SKU (Tự động sinh)</label>
                   <input
                     type="text"
                     readOnly
-                    className="w-full px-4 py-3 border border-[#E0E5F2] bg-[#F4F7FE] rounded-md outline-none text-red-600 font-mono font-bold select-all"
+                    className="w-full px-4 py-3 border border-admin-border bg-admin-bg rounded-md outline-none text-red-600 font-mono font-bold select-all"
                     value={generatedSku}
                   />
                 </div>
 
                 {/* Price */}
                 <div>
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Giá bán (Để trống = Theo sản phẩm gốc)</label>
+                  <label className="block text-sm font-bold text-admin-text-main mb-2">Giá bán (Để trống = Theo sản phẩm gốc)</label>
                   <input
                     type="number"
                     placeholder={selectedProduct ? `Giá gốc: ${selectedProduct.basePrice?.toLocaleString('vi-VN')} ₫` : 'Giá bán'}
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium"
+                    className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main font-medium"
                     value={variantPrice}
                     onChange={(e) => setVariantPrice(e.target.value)}
                   />
@@ -531,12 +531,12 @@ export default function AdminProductVariants() {
 
                 {/* Stock */}
                 <div>
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Tồn kho ban đầu</label>
+                  <label className="block text-sm font-bold text-admin-text-main mb-2">Tồn kho ban đầu</label>
                   <input
                     type="number"
                     min="0"
                     step="1"
-                    className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674] font-medium bg-white"
+                    className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main font-medium bg-white"
                     value={variantStock}
                     onChange={(e) => setVariantStock(e.target.value)}
                     required
@@ -550,32 +550,32 @@ export default function AdminProductVariants() {
                     id="isActive"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-5 h-5 rounded border-[#E0E5F2] text-[#4318FF] focus:ring-[#4318FF]"
+                    className="w-5 h-5 rounded border-admin-border text-primary focus:ring-primary"
                   />
-                  <label htmlFor="isActive" className="text-sm font-bold text-[#2B3674] cursor-pointer">Hoạt động (Is Active)</label>
+                  <label htmlFor="isActive" className="text-sm font-bold text-admin-text-main cursor-pointer">Hoạt động (Is Active)</label>
                 </div>
 
                 {/* Dynamic Attributes section */}
                 <div className="md:col-span-2 space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="block text-sm font-bold text-[#2B3674]">Thuộc tính của biến thể (Dynamic Attributes)</label>
+                    <label className="block text-sm font-bold text-admin-text-main">Thuộc tính của biến thể (Dynamic Attributes)</label>
                     <button
                       type="button"
                       onClick={handleAddAttribute}
-                      className="text-xs font-bold text-[#4318FF] hover:text-[#3911D1] flex items-center gap-1"
+                      className="text-xs font-bold text-primary hover:text-admin-primary-hover flex items-center gap-1"
                     >
                       <PlusCircle size={14} /> Thêm thuộc tính
                     </button>
                   </div>
 
-                  <div className="space-y-3 max-h-60 overflow-y-auto pr-1 border border-[#E0E5F2] rounded-md p-3 bg-gray-50">
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-1 border border-admin-border rounded-md p-3 bg-gray-50">
                     {attributes.map((attr, index) => (
-                      <div key={index} className="flex items-center gap-3 bg-white p-2.5 rounded-md border border-[#E0E5F2]">
+                      <div key={index} className="flex items-center gap-3 bg-white p-2.5 rounded-md border border-admin-border">
                         <div className="flex-1">
                           <input
                             type="text"
                             placeholder="Tên thuộc tính (VD: Màu sắc)"
-                            className="w-full px-3 py-1.5 border border-[#E0E5F2] rounded-md text-xs font-semibold outline-none focus:border-[#4318FF]"
+                            className="w-full px-3 py-1.5 border border-admin-border rounded-md text-xs font-semibold outline-none focus:border-primary"
                             value={attr.key}
                             onChange={(e) => handleAttributeChange(index, 'key', e.target.value)}
                             required
@@ -585,7 +585,7 @@ export default function AdminProductVariants() {
                           <input
                             type="text"
                             placeholder="Giá trị (VD: Đen)"
-                            className="w-full px-3 py-1.5 border border-[#E0E5F2] rounded-md text-xs outline-none focus:border-[#4318FF]"
+                            className="w-full px-3 py-1.5 border border-admin-border rounded-md text-xs outline-none focus:border-primary"
                             value={attr.value}
                             onChange={(e) => handleAttributeChange(index, 'value', e.target.value)}
                             required
@@ -594,7 +594,7 @@ export default function AdminProductVariants() {
                         <button
                           type="button"
                           onClick={() => handleRemoveAttribute(index)}
-                          className="text-[#EE5D50] hover:text-red-700 transition-colors p-1"
+                          className="text-admin-danger hover:text-red-700 transition-colors p-1"
                           title="Xóa thuộc tính"
                         >
                           <MinusCircle size={18} />
@@ -606,26 +606,26 @@ export default function AdminProductVariants() {
 
                 {/* Image Upload/URL Input */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#2B3674] mb-2">Hình ảnh biến thể</label>
-                  <div className="flex border-b border-[#E0E5F2] mb-3">
+                  <label className="block text-sm font-bold text-admin-text-main mb-2">Hình ảnh biến thể</label>
+                  <div className="flex border-b border-admin-border mb-3">
                     <button
                       type="button"
                       onClick={() => setImageInputMethod('upload')}
-                      className={`py-2 px-4 font-bold text-sm border-b-2 transition-colors ${imageInputMethod === 'upload' ? 'border-[#4318FF] text-[#4318FF]' : 'border-transparent text-[#A3AED0]'}`}
+                      className={`py-2 px-4 font-bold text-sm border-b-2 transition-colors ${imageInputMethod === 'upload' ? 'border-primary text-primary' : 'border-transparent text-admin-text-muted'}`}
                     >
                       Tải lên từ máy
                     </button>
                     <button
                       type="button"
                       onClick={() => setImageInputMethod('url')}
-                      className={`py-2 px-4 font-bold text-sm border-b-2 transition-colors ${imageInputMethod === 'url' ? 'border-[#4318FF] text-[#4318FF]' : 'border-transparent text-[#A3AED0]'}`}
+                      className={`py-2 px-4 font-bold text-sm border-b-2 transition-colors ${imageInputMethod === 'url' ? 'border-primary text-primary' : 'border-transparent text-admin-text-muted'}`}
                     >
                       Nhập liên kết URL
                     </button>
                   </div>
 
                   {imageInputMethod === 'upload' ? (
-                    <div className="relative border-2 border-dashed border-[#E0E5F2] rounded-md p-6 flex flex-col items-center justify-center bg-[#F4F7FE]/10 h-28 cursor-pointer hover:border-[#4318FF] transition-colors">
+                    <div className="relative border-2 border-dashed border-admin-border rounded-md p-6 flex flex-col items-center justify-center bg-admin-bg/10 h-28 cursor-pointer hover:border-primary transition-colors">
                       <input
                         type="file"
                         accept=".jpg,.jpeg,.png,.webp,.svg"
@@ -634,38 +634,38 @@ export default function AdminProductVariants() {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       />
                       {uploading ? (
-                        <span className="text-xs font-bold text-[#4318FF]">Đang tải ảnh...</span>
+                        <span className="text-xs font-bold text-primary">Đang tải ảnh...</span>
                       ) : (
-                        <span className="text-xs font-bold text-[#A3AED0]">Nhấp để tải lên ảnh biến thể</span>
+                        <span className="text-xs font-bold text-admin-text-muted">Nhấp để tải lên ảnh biến thể</span>
                       )}
                     </div>
                   ) : (
                     <input
                       type="text"
-                      className="w-full px-4 py-3 border border-[#E0E5F2] rounded-md focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF] outline-none text-[#2B3674]"
+                      className="w-full px-4 py-3 border border-admin-border rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-admin-text-main"
                       placeholder="Dán link ảnh biến thể (https://...)"
                       value={variantImage}
                       onChange={(e) => setVariantImage(e.target.value)}
                     />
                   )}
                   {variantImage && (
-                    <div className="flex items-center gap-3 mt-3 p-2 border border-[#E0E5F2] rounded-md w-fit bg-gray-50">
+                    <div className="flex items-center gap-3 mt-3 p-2 border border-admin-border rounded-md w-fit bg-gray-50">
                       <img src={variantImage} alt="Preview" className="w-12 h-12 object-contain rounded" />
-                      <span className="text-xs text-[#A3AED0] font-bold">Hình ảnh xem trước</span>
+                      <span className="text-xs text-admin-text-muted font-bold">Hình ảnh xem trước</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Inventory history (Mocked table as requested by UI design) */}
-              <div className="border border-[#E0E5F2] rounded-md overflow-hidden mt-6">
-                <div className="bg-gray-50 px-4 py-2 border-b border-[#E0E5F2] text-[10px] font-black text-gray-500 uppercase tracking-widest">
+              <div className="border border-admin-border rounded-md overflow-hidden mt-6">
+                <div className="bg-gray-50 px-4 py-2 border-b border-admin-border text-[10px] font-black text-gray-500 uppercase tracking-widest">
                   Lịch sử tồn kho
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-[#FFFFFF] text-gray-400 border-b border-[#E0E5F2]">
+                      <tr className="bg-white text-gray-400 border-b border-admin-border">
                         <th className="px-4 py-2 font-bold uppercase">Loại</th>
                         <th className="px-4 py-2 font-bold uppercase">Số lượng</th>
                         <th className="px-4 py-2 font-bold uppercase">Tồn trước</th>
@@ -674,31 +674,31 @@ export default function AdminProductVariants() {
                         <th className="px-4 py-2 font-bold uppercase">Thời gian</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E0E5F2] text-gray-600">
+                    <tbody className="divide-y divide-admin-border text-gray-600">
                       <tr className="hover:bg-gray-50">
                         <td className="px-4 py-2 font-bold text-green-600">NHẬP KHO</td>
                         <td className="px-4 py-2 font-bold">{variantStock}</td>
                         <td className="px-4 py-2">0</td>
                         <td className="px-4 py-2">{variantStock}</td>
                         <td className="px-4 py-2">Khởi tạo tồn kho ban đầu</td>
-                        <td className="px-4 py-2 text-[#A3AED0]">{new Date().toLocaleDateString('vi-VN')}</td>
+                        <td className="px-4 py-2 text-admin-text-muted">{new Date().toLocaleDateString('vi-VN')}</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-end pt-4 border-t border-[#E0E5F2]">
+              <div className="flex gap-3 justify-end pt-4 border-t border-admin-border">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 bg-[#F4F7FE] text-[#2B3674] rounded-md font-bold hover:bg-[#E0E5F2] transition-colors"
+                  className="px-6 py-3 bg-admin-bg text-admin-text-main rounded-md font-bold hover:bg-admin-border transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-[#4318FF] text-[#FFFFFF] rounded-md font-bold hover:bg-[#3911D1] transition-all active:scale-95"
+                  className="px-6 py-3 bg-primary text-white rounded-md font-bold hover:bg-admin-primary-hover transition-all active:scale-95"
                 >
                   Lưu Lại
                 </button>

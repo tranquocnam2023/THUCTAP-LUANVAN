@@ -48,7 +48,7 @@ export default function PriceInput({ value, onChange, placeholder, className, re
         className={className}
         required={required}
       />
-      {error && <p className="text-[#EE5D50] text-xs font-bold mt-1">{error}</p>}
+      {error && <p className="text-admin-danger text-xs font-bold mt-1">{error}</p>}
     </div>
   );
 }
